@@ -1,13 +1,24 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
-import {Search} from '@element-plus/icons'
+import {Check, Search} from '@element-plus/icons'
 
 const CPU = ref(true)
 const Mem = ref(true)
 const FPS = ref(true)
 const jank = ref(true)
-const select = ref('')
+const packageSelect = ref('')
+const isRecord = ref(false)
+const isMultiple = ref(false)
+
+const checked3 = ref(false)
+
 const inputPackageName = ref("")
+
+const FPSThreshold = ref(0)
+const CPUThreshold = ref(0)
+const MemThreshold = ref(0)
+const JankThreshold = ref(0)
+// const value5 = ref(0)
 
 const options = [
   {
@@ -32,6 +43,10 @@ const options = [
   },
 ]
 
+const changeBtn = function(){//明白这一点之后我们将@click换成@change,点击复选框之后将会得到true
+  console.log(FPS)//--->true
+}
+
 </script>
 
 <template>
@@ -42,25 +57,15 @@ const options = [
       <el-container>
         <el-aside width="270px">
           <el-space direction="vertical">
-            <!--            <el-card v-for="i in 3" :key="i" class="box-card" style="width: 250px">-->
-            <!--              <template #header>-->
-            <!--                <div class="card-header">-->
-            <!--                  <span>Card name</span>-->
-            <!--                  <el-button class="button" text>Operation button</el-button>-->
-            <!--                </div>-->
-            <!--              </template>-->
-            <!--              <div v-for="o in 4" :key="o" class="text item">-->
-            <!--                {{ 'List item ' + o }}-->
-            <!--              </div>-->
-            <!--            </el-card>-->
             <el-card class="box-card">
+<!--              todo el-autocomplete-->
               <el-input
                   v-model="inputPackageName"
                   placeholder="输入包名或者bundle"
                   class="input-with-select"
               >
                 <template #prepend>
-                  <el-select v-model="select" placeholder=" " style="width: 43px">
+                  <el-select v-model="packageSelect" placeholder=" " style="width: 43px">
                     <el-option
                         v-for="item in options"
                         :key="item.value"
@@ -78,34 +83,108 @@ const options = [
               <br>
               <br>
               <div>
-                <el-button type="primary">获取当前运行应用</el-button>
+                <el-button type="primary">当前运行应用</el-button>
               </div>
             </el-card>
 
             <el-card class="box-card" >
               <el-checkbox v-model="CPU" label="CPU"  class="checkbox-item"/>
               <el-checkbox v-model="Mem" label="内存"  class="checkbox-item"/>
-              <el-checkbox v-model="FPS" label="FPS"  class="checkbox-item"/>
+              <el-checkbox v-model="FPS" label="FPS" @change="changeBtn"  class="checkbox-item"/>
               <el-checkbox v-model="jank" label="jank"  class="checkbox-item"/>
             </el-card>
+
+            <el-card class="box-card" :body-style="{ width: '228px' }">
+              录像
+              <el-switch
+                  v-model="isRecord"
+                  inline-prompt
+              />
+              多机协同
+              <el-switch
+                  v-model="isMultiple"
+                  inline-prompt
+              />
+
+              <div class="slider-demo-block" >
+                <span class="demonstration">CPU阈值</span>
+                <el-input-number v-model="CPUThreshold" />
+              </div>
+              <div class="slider-demo-block">
+                <span class="demonstration">内存阈值</span>
+                <el-input-number v-model="MemThreshold"  />
+              </div>
+              <div class="slider-demo-block">
+                <span class="demonstration">FPS阈值</span>
+                <!--                <el-input-number v-model="FPSThreshold" @change="handleChange" />-->
+                <el-input-number v-model="FPSThreshold"  />
+              </div>
+              <div class="slider-demo-block">
+                <span class="demonstration">jank阈值</span>
+                <el-input-number v-model="JankThreshold"  />
+              </div>
+            </el-card>
+
           </el-space>
         </el-aside>
-        <el-main>Main</el-main>
+
+        <el-main style="padding-top: inherit">
+          <el-card class="box-card">
+            <div >
+              <el-row :gutter="12">
+                <el-col :span="8" v-for="o in 15" :key="o" style="padding-bottom: 1%">
+                  <el-card shadow="always">
+                    <el-checkbox v-model="checked3" />
+                    {{ o }}
+                    <br>
+                    device:xxxx
+                    <br>
+                    device ip:xxxxx
+                  </el-card>
+                </el-col>
+              </el-row>
+            </div>
+
+            <br>
+            <el-pagination
+                background
+                layout="prev, pager, next"
+                :page-size="20"
+                :pager-count="11"
+                :total="1000" />
+          </el-card>
+        </el-main>
+
       </el-container>
     </el-container>
   </div>
 </template>
 
 <style>
-/*.checkbox-group {*/
-/*  display: flex;*/
-/*  flex-wrap: wrap;*/
-/*  margin-left: -10px; !* 调整左侧的负边距 *!*/
-/*}*/
-
 .checkbox-item {
   /* 设置复选框之间的间隔 */
   /* 设置复选框之间的下间距 */
   margin: 0 10px 10px;
+}
+.slider-demo-block {
+  display: flex;
+  align-items: center;
+}
+.slider-demo-block .el-slider {
+  margin-top: 0;
+  margin-left: 12px;
+}
+.slider-demo-block .demonstration {
+  font-size: 14px;
+  color: var(--el-text-color-secondary);
+  line-height: 44px;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 0;
+}
+.slider-demo-block .demonstration + .el-slider {
+  flex: 0 0 70%;
 }
 </style>
