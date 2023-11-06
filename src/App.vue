@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
 import {Check, Search} from '@element-plus/icons'
+import {GetAndroidPackageList} from "./util/android.js"
+import axios from "axios";
 
 const CPU = ref(true)
 const Mem = ref(true)
@@ -20,31 +22,32 @@ const MemThreshold = ref(0)
 const JankThreshold = ref(0)
 // const value5 = ref(0)
 
-const options = [
+let options = ref([
   {
     value: 'Option1',
     label: 'Option1',
-  },
-  {
-    value: 'Option2',
-    label: 'Option2',
-  },
-  {
-    value: 'Option3',
-    label: 'Option3',
-  },
-  {
-    value: 'Option4',
-    label: 'Option4',
-  },
-  {
-    value: 'Option5',
-    label: 'Option5',
-  },
-]
+  }
+])
 
-const changeBtn = function(){//明白这一点之后我们将@click换成@change,点击复选框之后将会得到true
+const changeBtn = function () {//明白这一点之后我们将@click换成@change,点击复选框之后将会得到true
   console.log(FPS)//--->true
+}
+
+const baseUrl = "http://127.0.0.1:8080"
+
+const packageNameBtn = function () {
+  axios.get(baseUrl + '/android/package/list').then(
+      response => {
+        let res = []
+        response.data.forEach(function (item) {
+          res.push({
+            value: item,
+            label: item
+          })
+        });
+        options.value = res
+      }
+  )
 }
 
 </script>
@@ -58,20 +61,19 @@ const changeBtn = function(){//明白这一点之后我们将@click换成@change
         <el-aside width="270px">
           <el-space direction="vertical">
             <el-card class="box-card">
-<!--              todo el-autocomplete-->
+              <!--              todo el-autocomplete-->
               <el-input
                   v-model="inputPackageName"
                   placeholder="输入包名或者bundle"
                   class="input-with-select"
               >
                 <template #prepend>
-                  <el-select v-model="packageSelect" placeholder=" " style="width: 43px">
+                  <el-select v-model="packageSelect" @focus="packageNameBtn" placeholder=" " style="width: 43px">
                     <el-option
                         v-for="item in options"
                         :key="item.value"
                         :label="item.label"
                         :value="item.value"
-                        :disabled="item.disabled"
                     />
                   </el-select>
                 </template>
@@ -87,11 +89,11 @@ const changeBtn = function(){//明白这一点之后我们将@click换成@change
               </div>
             </el-card>
 
-            <el-card class="box-card" >
-              <el-checkbox v-model="CPU" label="CPU"  class="checkbox-item"/>
-              <el-checkbox v-model="Mem" label="内存"  class="checkbox-item"/>
-              <el-checkbox v-model="FPS" label="FPS" @change="changeBtn"  class="checkbox-item"/>
-              <el-checkbox v-model="jank" label="jank"  class="checkbox-item"/>
+            <el-card class="box-card">
+              <el-checkbox v-model="CPU" label="CPU" class="checkbox-item"/>
+              <el-checkbox v-model="Mem" label="内存" class="checkbox-item"/>
+              <el-checkbox v-model="FPS" label="FPS" @change="changeBtn" class="checkbox-item"/>
+              <el-checkbox v-model="jank" label="jank" class="checkbox-item"/>
             </el-card>
 
             <el-card class="box-card" :body-style="{ width: '228px' }">
@@ -106,22 +108,22 @@ const changeBtn = function(){//明白这一点之后我们将@click换成@change
                   inline-prompt
               />
 
-              <div class="slider-demo-block" >
+              <div class="slider-demo-block">
                 <span class="demonstration">CPU阈值</span>
-                <el-input-number v-model="CPUThreshold" />
+                <el-input-number v-model="CPUThreshold"/>
               </div>
               <div class="slider-demo-block">
                 <span class="demonstration">内存阈值</span>
-                <el-input-number v-model="MemThreshold"  />
+                <el-input-number v-model="MemThreshold"/>
               </div>
               <div class="slider-demo-block">
                 <span class="demonstration">FPS阈值</span>
                 <!--                <el-input-number v-model="FPSThreshold" @change="handleChange" />-->
-                <el-input-number v-model="FPSThreshold"  />
+                <el-input-number v-model="FPSThreshold"/>
               </div>
               <div class="slider-demo-block">
                 <span class="demonstration">jank阈值</span>
-                <el-input-number v-model="JankThreshold"  />
+                <el-input-number v-model="JankThreshold"/>
               </div>
             </el-card>
 
@@ -130,11 +132,11 @@ const changeBtn = function(){//明白这一点之后我们将@click换成@change
 
         <el-main style="padding-top: inherit">
           <el-card class="box-card">
-            <div >
+            <div>
               <el-row :gutter="12">
                 <el-col :span="8" v-for="o in 15" :key="o" style="padding-bottom: 1%">
                   <el-card shadow="always">
-                    <el-checkbox v-model="checked3" />
+                    <el-checkbox v-model="checked3"/>
                     {{ o }}
                     <br>
                     device:xxxx
@@ -151,7 +153,7 @@ const changeBtn = function(){//明白这一点之后我们将@click换成@change
                 layout="prev, pager, next"
                 :page-size="20"
                 :pager-count="11"
-                :total="1000" />
+                :total="1000"/>
           </el-card>
         </el-main>
 
@@ -166,14 +168,17 @@ const changeBtn = function(){//明白这一点之后我们将@click换成@change
   /* 设置复选框之间的下间距 */
   margin: 0 10px 10px;
 }
+
 .slider-demo-block {
   display: flex;
   align-items: center;
 }
+
 .slider-demo-block .el-slider {
   margin-top: 0;
   margin-left: 12px;
 }
+
 .slider-demo-block .demonstration {
   font-size: 14px;
   color: var(--el-text-color-secondary);
@@ -184,6 +189,7 @@ const changeBtn = function(){//明白这一点之后我们将@click换成@change
   white-space: nowrap;
   margin-bottom: 0;
 }
+
 .slider-demo-block .demonstration + .el-slider {
   flex: 0 0 70%;
 }
