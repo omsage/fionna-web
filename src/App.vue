@@ -1,43 +1,13 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
 import {Check, Search} from '@element-plus/icons'
-import {GetAndroidPackageList} from "./util/android.js"
-import axios from "axios";
+import {getAndroidPackageList, getAndroidCurrentPackage} from "./util/android.js"
 
-const CPU = ref(true)
-const Mem = ref(true)
-const FPS = ref(true)
-const jank = ref(true)
-const packageSelect = ref('')
-const isRecord = ref(false)
-const isMultiple = ref(false)
+let inputPackageName = ref('')
+let packageNameList = ref([])
 
-const checked3 = ref(false)
-
-const inputPackageName = ref("")
-
-const FPSThreshold = ref(0)
-const CPUThreshold = ref(0)
-const MemThreshold = ref(0)
-const JankThreshold = ref(0)
-// const value5 = ref(0)
-
-let options = ref([
-  {
-    value: 'Option1',
-    label: 'Option1',
-  }
-])
-
-const changeBtn = function () {//明白这一点之后我们将@click换成@change,点击复选框之后将会得到true
-  console.log(FPS)//--->true
-}
-
-const baseUrl = "http://127.0.0.1:8080"
-
-const packageNameBtn = function () {
-  axios.get(baseUrl + '/android/package/list').then(
-      response => {
+const packageNameSelectOpenCallback = function () {
+  getAndroidPackageList().then(response => {
         let res = []
         response.data.forEach(function (item) {
           res.push({
@@ -45,9 +15,42 @@ const packageNameBtn = function () {
             label: item
           })
         });
-        options.value = res
+        console.log(res)
+        packageNameList.value = res
       }
   )
+}
+
+const pickCurrentPackageCallback = function () {
+  getAndroidCurrentPackage().then(response => {
+    inputPackageName.value = response.data
+  })
+}
+
+let deviceSerial = ref('')
+let deviceSerialList = ref([
+  {
+    label:"affsb",
+    value:"value1"
+  }
+])
+
+const CPU = ref(true)
+const Mem = ref(true)
+const FPS = ref(true)
+const jank = ref(true)
+const isRecord = ref(false)
+const isMultiple = ref(false)
+
+const checked3 = ref(false)
+
+const FPSThreshold = ref(0)
+const CPUThreshold = ref(0)
+const MemThreshold = ref(0)
+const JankThreshold = ref(0)
+// const value5 = ref(0)
+const changeBtn = function () {
+  console.log(FPS)//--->true
 }
 
 </script>
@@ -60,32 +63,50 @@ const packageNameBtn = function () {
       <el-container>
         <el-aside width="270px">
           <el-space direction="vertical">
+
             <el-card class="box-card">
               <!--              todo el-autocomplete-->
-              <el-input
-                  v-model="inputPackageName"
-                  placeholder="输入包名或者bundle"
-                  class="input-with-select"
-              >
-                <template #prepend>
-                  <el-select v-model="packageSelect" @focus="packageNameBtn" placeholder=" " style="width: 43px">
-                    <el-option
-                        v-for="item in options"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                    />
-                  </el-select>
-                </template>
 
-                <template #append>
-                  <el-button :icon="Search"/>
-                </template>
-              </el-input>
+              <el-select
+                  v-model="deviceSerial"
+                  filterable
+                  :options="deviceSerialList"
+
+                  placeholder="输入设备serial"
+                  clearable
+                  style="width: 228px"
+              >
+                <el-option
+                    v-for="item in deviceSerialList"
+                    :key="item.label"
+                    :label="item.label"
+                    :value="item.value"
+                />
+              </el-select>
+            </el-card>
+
+            <el-card class="box-card">
+              <!--              todo el-autocomplete-->
+              <el-select
+                  v-model="inputPackageName"
+                  filterable
+
+                  @focus="packageNameSelectOpenCallback"
+                  placeholder="输入包名或者bundle"
+                  clearable
+                  style="width: 228px"
+              >
+                <el-option
+                    v-for="item in packageNameList"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                />
+              </el-select>
               <br>
               <br>
               <div>
-                <el-button type="primary">当前运行应用</el-button>
+                <el-button type="primary" @click="pickCurrentPackageCallback">当前运行应用</el-button>
               </div>
             </el-card>
 

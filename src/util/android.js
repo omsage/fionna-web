@@ -1,18 +1,18 @@
 import axios from 'axios';
 
 const baseUrl = "http://127.0.0.1:8080"
-export  function GetAndroidPackageList() {
+export async function getAndroidPackageList() {
     try {
-        // let res = []
-        const response = axios.get(baseUrl + '/android/package/list');
-        // response.data.forEach(function(item) {
-        //     res.push({
-        //         value:item,
-        //         label:item
-        //     })
-        // });
-        return response
+        return axios.get(baseUrl + '/android/package/list')
     } catch (e) {
+        throw new Error(e);
+    }
+}
+
+export async function getAndroidCurrentPackage(){
+    try {
+        return axios.get(baseUrl + '/android/package/current')
+    }catch (e) {
         throw new Error(e);
     }
 }
