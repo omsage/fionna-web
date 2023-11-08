@@ -1,13 +1,37 @@
 <script lang="ts" setup>
-import {ref} from 'vue'
+import {onMounted, ref} from 'vue'
 import {Check, Search} from '@element-plus/icons'
-import {getAndroidPackageList, getAndroidCurrentPackage} from "./util/android.js"
+import {getAndroidPackageList, getAndroidCurrentPackage, getSerialList, getDefaultSerial} from "./util/android.js"
+
+// let deviceSerialDefault = ''
+//
+
+
+let deviceSerial = ref('')
+let deviceSerialList = ref([])
+
+getDefaultSerial().then(response=>{
+  deviceSerial.value = response.data
+})
+
+const serialListSelectOpenCallback = function (){
+  getSerialList().then( response => {
+    let res = []
+    response.data.forEach(function (item) {
+      res.push({
+        value: item,
+        label: item
+      })
+    });
+    deviceSerialList.value = res
+  })
+}
 
 let inputPackageName = ref('')
 let packageNameList = ref([])
 
-const packageNameSelectOpenCallback = function () {
-  getAndroidPackageList().then(response => {
+const packageNameSelectOpenCallback = function (serial) {
+  getAndroidPackageList(serial).then(response => {
         let res = []
         response.data.forEach(function (item) {
           res.push({
@@ -15,25 +39,19 @@ const packageNameSelectOpenCallback = function () {
             label: item
           })
         });
-        console.log(res)
+        // console.log(res)
         packageNameList.value = res
       }
   )
 }
 
-const pickCurrentPackageCallback = function () {
-  getAndroidCurrentPackage().then(response => {
+const pickCurrentPackageCallback = function (serial) {
+  getAndroidCurrentPackage(serial).then(response => {
     inputPackageName.value = response.data
   })
 }
 
-let deviceSerial = ref('')
-let deviceSerialList = ref([
-  {
-    label:"affsb",
-    value:"value1"
-  }
-])
+
 
 const CPU = ref(true)
 const Mem = ref(true)
@@ -72,6 +90,7 @@ const changeBtn = function () {
                   filterable
                   :options="deviceSerialList"
 
+                  @focus="serialListSelectOpenCallback"
                   placeholder="输入设备serial"
                   clearable
                   style="width: 228px"
@@ -83,18 +102,16 @@ const changeBtn = function () {
                     :value="item.value"
                 />
               </el-select>
-            </el-card>
-
-            <el-card class="box-card">
-              <!--              todo el-autocomplete-->
+              <br>
+              <br>
               <el-select
                   v-model="inputPackageName"
                   filterable
 
-                  @focus="packageNameSelectOpenCallback"
+                  @focus="packageNameSelectOpenCallback(deviceSerial)"
                   placeholder="输入包名或者bundle"
                   clearable
-                  style="width: 228px"
+                  style="width: 159px"
               >
                 <el-option
                     v-for="item in packageNameList"
@@ -102,12 +119,16 @@ const changeBtn = function () {
                     :label="item.label"
                     :value="item.value"
                 />
-              </el-select>
-              <br>
-              <br>
-              <div>
-                <el-button type="primary" @click="pickCurrentPackageCallback">当前运行应用</el-button>
-              </div>
+
+              </el-select>&nbsp;
+              <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  content="获取设备前台应用包名"
+                  placement="top"
+              >
+              <el-button type="success" @click="pickCurrentPackageCallback(deviceSerial)" plain>pick</el-button>
+              </el-tooltip>
             </el-card>
 
             <el-card class="box-card">
