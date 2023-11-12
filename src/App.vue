@@ -1,7 +1,13 @@
 <script lang="ts" setup>
 import {onMounted, ref} from 'vue'
-import {Check, Search} from '@element-plus/icons'
-import {getAndroidPackageList, getAndroidCurrentPackage, getSerialList, getDefaultSerial} from "./util/android.js"
+import {
+  getAndroidPackageList,
+  getAndroidCurrentPackage,
+  getSerialList,
+  getDefaultSerial,
+  startPerfGather
+} from "./util/android.js"
+import {VideoPlay, SwitchButton} from '@element-plus/icons-vue'
 
 // let deviceSerialDefault = ''
 //
@@ -10,12 +16,12 @@ import {getAndroidPackageList, getAndroidCurrentPackage, getSerialList, getDefau
 let deviceSerial = ref('')
 let deviceSerialList = ref([])
 
-getDefaultSerial().then(response=>{
+getDefaultSerial().then(response => {
   deviceSerial.value = response.data
 })
 
-const serialListSelectOpenCallback = function (){
-  getSerialList().then( response => {
+const serialListSelectOpenCallback = function () {
+  getSerialList().then(response => {
     let res = []
     response.data.forEach(function (item) {
       res.push({
@@ -52,13 +58,16 @@ const pickCurrentPackageCallback = function (serial) {
 }
 
 
-
 const CPU = ref(true)
 const Mem = ref(true)
 const FPS = ref(true)
 const jank = ref(true)
+const isSysMem = ref(false)
+const isSysCPU = ref(false)
+
 const isRecord = ref(false)
 const isMultiple = ref(false)
+const isScreenCasting = ref(true)
 
 const checked3 = ref(false)
 
@@ -69,6 +78,12 @@ const JankThreshold = ref(0)
 // const value5 = ref(0)
 const changeBtn = function () {
   console.log(FPS)//--->true
+}
+
+const isStartPerf = ref(false)
+const startBtnCallback = function () {
+  isStartPerf.value = !isStartPerf.value
+  startPerfGather()
 }
 
 </script>
@@ -127,7 +142,7 @@ const changeBtn = function () {
                   content="获取设备前台应用包名"
                   placement="top"
               >
-              <el-button type="success" @click="pickCurrentPackageCallback(deviceSerial)" plain>pick</el-button>
+                <el-button type="success" @click="pickCurrentPackageCallback(deviceSerial)" plain>pick</el-button>
               </el-tooltip>
             </el-card>
 
@@ -136,19 +151,53 @@ const changeBtn = function () {
               <el-checkbox v-model="Mem" label="内存" class="checkbox-item"/>
               <el-checkbox v-model="FPS" label="FPS" @change="changeBtn" class="checkbox-item"/>
               <el-checkbox v-model="jank" label="jank" class="checkbox-item"/>
+              <el-checkbox v-model="isSysCPU" label="sys-cpu" class="checkbox-item"/>
+              <el-checkbox v-model="isSysMem" label="sys-mem" class="checkbox-item"/>
             </el-card>
 
             <el-card class="box-card" :body-style="{ width: '228px' }">
-              录像
+
+              <el-switch
+                  v-model="isScreenCasting"
+                  style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949;"
+                  inline-prompt
+                  active-text="投屏:开"
+                  inactive-text="投屏:关"
+              />
+              &nbsp;
               <el-switch
                   v-model="isRecord"
+                  style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949;"
                   inline-prompt
+                  active-text="录像:开"
+                  inactive-text="录像:关"
               />
-              多机协同
+              &nbsp;
               <el-switch
                   v-model="isMultiple"
+                  style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949;"
+                  active-text="协同:开"
                   inline-prompt
+                  inactive-text="协同:关"
               />
+              &nbsp;
+              <el-drawer v-model="isMultiple" title="I am the title" :with-header="false">
+                  <div>
+                    <el-row>
+                      <el-col v-for="o in 15" :key="o" style="padding-bottom: 1%">
+                        <el-card shadow="always">
+                          <el-checkbox v-model="checked3"/>
+                          {{ o }}
+                          <br>
+                          device:xxxx
+                          <br>
+                          device ip:xxxxx
+                        </el-card>
+                        <br>
+                      </el-col>
+                    </el-row>
+                  </div>
+              </el-drawer>
 
               <div class="slider-demo-block">
                 <span class="demonstration">CPU阈值</span>
@@ -173,30 +222,43 @@ const changeBtn = function () {
         </el-aside>
 
         <el-main style="padding-top: inherit">
-          <el-card class="box-card">
-            <div>
-              <el-row :gutter="12">
-                <el-col :span="8" v-for="o in 15" :key="o" style="padding-bottom: 1%">
-                  <el-card shadow="always">
-                    <el-checkbox v-model="checked3"/>
-                    {{ o }}
-                    <br>
-                    device:xxxx
-                    <br>
-                    device ip:xxxxx
-                  </el-card>
-                </el-col>
-              </el-row>
-            </div>
+          <!--          <el-card class="box-card">-->
+          <!--            <div>-->
+          <!--              <el-row :gutter="12">-->
+          <!--                <el-col :span="8" v-for="o in 15" :key="o" style="padding-bottom: 1%">-->
+          <!--                  <el-card shadow="always">-->
+          <!--                    <el-checkbox v-model="checked3"/>-->
+          <!--                    {{ o }}-->
+          <!--                    <br>-->
+          <!--                    device:xxxx-->
+          <!--                    <br>-->
+          <!--                    device ip:xxxxx-->
+          <!--                  </el-card>-->
+          <!--                </el-col>-->
+          <!--              </el-row>-->
+          <!--            </div>-->
 
-            <br>
-            <el-pagination
-                background
-                layout="prev, pager, next"
-                :page-size="20"
-                :pager-count="11"
-                :total="1000"/>
-          </el-card>
+          <!--            <br>-->
+          <!--            <el-pagination-->
+          <!--                background-->
+          <!--                layout="prev, pager, next"-->
+          <!--                :page-size="20"-->
+          <!--                :pager-count="11"-->
+          <!--                :total="1000"/>-->
+          <!--          </el-card>-->
+
+          <!--          <el-icon :size="size" :color="color">-->
+          <!--            <Edit />-->
+          <!--          </el-icon>-->
+          <!--          <el-icon><SwitchButton /></el-icon>-->
+          <div class="start-to-home" @click="startBtnCallback">
+            <el-icon v-if="!isStartPerf" :size="60" color="#4caf50" class="start-to-home">
+              <VideoPlay/>
+            </el-icon>
+            <el-icon v-if="isStartPerf" :size="60" color="#d80f0f" class="start-to-home">
+              <SwitchButton/>
+            </el-icon>
+          </div>
         </el-main>
 
       </el-container>
@@ -234,5 +296,15 @@ const changeBtn = function () {
 
 .slider-demo-block .demonstration + .el-slider {
   flex: 0 0 70%;
+}
+
+.start-to-home {
+  position: fixed;
+  bottom: 30px;
+  right: 50px;
+}
+
+.el-button .iconfont {
+  font-size: inherit;
 }
 </style>

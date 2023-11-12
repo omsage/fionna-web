@@ -19,3 +19,12 @@ export async function getSerialList() {
 export async function getDefaultSerial() {
     return axios.get(baseUrl + "/android/serial/default")
 }
+
+export async function startPerfGather() {
+    return axios.post(baseUrl+"/android/perf/start",{
+        cpu:true,
+        fps:true,
+        mem:true,
+        jank:true
+    })
+}
