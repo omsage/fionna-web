@@ -25,8 +25,10 @@ const serialListSelectOpenCallback = function () {
     let res = []
     response.data.forEach(function (item) {
       res.push({
-        value: item,
-        label: item
+        ProductDevice: item.ProductDevice,
+        SerialName: item.SerialName,
+        OSVersion: item.OSVersion,
+        label : item.SerialName + "(" + item.ProductDevice + ")"
       })
     });
     deviceSerialList.value = res
@@ -112,9 +114,9 @@ const startBtnCallback = function () {
               >
                 <el-option
                     v-for="item in deviceSerialList"
-                    :key="item.label"
+                    :key="item.SerialName"
                     :label="item.label"
-                    :value="item.value"
+                    :value="item.SerialName"
                 />
               </el-select>
               <br>
@@ -159,44 +161,52 @@ const startBtnCallback = function () {
 
               <el-switch
                   v-model="isScreenCasting"
-                  style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949;"
+                  style="--el-switch-on-color: #409eff; --el-switch-off-color: #909399;"
                   inline-prompt
                   active-text="投屏:开"
                   inactive-text="投屏:关"
               />
               &nbsp;
-              <el-switch
-                  v-model="isRecord"
-                  style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949;"
-                  inline-prompt
-                  active-text="录像:开"
-                  inactive-text="录像:关"
-              />
-              &nbsp;
+              <!--              <el-switch-->
+              <!--                  v-model="isRecord"-->
+              <!--                  style="&#45;&#45;el-switch-on-color: #409eff; &#45;&#45;el-switch-off-color: #909399;"-->
+              <!--                  inline-prompt-->
+              <!--                  active-text="录像:开"-->
+              <!--                  inactive-text="录像:关"-->
+              <!--              />-->
+              <!--              &nbsp;-->
               <el-switch
                   v-model="isMultiple"
-                  style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949;"
+                  style="--el-switch-on-color: #409eff; --el-switch-off-color: #909399;"
                   active-text="协同:开"
                   inline-prompt
                   inactive-text="协同:关"
+                  @change="serialListSelectOpenCallback"
               />
               &nbsp;
               <el-drawer v-model="isMultiple" title="I am the title" :with-header="false">
-                  <div>
-                    <el-row>
-                      <el-col v-for="o in 15" :key="o" style="padding-bottom: 1%">
-                        <el-card shadow="always">
-                          <el-checkbox v-model="checked3"/>
-                          {{ o }}
-                          <br>
-                          device:xxxx
-                          <br>
-                          device ip:xxxxx
-                        </el-card>
+                <div>
+                  <el-row>
+
+<!--                    v-for="item in deviceSerialList"-->
+<!--                    :key="item.SerialName"-->
+<!--                    :label="item.label"-->
+<!--                    :value="item.SerialName"-->
+
+                    <el-col v-for="item in deviceSerialList" :key="item" style="padding-bottom: 1%">
+                      <el-card shadow="always">
+                        <el-checkbox v-model="checked3"/>
                         <br>
-                      </el-col>
-                    </el-row>
-                  </div>
+                        serial:{{ item.SerialName }}
+                        <br>
+                        设备名:{{item.ProductDevice}}
+                        <br>
+                        系统版本: {{item.OSVersion}}
+                      </el-card>
+                      <br>
+                    </el-col>
+                  </el-row>
+                </div>
               </el-drawer>
 
               <div class="slider-demo-block">
