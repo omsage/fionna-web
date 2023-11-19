@@ -8,7 +8,7 @@ import {
   startPerfGather
 } from "./util/android.js"
 import {VideoPlay, SwitchButton} from '@element-plus/icons-vue'
-
+import PerfHome from './components/PerfHome.vue'
 // let deviceSerialDefault = ''
 //
 
@@ -96,7 +96,7 @@ const startBtnCallback = function () {
     <el-container>
       <el-header>Header</el-header>
       <el-container>
-        <el-aside width="270px">
+        <el-aside v-show="!isStartPerf" width="270px">
           <el-space direction="vertical">
 
             <el-card class="box-card">
@@ -232,30 +232,9 @@ const startBtnCallback = function () {
         </el-aside>
 
         <el-main style="padding-top: inherit">
-          <!--          <el-card class="box-card">-->
-          <!--            <div>-->
-          <!--              <el-row :gutter="12">-->
-          <!--                <el-col :span="8" v-for="o in 15" :key="o" style="padding-bottom: 1%">-->
-          <!--                  <el-card shadow="always">-->
-          <!--                    <el-checkbox v-model="checked3"/>-->
-          <!--                    {{ o }}-->
-          <!--                    <br>-->
-          <!--                    device:xxxx-->
-          <!--                    <br>-->
-          <!--                    device ip:xxxxx-->
-          <!--                  </el-card>-->
-          <!--                </el-col>-->
-          <!--              </el-row>-->
-          <!--            </div>-->
-
-          <!--            <br>-->
-          <!--            <el-pagination-->
-          <!--                background-->
-          <!--                layout="prev, pager, next"-->
-          <!--                :page-size="20"-->
-          <!--                :pager-count="11"-->
-          <!--                :total="1000"/>-->
-          <!--          </el-card>-->
+            <PerfHome
+            :isStartPerf="isStartPerf"
+            />
 
           <!--          <el-icon :size="size" :color="color">-->
           <!--            <Edit />-->
