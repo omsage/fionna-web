@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const baseUrl = "http://127.0.0.1:8080"
+const baseHost = "127.0.0.1:8080"
+export const baseUrl = "http://" + baseHost
+export const baseWs = 'ws://' + baseHost
 export async function getAndroidPackageList(serial) {
     console.log(serial)
     let serialParams = encodeURIComponent(serial)

@@ -6,7 +6,7 @@ import {
   getSerialList,
   getDefaultSerial,
   startPerfGather
-} from "./util/android.js"
+} from "./util/AndroidRequest.js"
 import {VideoPlay, SwitchButton} from '@element-plus/icons-vue'
 import PerfHome from './components/PerfHome.vue'
 // let deviceSerialDefault = ''

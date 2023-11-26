@@ -54,9 +54,9 @@
 
 <script setup>
 import {ref, watch} from "vue";
-import Scrcpy from "@/util/scrcpy";
+import Scrcpy from "@/util/Scrcpy";
 
-let scrcpySever = new Scrcpy("ws://127.0.0.1:8080/android/h264",'scrcpy-video',0,60)
+let scrcpySever = new Scrcpy('scrcpy-video',0,60)
 
 const props = defineProps({
   isStartPerf:Boolean
