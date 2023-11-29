@@ -21,12 +21,12 @@
         landscapeScreenBottom:isLandscapeScreen,
         portraitScreenRight:!isLandscapeScreen
       }">
-        <img src="src/assets/BufferQueue.png" style="min-width: 200px;float: left;">
-        <img src="src/assets/BufferQueue1.png" style="min-width: 200px;float: left;">
+        <img src="src/assets/BufferQueue.png" style="width: 20%" :class="{portraitScreenRightChild:!isLandscapeScreen}">
+        <img src="src/assets/BufferQueue1.png" style="width: 20%" :class="{portraitScreenRightChild:!isLandscapeScreen}">
       </div>
     </div>
 
-<!--    <p>横屏：{{isLandscapeScreen}}</p>-->
+    <!--    <p>横屏：{{isLandscapeScreen}}</p>-->
     <br>
   </el-card>
 </template>
@@ -37,18 +37,18 @@ import Scrcpy from "@/util/Scrcpy";
 
 let isLandscapeScreen = ref(false)
 
-let scrcpySever = new Scrcpy('scrcpy-video',0,60,isLandscapeScreen)
+let scrcpySever = new Scrcpy('scrcpy-video', 0, 60, isLandscapeScreen)
 
 const props = defineProps({
-  isStartPerf:Boolean
+  isStartPerf: Boolean
 })
 
 let screenMode = ref('Scrcpy')
 
-watch(() => props.isStartPerf,(isStart) => {
-  if (isStart){
+watch(() => props.isStartPerf, (isStart) => {
+  if (isStart) {
     scrcpySever.startServer()
-  }else {
+  } else {
     scrcpySever.closeServer()
   }
 })
@@ -69,7 +69,7 @@ function scrcpyMousemove(event) {
 </script>
 
 <style scoped>
-.portraitScreenContainer{
+.portraitScreenContainer {
   display: flex;
 }
 
@@ -87,6 +87,11 @@ function scrcpyMousemove(event) {
   flex-wrap: wrap;
 }
 
+.portraitScreenRightChild {
+  min-width: 200px;
+  float: left;
+}
+
 .landscapeScreenContainer {
   display: flex;
   flex-direction: column;
@@ -97,6 +102,10 @@ function scrcpyMousemove(event) {
 }
 
 .landscapeScreenBottom {
-  height: calc(100% - 50px);
+  /*height: calc(100% - 50px);*/
+  /*flex: 0 0 calc(25% - 10px); !* 计算每个图片的宽度，减去间距 *!*/
+  /*margin: 5px; !* 图片之间的间距 *!*/
+  display: flex;
+  flex-wrap: wrap;
 }
 </style>
