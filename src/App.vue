@@ -96,7 +96,8 @@ const startBtnCallback = function () {
     <el-container>
       <el-header>Header</el-header>
       <el-container>
-        <el-aside v-show="!isStartPerf" width="270px">
+<!--        <el-aside v-show="!isStartPerf" width="270px">-->
+        <el-aside  width="270px">
           <el-space direction="vertical">
 
             <el-card class="box-card">
@@ -183,7 +184,7 @@ const startBtnCallback = function () {
                   inactive-text="协同:关"
                   @change="serialListSelectOpenCallback"
               />
-              &nbsp;
+              &nbsp
               <el-drawer v-model="isMultiple" title="I am the title" :with-header="false">
                 <div>
                   <el-row>

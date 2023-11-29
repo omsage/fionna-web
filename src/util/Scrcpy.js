@@ -5,13 +5,15 @@ class Scrcpy {
     constructor(
         nodeID,
         flushingTime,
-        FPS
+        FPS,
+        isLandscapeScreen
         ) {
         this.rotationUrl =  baseWs + '/android/rotation'
         this.h264Url = baseWs + '/android/h264'
         this.nodeID = nodeID
         this.flushTime = flushingTime
         this.FPS = FPS
+        this.isLandscapeScreen = isLandscapeScreen
     }
 
     initJmuxer(){
@@ -55,14 +57,10 @@ class Scrcpy {
             if (this.jmuxer){
                 this.jmuxer.reset();
             }
-            // const rotationJson = JSON.parse(event.data);
-            // let rotation = rotationJson.rotation;
-            // console.log("rotation",rotation);
-            // if (rotation === 1 || rotation === 3) {
-
-                // this.destroy()
-                // this.initJmuxer()
-            // }
+            const rotationJson = JSON.parse(event.data);
+            let rotation = rotationJson.rotation;
+            console.log("rotation",rotation);
+            this.isLandscapeScreen.value = rotation === 1 || rotation === 3;
         });
 
         // 监听WebSocket的onopen事件
