@@ -8,13 +8,15 @@
         landscapeScreenTop:isLandscapeScreen,
         portraitScreenLeft:!isLandscapeScreen
       }">
-        <video
-            v-show="screenMode == 'Scrcpy'"
-            id="scrcpy-video"
-            @mousemove="scrcpyMousemove"
-            autoplay
-            muted
-            style="max-width:98%; max-height: 100%"
+        <ScreenCasting
+            :rotationUrl="rotationUrl"
+            :h264Url="h264Url"
+            :controlUrl="controlUrl"
+
+            :isStart="props.isStartPerf"
+            :deviceSerial="props.deviceSerial"
+            @watchRotation="watchRotation"
+            :nodeID="masterID"
         />
       </div>
       <div :class="{
@@ -32,38 +34,27 @@
 </template>
 
 <script setup>
-import {ref, watch} from "vue";
-import Scrcpy from "@/util/Scrcpy";
+import {ref} from "vue";
+import ScreenCasting from "@/components/ScreenCasting.vue";
+import {h264Url, rotationUrl,controlUrl} from "@/util/AndroidRequest";
+
+let masterID = "masterVideo"
 
 let isLandscapeScreen = ref(false)
+let isPress = false;
 
-let scrcpySever = new Scrcpy('scrcpy-video', 0, 60, isLandscapeScreen)
+
+// let scrcpySever = new Scrcpy('scrcpy-video', 0, 60, isLandscapeScreen)
 
 const props = defineProps({
-  isStartPerf: Boolean
+  isStartPerf: Boolean,
+  deviceSerial:String
 })
 
-let screenMode = ref('Scrcpy')
-
-watch(() => props.isStartPerf, (isStart) => {
-  if (isStart) {
-    scrcpySever.startServer()
-  } else {
-    scrcpySever.closeServer()
-  }
-})
-
-function scrcpyMousemove(event) {
-  var box = document.getElementById("scrcpy-video");
-
-  const rect = box.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
-
-  console.log("X坐标" + x + "\n" + "Y坐标" + y);
-
+const watchRotation = (rotationValue) => {
+  console.log("watch rotation",rotationValue)
+  isLandscapeScreen.value = rotationValue === 1 || rotationValue === 3;
 }
-
 
 // scrcpyVideo()
 </script>

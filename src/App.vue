@@ -235,6 +235,7 @@ const startBtnCallback = function () {
         <el-main style="padding-top: inherit">
             <PerfHome
             :isStartPerf="isStartPerf"
+            :deviceSerial = "deviceSerial"
             />
 
           <!--          <el-icon :size="size" :color="color">-->
