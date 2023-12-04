@@ -19,10 +19,11 @@ import {getScrcpySize} from "@/util/AndroidRequest";
 let isPress = false;
 let scrcpyWidth = 0;
 let scrcpyHeight = 0;
+let scrcpyLandscapeScreen = false;
 let rotationWS = undefined;
 let controlWS = undefined;
 let rotation = 0
-
+let firstRotation = true
 const props = defineProps({
   rotationUrl: String,
   h264Url: String,
@@ -39,7 +40,7 @@ let scrcpySever = new Scrcpy(
     props.nodeID,
     0,
     60,
-    )
+)
 
 watch(() => props.isStart, (isStart) => {
   if (isStart) {
@@ -50,6 +51,7 @@ watch(() => props.isStart, (isStart) => {
         watchRotation(scrcpySever)
 
         getScrcpySize(scrcpyID).then(response => {
+          scrcpyLandscapeScreen = response.data.rotation === 1 || response.data.rotation === 3
           scrcpyWidth = response.data.width
           scrcpyHeight = response.data.height
           setControl(scrcpyID)
@@ -60,6 +62,8 @@ watch(() => props.isStart, (isStart) => {
     scrcpySever.closeServer()
     controlWS.close()
     rotationWS.close()
+    firstRotation = true
+    scrcpyLandscapeScreen = false
   }
 })
 
@@ -67,16 +71,34 @@ function emitRotation(rotation) {
   emit('watchRotation', rotation)
 }
 
-let firstRotation = true
-
-const watchRotation = (scrcpySever)=> {
+const watchRotation = (scrcpySever) => {
   rotationWS = new WebSocket(props.rotationUrl);
   rotationWS.addEventListener("message", (event) => {
     const rotationJson = JSON.parse(event.data);
-    if (scrcpySever&&!firstRotation){
+    if (scrcpySever && !firstRotation) {
       scrcpySever.reset();
     }
     rotation = rotationJson.rotation
+    console.log(rotationJson)
+
+    if (rotation === 1 || rotation === 3) {
+      if (!scrcpyLandscapeScreen) {
+        // 交换宽高
+        let tmp = scrcpyWidth
+        scrcpyWidth = scrcpyHeight
+        scrcpyHeight = tmp
+        scrcpyLandscapeScreen = true
+      }
+    } else if (rotation === 0 || rotation === 2) {
+      if (scrcpyLandscapeScreen) {
+        // 交换宽高
+        let tmp = scrcpyWidth
+        scrcpyWidth = scrcpyHeight
+        scrcpyHeight = tmp
+        scrcpyLandscapeScreen = false
+      }
+    }
+
     emitRotation(rotationJson.rotation)
     firstRotation = false
   });
@@ -93,7 +115,7 @@ const watchRotation = (scrcpySever)=> {
   };
 }
 
-const setControl = (scrcpyID) =>{
+const setControl = (scrcpyID) => {
   controlWS = new WebSocket(props.controlUrl);
   controlWS.addEventListener("message", (event) => {
     console.log(event)
@@ -109,45 +131,66 @@ const setControl = (scrcpyID) =>{
     controlWS.send(JSON.stringify(message)); // 发送消息
   };
 }
+
 function mousemove(event) {
   if (isPress) {
-    console.log(getDevicePoint(event));
+    // console.log(getDevicePoint(event));
+    const {x, y} = getDevicePoint(event);
+    controlWS.send(
+        JSON.stringify({
+          actionType: 2,
+          x: x,
+          y: y,
+          width: scrcpyWidth,
+          height: scrcpyHeight,
+        })
+    )
   }
 }
 
-const getDevicePoint= (event) => {
+const getDevicePoint = (event) => {
   let box = document.getElementById(props.nodeID);
 
   let x;
   let y;
-  let _x;
-  let _y;
+  // let _x;
+  // let _y;
 
   const rect = box.getBoundingClientRect();
-  console.log(rotation)
-  if (rotation===0||rotation===2){
-    _x = parseInt(
-        (event.clientX - rect.left) * (scrcpyWidth / rect.width)
-    );
-    _y = parseInt(
-        (event.clientY - rect.top) * (scrcpyHeight / rect.height)
-    );
-    x = rotation===0?_x:scrcpyWidth-_x
-    y = rotation===0?_y:scrcpyHeight-_y
-  }
-  if (x<0){
+
+  // _x = parseInt(
+  //     (event.clientX - rect.left) * (scrcpyWidth / rect.width)
+  // );
+  // _y = parseInt(
+  //     (event.clientY - rect.top) * (scrcpyHeight / rect.height)
+  // );
+
+  // if (rotation===0||rotation===2){
+  //   x = rotation===0?_x:scrcpyWidth-_x
+  //   y = rotation===0?_y:scrcpyHeight-_y
+  // }
+
+  x = parseInt(
+      (event.clientX - rect.left) * (scrcpyWidth / rect.width)
+  );
+  y = parseInt(
+      (event.clientY - rect.top) * (scrcpyHeight / rect.height)
+  );
+
+  // console.log("X1坐标" + x + "\n" + "Y1坐标" + y);
+  if (x < 0 || x === -0) {
     x = 0
   }
-  if (x>scrcpyWidth){
+  if (x > scrcpyWidth) {
     x = scrcpyWidth
   }
-  if (y<0){
+  if (y < 0 || y === -0) {
     y = 0
   }
-  if (y>scrcpyHeight){
+  if (y > scrcpyHeight) {
     y = scrcpyHeight
   }
-  console.log("X坐标" + x + "\n" + "Y坐标" + y);
+  // console.log("X2坐标" + x + "\n" + "Y2坐标" + y);
   return {
     x,
     y,
@@ -156,38 +199,48 @@ const getDevicePoint= (event) => {
 
 const mouseup = (event) => {
   if (isPress) {
+    const {x, y} = getDevicePoint(event);
     isPress = false;
-    // websocket.send(
-    //     JSON.stringify({
-    //       type: 'touch',
-    //       detail: 'up\n',
-    //     })
-    // );
-    // inputBox.value.focus();
+    controlWS.send(
+        JSON.stringify({
+          actionType: 1,
+          x: x,
+          y: y,
+          width: scrcpyWidth,
+          height: scrcpyHeight,
+        })
+    )
   }
 };
 
 const mousedown = (event) => {
   // todo
-  // const {x, y} = getCurLocation();
+  const {x, y} = getDevicePoint(event);
   isPress = true;
-  // websocket.send(
-  //     JSON.stringify({
-  //       type: 'touch',
-  //       detail: `down ${x} ${y}\n`,
-  //     })
-  // );
+  controlWS.send(
+      JSON.stringify({
+        actionType: 0,
+        x: x,
+        y: y,
+        width: scrcpyWidth,
+        height: scrcpyHeight,
+      })
+  )
 }
 
-const mouseleave = () => {
+const mouseleave = (event) => {
   if (isPress) {
     isPress = false;
-    // websocket.send(
-    //     JSON.stringify({
-    //       type: 'touch',
-    //       detail: 'up\n',
-    //     })
-    // );
+    const {x, y} = getDevicePoint(event);
+    controlWS.send(
+        JSON.stringify({
+          actionType: 1,
+          x: x,
+          y: y,
+          width: scrcpyWidth,
+          height: scrcpyHeight,
+        })
+    )
   }
 };
 
