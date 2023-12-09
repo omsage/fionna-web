@@ -11,6 +11,7 @@
     "@element-plus/icons": "^0.0.11",
     "@element-plus/icons-vue": "^2.1.0",
     "axios": "^1.6.0",
+    "echarts": "^5.4.3",
     "element-plus": "^2.4.1",
     "jmuxer": "^2.0.5",
     "vue": "^3.3.4",

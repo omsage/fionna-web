@@ -8,7 +8,7 @@ import {
   startPerfGather
 } from "./util/AndroidRequest.js"
 import {VideoPlay, SwitchButton} from '@element-plus/icons-vue'
-import PerfHome from './components/PerfHome.vue'
+import PerfHome from './view/PerfHome.vue'
 // let deviceSerialDefault = ''
 //
 
