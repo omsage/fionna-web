@@ -20,28 +20,7 @@
             :nodeID="masterID"
         />
       </div>
-      <div :class="{
-        landscapeScreenBottom:isLandscapeScreen,
-        portraitScreenRight:!isLandscapeScreen
-      }">
-        <echartsView :isStart="props.isStartPerf"></echartsView>
-        <img src="../assets/CPU.png" :class="{
-          portraitScreenRightChild:!isLandscapeScreen,
-          landscapeScreenBottomChild:isLandscapeScreen
-        }">
-        <img src="../assets/Mem.png" :class="{
-          portraitScreenRightChild:!isLandscapeScreen,
-          landscapeScreenBottomChild:isLandscapeScreen
-        }">
-        <img src="../assets/FPS.png" :class="{
-          portraitScreenRightChild:!isLandscapeScreen,
-          landscapeScreenBottomChild:isLandscapeScreen
-        }">
-        <img src="../assets/Mem.png" :class="{
-          portraitScreenRightChild:!isLandscapeScreen,
-          landscapeScreenBottomChild:isLandscapeScreen
-        }">
-      </div>
+      <EchartView :isStartPerf="props.isStartPerf" :deviceSerial="props.deviceSerial"></EchartView>
     </div>
 
     <!--    <p>横屏：{{isLandscapeScreen}}</p>-->
@@ -53,8 +32,7 @@
 <script setup>
 import {ref} from "vue";
 import ScreenCasting from "@/components/ScreenCasting.vue";
-import EchartsView from "@/view/EchartsView.vue"
-import {View} from '@element-plus/icons-vue'
+import EchartView from "@/view/EchartView.vue";
 import {h264Url, rotationUrl,controlUrl} from "@/util/AndroidRequest";
 
 let masterID = "masterVideo"
@@ -89,17 +67,6 @@ const watchRotation = (rotationValue) => {
   align-items: center; /* 垂直居中 */
 }
 
-.portraitScreenRight {
-  width: 300px;
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.portraitScreenRightChild {
-  min-width: 300px;
-  float: left;
-}
-
 .landscapeScreenContainer {
   display: flex;
   flex-direction: column;
@@ -109,18 +76,4 @@ const watchRotation = (rotationValue) => {
   flex: 1;
 }
 
-.landscapeScreenBottom {
-  /*height: calc(100% - 50px);*/
-  /*flex: 0 0 calc(25% - 10px); !* 计算每个图片的宽度，减去间距 *!*/
-  margin: 30px; /* 图片之间的间距 */
-  display: flex;
-  justify-content: center; /* 水平居中 */
-  align-items: center; /* 垂直居中 */
-  flex-wrap: wrap;
-}
-
-.landscapeScreenBottomChild {
-  min-width: 300px;
-  width: 300px;
-}
 </style>
