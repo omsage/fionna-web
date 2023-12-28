@@ -62,8 +62,8 @@ const pickCurrentPackageCallback = function (serial) {
 
 const CPU = ref(true)
 const Mem = ref(true)
-const FPS = ref(true)
-const jank = ref(true)
+const Frame = ref(true)
+const thread = ref(true)
 const isSysMem = ref(false)
 const isSysCPU = ref(false)
 
@@ -79,7 +79,7 @@ const MemThreshold = ref(0)
 const JankThreshold = ref(0)
 // const value5 = ref(0)
 const changeBtn = function () {
-  console.log(FPS)//--->true
+  console.log(Frame)//--->true
 }
 
 const isStartPerf = ref(false)
@@ -150,12 +150,14 @@ const startBtnCallback = function () {
             </el-card>
 
             <el-card class="box-card">
-              <el-checkbox v-model="CPU" label="CPU" class="checkbox-item"/>
-              <el-checkbox v-model="Mem" label="内存" class="checkbox-item"/>
-              <el-checkbox v-model="FPS" label="FPS" @change="changeBtn" class="checkbox-item"/>
-              <el-checkbox v-model="jank" label="jank" class="checkbox-item"/>
+              <el-checkbox v-model="CPU" label="proc-cpu" class="checkbox-item"/>
+              <el-checkbox v-model="Mem" label="proc-pss" class="checkbox-item"/>
+              <el-checkbox v-model="thread" label="proc-thread" class="checkbox-item"/>
+              <el-checkbox v-model="Frame" label="frame" @change="changeBtn" class="checkbox-item"/>
+
               <el-checkbox v-model="isSysCPU" label="sys-cpu" class="checkbox-item"/>
               <el-checkbox v-model="isSysMem" label="sys-mem" class="checkbox-item"/>
+              <el-checkbox v-model="isSysMem" label="sys-network" class="checkbox-item"/>
             </el-card>
 
             <el-card class="box-card" :body-style="{ width: '228px' }">
@@ -297,5 +299,17 @@ const startBtnCallback = function () {
 
 .el-button .iconfont {
   font-size: inherit;
+}
+
+
+.el-checkbox-group {
+  text-align: left;
+}
+
+.el-checkbox {
+  margin-left: 0px;
+  margin-right: 0px;
+  width: 110px;
+  text-align: left;
 }
 </style>
