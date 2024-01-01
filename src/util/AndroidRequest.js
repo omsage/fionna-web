@@ -30,12 +30,3 @@ export async function getDefaultSerial() {
 export async function getScrcpySize(scrcpyID) {
     return axios.get(baseUrl + "/android/scrcpy/size?scrcpyID="+scrcpyID)
 }
-
-export async function startPerfGather() {
-    return axios.post(baseUrl+"/android/perf/start",{
-        cpu:true,
-        fps:true,
-        mem:true,
-        jank:true
-    })
-}

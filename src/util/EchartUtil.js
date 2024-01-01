@@ -140,7 +140,13 @@ export var getOptionTemplate = function (titleText) {
         },
         toolbox: {
             feature: {
-                saveAsImage: {},
+                dataZoom: {
+                    yAxisIndex: 'none'
+                },
+                dataView: { readOnly: false },
+                magicType: { type: ['line', 'bar'] },
+                restore: {},
+                saveAsImage: {}
             }
         },
         dataZoom: [

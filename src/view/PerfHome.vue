@@ -15,12 +15,16 @@
             :controlUrl="controlUrl"
 
             :isStart="props.isStartPerf"
-            :deviceSerial="props.deviceSerial"
+            :deviceSerial="props.perfConfig.deviceSerial"
             @watchRotation="watchRotation"
             :nodeID="masterID"
         />
       </div>
-      <EchartView :isStartPerf="props.isStartPerf" :deviceSerial="props.deviceSerial"></EchartView>
+      <EchartView
+          :isStartPerf="props.isStartPerf"
+          :isLandscapeScreen="isLandscapeScreen"
+          :perfConfig="props.perfConfig"
+      ></EchartView>
     </div>
 
     <!--    <p>横屏：{{isLandscapeScreen}}</p>-->
@@ -43,7 +47,7 @@ let isLandscapeScreen = ref(false)
 
 const props = defineProps({
   isStartPerf: Boolean,
-  deviceSerial:String
+  perfConfig:Object,
 })
 
 const watchRotation = (rotationValue) => {

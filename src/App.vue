@@ -1,11 +1,10 @@
 <script lang="ts" setup>
-import {onMounted, ref} from 'vue'
+import {ref} from 'vue'
 import {
   getAndroidPackageList,
   getAndroidCurrentPackage,
   getSerialList,
   getDefaultSerial,
-  startPerfGather
 } from "./util/AndroidRequest.js"
 import {VideoPlay, SwitchButton} from '@element-plus/icons-vue'
 import PerfHome from './view/PerfHome.vue'
@@ -13,11 +12,11 @@ import PerfHome from './view/PerfHome.vue'
 //
 
 
-let deviceSerial = ref('')
+// let deviceSerial = ref('')
 let deviceSerialList = ref([])
 
 getDefaultSerial().then(response => {
-  deviceSerial.value = response.data
+  perfConfig.value.deviceSerial = response.data
 })
 
 const serialListSelectOpenCallback = function () {
@@ -35,7 +34,7 @@ const serialListSelectOpenCallback = function () {
   })
 }
 
-let inputPackageName = ref('')
+// let inputPackageName = ref('')
 let packageNameList = ref([])
 
 const packageNameSelectOpenCallback = function (serial) {
@@ -55,17 +54,20 @@ const packageNameSelectOpenCallback = function (serial) {
 
 const pickCurrentPackageCallback = function (serial) {
   getAndroidCurrentPackage(serial).then(response => {
-    inputPackageName.value = response.data
+    perfConfig.value.packageName = response.data
   })
 }
 
-
-const CPU = ref(true)
-const Mem = ref(true)
-const Frame = ref(true)
-const thread = ref(true)
-const isSysMem = ref(false)
-const isSysCPU = ref(false)
+const perfConfig = ref({
+  procCPU : true,
+  procMem : true,
+  procThread : true,
+  frame : true,
+  sysCpu : false,
+  sysMem : false,
+  deviceSerial:"",
+  packageName:""
+})
 
 const isRecord = ref(false)
 const isMultiple = ref(false)
@@ -78,14 +80,10 @@ const CPUThreshold = ref(0)
 const MemThreshold = ref(0)
 const JankThreshold = ref(0)
 // const value5 = ref(0)
-const changeBtn = function () {
-  console.log(Frame)//--->true
-}
 
 const isStartPerf = ref(false)
 const startBtnCallback = function () {
   isStartPerf.value = !isStartPerf.value
-  startPerfGather()
 }
 
 </script>
@@ -104,7 +102,7 @@ const startBtnCallback = function () {
               <!--              todo el-autocomplete-->
 
               <el-select
-                  v-model="deviceSerial"
+                  v-model="perfConfig.deviceSerial"
                   filterable
                   :options="deviceSerialList"
 
@@ -123,10 +121,10 @@ const startBtnCallback = function () {
               <br>
               <br>
               <el-select
-                  v-model="inputPackageName"
+                  v-model="perfConfig.packageName"
                   filterable
 
-                  @focus="packageNameSelectOpenCallback(deviceSerial)"
+                  @focus="packageNameSelectOpenCallback(perfConfig.deviceSerial)"
                   placeholder="输入包名或者bundle"
                   clearable
                   style="width: 159px"
@@ -145,19 +143,19 @@ const startBtnCallback = function () {
                   content="获取设备前台应用包名"
                   placement="top"
               >
-                <el-button type="success" @click="pickCurrentPackageCallback(deviceSerial)" plain>pick</el-button>
+                <el-button type="success" @click="pickCurrentPackageCallback(perfConfig.deviceSerial)" plain>pick</el-button>
               </el-tooltip>
             </el-card>
 
             <el-card class="box-card">
-              <el-checkbox v-model="CPU" label="proc-cpu" class="checkbox-item"/>
-              <el-checkbox v-model="Mem" label="proc-pss" class="checkbox-item"/>
-              <el-checkbox v-model="thread" label="proc-thread" class="checkbox-item"/>
-              <el-checkbox v-model="Frame" label="frame" @change="changeBtn" class="checkbox-item"/>
+              <el-checkbox v-model="perfConfig.procCPU" label="proc-cpu" class="checkbox-item"/>
+              <el-checkbox v-model="perfConfig.procMem" label="proc-pss" class="checkbox-item"/>
+              <el-checkbox v-model="perfConfig.procThread" label="proc-thread" class="checkbox-item"/>
+              <el-checkbox v-model="perfConfig.frame" label="frame" class="checkbox-item"/>
 
-              <el-checkbox v-model="isSysCPU" label="sys-cpu" class="checkbox-item"/>
-              <el-checkbox v-model="isSysMem" label="sys-mem" class="checkbox-item"/>
-              <el-checkbox v-model="isSysMem" label="sys-network" class="checkbox-item"/>
+              <el-checkbox v-model="perfConfig.sysCpu" label="sys-cpu" class="checkbox-item"/>
+              <el-checkbox v-model="perfConfig.sysMem" label="sys-mem" class="checkbox-item"/>
+<!--              <el-checkbox v-model="isSysMem" label="sys-network" class="checkbox-item"/>-->
             </el-card>
 
             <el-card class="box-card" :body-style="{ width: '228px' }">
@@ -237,7 +235,7 @@ const startBtnCallback = function () {
         <el-main style="padding-top: inherit">
             <PerfHome
             :isStartPerf="isStartPerf"
-            :deviceSerial = "deviceSerial"
+            :perfConfig = "perfConfig"
             />
 
           <!--          <el-icon :size="size" :color="color">-->

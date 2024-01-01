@@ -12,7 +12,7 @@
     >
       <div :id="cpuProcPerfEChartDrawerID" style="width: 100%;height: 100%"></div>
     </el-drawer>
-    <div style="width: 50%; float: left; overflow: hidden;height: 170px">
+    <div style="width: 300px; float: left; overflow: hidden;height: 170px">
       <div :id="cpuProcPerfEChartID" style="width:100%;height: 170px"></div>
     </div>
 
@@ -25,7 +25,7 @@
     >
       <div :id="memProcPerfEChartDrawerID" style="width: 100%;height: 100%"></div>
     </el-drawer>
-    <div  style="width: 50%; float: left; overflow: hidden;height: 170px">
+    <div style="width: 300px; float: left; overflow: hidden;height: 170px">
       <div :id="memProcPerfEChartID" style="width:100%;height: 170px"></div>
     </div>
 
@@ -38,12 +38,49 @@
     >
       <div :id="threadProcPerfEChartDrawerID" style="width: 100%;height: 100%"></div>
     </el-drawer>
-    <div  style="width: 50%; float: left; overflow: hidden;height: 170px">
+    <div style="width: 300px; float: left; overflow: hidden;height: 170px">
       <div :id="threadProcPerfEChartID" style="width:100%;height: 170px"></div>
     </div>
-    <!--    <PerfEchart :isStart="props.isStartPerf" :nodeID="'echartMEM'" ></PerfEchart>-->
-    <!--    <PerfEchart :isStart="props.isStartPerf" :nodeID="'echartFPS'" ></PerfEchart>-->
-    <!--    <PerfEchart :isStart="props.isStartPerf" :nodeID="'echartJank'" ></PerfEchart>-->
+
+    <el-drawer
+        v-model="isOpenFrameDrawer"
+        title="I am the title"
+        :with-header="false"
+        :direction="direction"
+        :size="400"
+    >
+      <div :id="frameEChartDrawerID" style="width: 100%;height: 100%"></div>
+    </el-drawer>
+    <div style="width: 300px; float: left; overflow: hidden;height: 170px">
+      <div :id="frameEChartID" style="width:100%;height: 170px"></div>
+    </div>
+
+    <el-drawer
+        v-model="isOpenSysCPUDrawer"
+        title="I am the title"
+        :with-header="false"
+        :direction="direction"
+        :size="400"
+    >
+      <div :id="sysCPUEChartDrawerID" style="width: 100%;height: 100%"></div>
+    </el-drawer>
+    <div style="width: 300px; float: left; overflow: hidden;height: 170px">
+      <div :id="sysCPUEChartID" style="width:100%;height: 170px"></div>
+    </div>
+
+    <el-drawer
+        v-model="isOpenSysMemDrawer"
+        title="I am the title"
+        :with-header="false"
+        :direction="direction"
+        :size="400"
+    >
+      <div :id="sysMemEChartDrawerID" style="width: 100%;height: 100%"></div>
+    </el-drawer>
+    <div style="width: 300px; float: left; overflow: hidden;height: 170px">
+      <div :id="sysMemEChartID" style="width:100%;height: 170px"></div>
+    </div>
+
   </div>
 </template>
 
@@ -77,8 +114,8 @@ echarts.use(
 )
 const props = defineProps({
   isStartPerf: Boolean,
-  deviceSerial: String,
-  isLandscapeScreen: Boolean
+  isLandscapeScreen: Boolean,
+  perfConfig: Object,
 })
 
 const direction = ref('ttb')
@@ -94,6 +131,18 @@ let memProcPerfEChartDrawerID = "memProcPerfEChartDrawer"
 let isOpenProcThreadDrawer = ref(false)
 let threadProcPerfEChartID = "threadProcPerfEChart"
 let threadProcPerfEChartDrawerID = "threadProcPerfEChartDrawer"
+
+let isOpenFrameDrawer = ref(false)
+let frameEChartID = "framePerfEChart"
+let frameEChartDrawerID = "framePerfEChartDrawer"
+
+let isOpenSysCPUDrawer = ref(false)
+let sysCPUEChartID = "sysCPUPerfEChart"
+let sysCPUEChartDrawerID = "sysCPUPerfEChartDrawer"
+
+let isOpenSysMemDrawer = ref(false)
+let sysMemEChartID = "sysMemPerfEChart"
+let sysMemEChartDrawerID = "sysMemPerfEChartDrawer"
 
 let procCpuFn = function () {
 
@@ -126,8 +175,8 @@ let procCpuFn = function () {
   conn_proc_cpu.onopen = function (event) {
     // 发送数据到服务器
     const data = {
-      serial: '',
-      pid: '32715',
+      serial: props.perfConfig.deviceSerial,
+      packageName: props.perfConfig.packageName,
       intervalTime: 1
     };
     conn_proc_cpu.send(JSON.stringify(data));
@@ -226,8 +275,8 @@ let procMemFn = function () {
   connProcMem.onopen = function (event) {
     // 发送数据到服务器
     const data = {
-      serial: '',
-      pid: '32715',
+      serial: props.perfConfig.deviceSerial,
+      packageName: props.perfConfig.packageName,
       intervalTime: 1
     };
     connProcMem.send(JSON.stringify(data));
@@ -329,7 +378,7 @@ let procMemFn = function () {
   }
 
   ProcMemThumbnailOptionTemplate.color = [
-      '#5470c6', '#91cc75', '#fac858', '#ee6666',
+    '#5470c6', '#91cc75', '#fac858', '#ee6666',
     '#5645c7', '#bf40ff', '#80e3cc', '#25316b']
 
   connProcMem.onmessage = function (evt) {
@@ -405,8 +454,8 @@ let procThreadFn = function () {
   connProcThread.onopen = function (event) {
     // 发送数据到服务器
     const data = {
-      serial: '',
-      pid: '32715',
+      serial: props.perfConfig.deviceSerial,
+      packageName: props.perfConfig.packageName,
       intervalTime: 1
     };
     connProcThread.send(JSON.stringify(data));
@@ -474,12 +523,396 @@ let procThreadFn = function () {
 
 }
 
+let sysCPUFn = function () {
+
+  let perfEChartDOM = document.getElementById(sysCPUEChartID);
+
+  let perfEChart = echarts.init(perfEChartDOM, null, {
+    renderer: 'canvas',
+    useDirtyRect: false,
+  });
+
+  let perfDrawerEChart = undefined;
+
+  let thumbnailOptionTemplate = getThumbnailOptionTemplate("sys-cpu", function () {
+    isOpenSysCPUDrawer.value = true
+    nextTick(() => {
+      // 在这里编写放大图表的逻辑
+      let perfEChartDrawerDOM = document.getElementById(sysCPUEChartDrawerID);
+
+      perfDrawerEChart = echarts.init(perfEChartDrawerDOM, null, {
+        renderer: 'canvas',
+        useDirtyRect: false,
+      });
+
+    })
+  })
+
+  let optionTemplate = getOptionTemplate("sys-cpu")
+
+  let connSysThread = new WebSocket(baseWs + "/android/perf/sys/cpu");
+  connSysThread.onopen = function (event) {
+    // 发送数据到服务器
+    const data = {
+      serial: props.perfConfig.deviceSerial,
+      intervalTime: 1
+    };
+    connSysThread.send(JSON.stringify(data));
+  };
+  connSysThread.onclose = function (e) {
+    console.log(e);
+    console.log("connection closed");
+  };
+
+
+  let xAxis =
+      {
+        type: 'category',
+        boundaryGap: false,
+        data: []
+      }
+
+  let yAxis = [
+    {
+      type: 'value'
+    }
+  ]
+  let result = {}
+  let legend = {
+    top: '8%',
+    data: [],
+  }
+
+  connSysThread.onmessage = function (evt) {
+    let data = JSON.parse(evt.data);
+    let isPushTimes = false
+    for (const cpuName in data) {
+      if (cpuName in result) {
+        result[cpuName].data.push(data[cpuName].cpuUsage)
+        if (!isPushTimes) {
+          const date = new Date(data[cpuName].timeStamp);
+
+          // 获取小时、分钟和秒
+          const hours = date.getHours();
+          const minutes = date.getMinutes();
+          const seconds = date.getSeconds();
+
+          // 格式化输出
+          const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+          xAxis.data.push(formattedTime)
+          isPushTimes = true
+        }
+      } else {
+        result[cpuName] = {
+          name: cpuName,
+          type: 'line',
+          areaStyle: {},
+          emphasis: {
+            focus: 'series'
+          },
+          data: [data[cpuName].cpuUsage]
+        }
+
+        legend.data.push(cpuName)
+
+        if (!isPushTimes) {
+          const date = new Date(data[cpuName].timeStamp);
+
+          // 获取小时、分钟和秒
+          const hours = date.getHours();
+          const minutes = date.getMinutes();
+          const seconds = date.getSeconds();
+
+          // 格式化输出
+          const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+          xAxis.data.push(formattedTime)
+          isPushTimes = true
+        }
+      }
+    }
+
+    let series = []
+
+    for (const cpuName in result) {
+      series.push(result[cpuName])
+    }
+
+    thumbnailOptionTemplate.xAxis = [xAxis]
+    thumbnailOptionTemplate.series = series
+    thumbnailOptionTemplate.yAxis = yAxis
+
+    perfEChart.setOption(thumbnailOptionTemplate)
+
+    optionTemplate.xAxis = [xAxis]
+    optionTemplate.series = series
+    optionTemplate.yAxis = yAxis
+    optionTemplate.legend = legend
+
+    if (perfDrawerEChart !== undefined && isOpenSysCPUDrawer.value) {
+      perfDrawerEChart.setOption(optionTemplate)
+    }
+
+  }
+
+}
+
+let frameFn = function () {
+
+  let perfEChartDOM = document.getElementById(frameEChartID);
+
+  let perfEChart = echarts.init(perfEChartDOM, null, {
+    renderer: 'canvas',
+    useDirtyRect: false,
+  });
+
+  let perfDrawerEChart = undefined;
+
+  let thumbnailOptionTemplate = getThumbnailOptionTemplate("FPS", function () {
+    isOpenFrameDrawer.value = true
+    nextTick(() => {
+      // 在这里编写放大图表的逻辑
+      let perfEChartDrawerDOM = document.getElementById(frameEChartDrawerID);
+
+      perfDrawerEChart = echarts.init(perfEChartDrawerDOM, null, {
+        renderer: 'canvas',
+        useDirtyRect: false,
+      });
+
+    })
+  })
+
+  let optionTemplate = getOptionTemplate("FPS")
+
+  let connSysFrame = new WebSocket(baseWs + "/android/perf/sys/frame");
+  connSysFrame.onopen = function (event) {
+    // 发送数据到服务器
+    const data = {
+      serial: props.perfConfig.deviceSerial,
+      intervalTime: 1
+    };
+    connSysFrame.send(JSON.stringify(data));
+  };
+  connSysFrame.onclose = function (e) {
+    console.log(e);
+    console.log("connection closed");
+  };
+
+  let series = [
+    {
+      name: 'FPS',
+      type: 'line',
+      areaStyle: {},
+      emphasis: {
+        focus: 'series'
+      },
+      data: [],
+    },
+  ]
+  let xAxis = [
+    {
+      type: 'category',
+      boundaryGap: false,
+      data: []
+    }
+  ]
+  let yAxis = [
+    {
+      type: 'value'
+    }
+  ]
+
+  // let markPoint = {
+  //   data: []
+  // }
+
+  connSysFrame.onmessage = function (evt) {
+    let data = JSON.parse(evt.data);
+    const date = new Date(data.timeStamp);
+
+
+    // 获取小时、分钟和秒
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+
+    // 格式化输出
+    const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+    // if (data.jankCount>0){
+    //   markPoint.data.push({ name: 'jank', value: data.jankCount, xAxis: series[0].data.length , yAxis: data.FPS  })
+    // }
+    // if (data.bigJankCount>0){
+    //   markPoint.data.push({ name: 'bigjank', value: data.bigJankCount, xAxis: series[0].data.length , yAxis: data.FPS  })
+    // }
+
+    xAxis[0].data.push(formattedTime)
+    series[0].data.push(data.FPS)
+    // series[0].markPoint = markPoint
+
+    thumbnailOptionTemplate.xAxis = xAxis
+    thumbnailOptionTemplate.series = series
+    thumbnailOptionTemplate.yAxis = yAxis
+
+    perfEChart.setOption(thumbnailOptionTemplate)
+
+
+    optionTemplate.xAxis = xAxis
+    optionTemplate.series = series
+    optionTemplate.yAxis = yAxis
+    // console.log(optionTemplate)
+
+    if (perfDrawerEChart !== undefined && isOpenFrameDrawer.value) {
+      perfDrawerEChart.setOption(optionTemplate)
+    }
+
+  }
+
+}
+
+let sysMemFn = function () {
+
+  let perfEChartDOM = document.getElementById(sysMemEChartID);
+
+  let perfEChart = echarts.init(perfEChartDOM, null, {
+    renderer: 'canvas',
+    useDirtyRect: false,
+  });
+
+  let perfDrawerEChart = undefined;
+
+  let thumbnailOptionTemplate = getThumbnailOptionTemplate("sys-mem", function () {
+    isOpenSysMemDrawer.value = true
+    nextTick(() => {
+      // 在这里编写放大图表的逻辑
+      let perfEChartDrawerDOM = document.getElementById(sysMemEChartDrawerID);
+
+      perfDrawerEChart = echarts.init(perfEChartDrawerDOM, null, {
+        renderer: 'canvas',
+        useDirtyRect: false,
+      });
+
+    })
+  })
+
+  let optionTemplate = getOptionTemplate("sys-mem")
+
+  let connSysThread = new WebSocket(baseWs + "/android/perf/sys/mem");
+  connSysThread.onopen = function (event) {
+    // 发送数据到服务器
+    const data = {
+      serial: props.perfConfig.deviceSerial,
+      intervalTime: 1
+    };
+    connSysThread.send(JSON.stringify(data));
+  };
+  connSysThread.onclose = function (e) {
+    console.log(e);
+    console.log("connection closed");
+  };
+
+
+  let xAxis =
+      {
+        type: 'category',
+        boundaryGap: false,
+        data: []
+      }
+
+  let yAxis = [
+    {
+      type: 'value'
+    }
+  ]
+  let result = {}
+  let legend = {
+    top: '8%',
+    data: [],
+  }
+
+  connSysThread.onmessage = function (evt) {
+    let data = JSON.parse(evt.data);
+
+    const date = new Date(data.timeStamp);
+
+    // 获取小时、分钟和秒
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+
+    // 格式化输出
+    const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+    xAxis.data.push(formattedTime)
+
+    for (const memName in data) {
+      if (memName === "timeStamp") {
+        continue
+      }
+      if (memName in result) {
+        result[memName].data.push(data[memName])
+      } else {
+        result[memName] = {
+          name: memName,
+          type: 'line',
+          areaStyle: {},
+          emphasis: {
+            focus: 'series'
+          },
+          data: [data[memName]]
+        }
+
+        legend.data.push(memName)
+      }
+    }
+
+    let series = []
+
+    for (const cpuName in result) {
+      series.push(result[cpuName])
+    }
+
+    thumbnailOptionTemplate.xAxis = [xAxis]
+    thumbnailOptionTemplate.series = series
+    thumbnailOptionTemplate.yAxis = yAxis
+
+    perfEChart.setOption(thumbnailOptionTemplate)
+
+    optionTemplate.xAxis = [xAxis]
+    optionTemplate.series = series
+    optionTemplate.yAxis = yAxis
+    optionTemplate.legend = legend
+
+    if (perfDrawerEChart !== undefined && isOpenSysMemDrawer.value) {
+      perfDrawerEChart.setOption(optionTemplate)
+    }
+
+  }
+
+}
+
 watch(() => props.isStartPerf, (isStart) => {
   if (isStart) {
     nextTick(() => {
-      procCpuFn()
-      procMemFn()
-      procThreadFn()
+      if (props.perfConfig.procCPU) {
+        procCpuFn()
+      }
+      if (props.perfConfig.procMem) {
+        procMemFn()
+      }
+      if (props.perfConfig.procThread) {
+        procThreadFn()
+      }
+      if (props.perfConfig.sysCpu) {
+        sysCPUFn()
+      }
+      if (props.perfConfig.frame) {
+        frameFn()
+      }
+      if (props.perfConfig.sysMem) {
+        sysMemFn()
+      }
     })
   }
 })
@@ -490,7 +923,7 @@ watch(() => props.isStartPerf, (isStart) => {
 <style scoped>
 
 .portraitScreenRight {
-  min-width: 600px;
+  min-width: 700px;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
