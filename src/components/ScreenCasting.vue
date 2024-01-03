@@ -23,7 +23,6 @@ let scrcpyLandscapeScreen = false;
 let rotationWS = undefined;
 let controlWS = undefined;
 let rotation = 0
-let firstRotation = true
 const props = defineProps({
   rotationUrl: String,
   h264Url: String,
@@ -51,7 +50,6 @@ watch(() => props.isStart, (isStart) => {
         watchRotation(scrcpySever)
 
         getScrcpySize(scrcpyID).then(response => {
-          scrcpyLandscapeScreen = response.data.rotation === 1 || response.data.rotation === 3
           scrcpyWidth = response.data.width
           scrcpyHeight = response.data.height
           setControl(scrcpyID)
@@ -62,8 +60,6 @@ watch(() => props.isStart, (isStart) => {
     scrcpySever.closeServer()
     controlWS.close()
     rotationWS.close()
-    firstRotation = true
-    scrcpyLandscapeScreen = false
   }
 })
 
@@ -75,32 +71,15 @@ const watchRotation = (scrcpySever) => {
   rotationWS = new WebSocket(props.rotationUrl);
   rotationWS.addEventListener("message", (event) => {
     const rotationJson = JSON.parse(event.data);
-    if (scrcpySever && !firstRotation) {
+    if (scrcpySever) {
       scrcpySever.reset();
     }
     rotation = rotationJson.rotation
+    scrcpyWidth = rotationJson.width
+    scrcpyHeight = rotationJson.height
     console.log(rotationJson)
 
-    if (rotation === 1 || rotation === 3) {
-      if (!scrcpyLandscapeScreen) {
-        // 交换宽高
-        let tmp = scrcpyWidth
-        scrcpyWidth = scrcpyHeight
-        scrcpyHeight = tmp
-        scrcpyLandscapeScreen = true
-      }
-    } else if (rotation === 0 || rotation === 2) {
-      if (scrcpyLandscapeScreen) {
-        // 交换宽高
-        let tmp = scrcpyWidth
-        scrcpyWidth = scrcpyHeight
-        scrcpyHeight = tmp
-        scrcpyLandscapeScreen = false
-      }
-    }
-
     emitRotation(rotationJson.rotation)
-    firstRotation = false
   });
 
   // 监听WebSocket的onopen事件

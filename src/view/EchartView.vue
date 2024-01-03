@@ -144,6 +144,13 @@ let isOpenSysMemDrawer = ref(false)
 let sysMemEChartID = "sysMemPerfEChart"
 let sysMemEChartDrawerID = "sysMemPerfEChartDrawer"
 
+let connProcCpu;
+let connProcMem;
+let connProcThread;
+let connSysCPU;
+let connSysFrame;
+let connSysMem;
+
 let procCpuFn = function () {
 
   let cpuPerfEChartDOM = document.getElementById(cpuProcPerfEChartID);
@@ -171,17 +178,17 @@ let procCpuFn = function () {
 
   let ProcCPUOptionTemplate = getOptionTemplate("proc-cpu")
 
-  let conn_proc_cpu = new WebSocket(baseWs + "/android/perf/proc/cpu");
-  conn_proc_cpu.onopen = function (event) {
+  connProcCpu = new WebSocket(baseWs + "/android/perf/proc/cpu");
+  connProcCpu.onopen = function (event) {
     // 发送数据到服务器
     const data = {
       serial: props.perfConfig.deviceSerial,
       packageName: props.perfConfig.packageName,
       intervalTime: 1
     };
-    conn_proc_cpu.send(JSON.stringify(data));
+    connProcCpu.send(JSON.stringify(data));
   };
-  conn_proc_cpu.onclose = function (e) {
+  connProcCpu.onclose = function (e) {
     console.log(e);
     console.log("connection closed");
   };
@@ -210,7 +217,7 @@ let procCpuFn = function () {
     }
   ]
 
-  conn_proc_cpu.onmessage = function (evt) {
+  connProcCpu.onmessage = function (evt) {
     let data = JSON.parse(evt.data);
     const date = new Date(data.timeStamp);
 
@@ -271,7 +278,7 @@ let procMemFn = function () {
 
   let ProcMemOptionTemplate = getOptionTemplate("proc-mem-pss(MB)")
 
-  let connProcMem = new WebSocket(baseWs + "/android/perf/proc/mem");
+  connProcMem = new WebSocket(baseWs + "/android/perf/proc/mem");
   connProcMem.onopen = function (event) {
     // 发送数据到服务器
     const data = {
@@ -450,7 +457,7 @@ let procThreadFn = function () {
 
   let optionTemplate = getOptionTemplate("proc-thread")
 
-  let connProcThread = new WebSocket(baseWs + "/android/perf/proc/thread");
+  connProcThread = new WebSocket(baseWs + "/android/perf/proc/thread");
   connProcThread.onopen = function (event) {
     // 发送数据到服务器
     const data = {
@@ -550,16 +557,16 @@ let sysCPUFn = function () {
 
   let optionTemplate = getOptionTemplate("sys-cpu")
 
-  let connSysThread = new WebSocket(baseWs + "/android/perf/sys/cpu");
-  connSysThread.onopen = function (event) {
+  connSysCPU = new WebSocket(baseWs + "/android/perf/sys/cpu");
+  connSysCPU.onopen = function (event) {
     // 发送数据到服务器
     const data = {
       serial: props.perfConfig.deviceSerial,
       intervalTime: 1
     };
-    connSysThread.send(JSON.stringify(data));
+    connSysCPU.send(JSON.stringify(data));
   };
-  connSysThread.onclose = function (e) {
+  connSysCPU.onclose = function (e) {
     console.log(e);
     console.log("connection closed");
   };
@@ -583,7 +590,7 @@ let sysCPUFn = function () {
     data: [],
   }
 
-  connSysThread.onmessage = function (evt) {
+  connSysCPU.onmessage = function (evt) {
     let data = JSON.parse(evt.data);
     let isPushTimes = false
     for (const cpuName in data) {
@@ -685,7 +692,7 @@ let frameFn = function () {
 
   let optionTemplate = getOptionTemplate("FPS")
 
-  let connSysFrame = new WebSocket(baseWs + "/android/perf/sys/frame");
+  connSysFrame = new WebSocket(baseWs + "/android/perf/sys/frame");
   connSysFrame.onopen = function (event) {
     // 发送数据到服务器
     const data = {
@@ -782,7 +789,7 @@ let sysMemFn = function () {
 
   let perfDrawerEChart = undefined;
 
-  let thumbnailOptionTemplate = getThumbnailOptionTemplate("sys-mem", function () {
+  let thumbnailOptionTemplate = getThumbnailOptionTemplate("sys-mem(MB)", function () {
     isOpenSysMemDrawer.value = true
     nextTick(() => {
       // 在这里编写放大图表的逻辑
@@ -796,18 +803,18 @@ let sysMemFn = function () {
     })
   })
 
-  let optionTemplate = getOptionTemplate("sys-mem")
+  let optionTemplate = getOptionTemplate("sys-mem(MB)")
 
-  let connSysThread = new WebSocket(baseWs + "/android/perf/sys/mem");
-  connSysThread.onopen = function (event) {
+  connSysMem = new WebSocket(baseWs + "/android/perf/sys/mem");
+  connSysMem.onopen = function (event) {
     // 发送数据到服务器
     const data = {
       serial: props.perfConfig.deviceSerial,
       intervalTime: 1
     };
-    connSysThread.send(JSON.stringify(data));
+    connSysMem.send(JSON.stringify(data));
   };
-  connSysThread.onclose = function (e) {
+  connSysMem.onclose = function (e) {
     console.log(e);
     console.log("connection closed");
   };
@@ -831,7 +838,7 @@ let sysMemFn = function () {
     data: [],
   }
 
-  connSysThread.onmessage = function (evt) {
+  connSysMem.onmessage = function (evt) {
     let data = JSON.parse(evt.data);
 
     const date = new Date(data.timeStamp);
@@ -914,6 +921,26 @@ watch(() => props.isStartPerf, (isStart) => {
         sysMemFn()
       }
     })
+  }else {
+
+    if(connProcCpu!==undefined){
+      connProcCpu.close()
+    }
+    if(connProcMem!==undefined){
+      connProcMem.close()
+    }
+    if(connProcThread!==undefined){
+      connProcThread.close()
+    }
+    if(connSysCPU!==undefined){
+      connSysCPU.close()
+    }
+    if(connSysFrame!==undefined){
+      connSysFrame.close()
+    }
+    if(connSysMem!==undefined){
+      connSysMem.close()
+    }
   }
 })
 

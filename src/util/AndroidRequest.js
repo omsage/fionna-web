@@ -9,7 +9,6 @@ export const h264Url = baseWs + '/android/scrcpy/h264'
 export const controlUrl = baseWs + '/android/scrcpy/control'
 
 export async function getAndroidPackageList(serial) {
-    console.log(serial)
     let serialParams = encodeURIComponent(serial)
     return axios.get(baseUrl + '/android/package/list?serial='+serialParams)
 }
