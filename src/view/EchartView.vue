@@ -219,7 +219,10 @@ let procCpuFn = function () {
 
   connProcCpu.onmessage = function (evt) {
     let data = JSON.parse(evt.data);
-    const date = new Date(data.timeStamp);
+
+    // console.log(data)
+
+    const date = new Date(data.data.timeStamp);
 
     // 获取小时、分钟和秒
     const hours = date.getHours();
@@ -230,7 +233,7 @@ let procCpuFn = function () {
     const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
     xAxis[0].data.push(formattedTime)
-    series[0].data.push(data.cpuUtilization)
+    series[0].data.push(data.data.cpuUtilization)
 
     ProcCPUThumbnailOptionTemplate.xAxis = xAxis
     ProcCPUThumbnailOptionTemplate.series = series
@@ -389,7 +392,7 @@ let procMemFn = function () {
     '#5645c7', '#bf40ff', '#80e3cc', '#25316b']
 
   connProcMem.onmessage = function (evt) {
-    let data = JSON.parse(evt.data);
+    let data = JSON.parse(evt.data).data;
     const date = new Date(data.timeStamp);
 
     // 获取小时、分钟和秒
@@ -497,7 +500,7 @@ let procThreadFn = function () {
   ]
 
   connProcThread.onmessage = function (evt) {
-    let data = JSON.parse(evt.data);
+    let data = JSON.parse(evt.data).data;
     const date = new Date(data.timeStamp);
 
     // 获取小时、分钟和秒
@@ -591,7 +594,7 @@ let sysCPUFn = function () {
   }
 
   connSysCPU.onmessage = function (evt) {
-    let data = JSON.parse(evt.data);
+    let data = JSON.parse(evt.data).data;
     let isPushTimes = false
     for (const cpuName in data) {
       if (cpuName in result) {
@@ -735,7 +738,8 @@ let frameFn = function () {
   // }
 
   connSysFrame.onmessage = function (evt) {
-    let data = JSON.parse(evt.data);
+    let data = JSON.parse(evt.data).data;
+
     const date = new Date(data.timeStamp);
 
 
@@ -839,7 +843,7 @@ let sysMemFn = function () {
   }
 
   connSysMem.onmessage = function (evt) {
-    let data = JSON.parse(evt.data);
+    let data = JSON.parse(evt.data).data;
 
     const date = new Date(data.timeStamp);
 
@@ -922,7 +926,6 @@ watch(() => props.isStartPerf, (isStart) => {
       }
     })
   }else {
-
     if(connProcCpu!==undefined){
       connProcCpu.close()
     }

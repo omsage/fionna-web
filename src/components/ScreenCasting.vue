@@ -50,13 +50,14 @@ watch(() => props.isStart, (isStart) => {
         watchRotation(scrcpySever)
 
         getScrcpySize(scrcpyID).then(response => {
-          scrcpyWidth = response.data.width
-          scrcpyHeight = response.data.height
+          scrcpyWidth = response.data.data.width
+          scrcpyHeight = response.data.data.height
           setControl(scrcpyID)
         })
       });
     }
   } else {
+    console.log("close server")
     scrcpySever.closeServer()
     controlWS.close()
     rotationWS.close()
@@ -70,14 +71,14 @@ function emitRotation(rotation) {
 const watchRotation = (scrcpySever) => {
   rotationWS = new WebSocket(props.rotationUrl);
   rotationWS.addEventListener("message", (event) => {
-    const rotationJson = JSON.parse(event.data);
+    const rotationJson = JSON.parse(event.data).data;
     if (scrcpySever) {
       scrcpySever.reset();
     }
     rotation = rotationJson.rotation
     scrcpyWidth = rotationJson.width
     scrcpyHeight = rotationJson.height
-    console.log(rotationJson)
+    console.log("????????",rotationJson)
 
     emitRotation(rotationJson.rotation)
   });

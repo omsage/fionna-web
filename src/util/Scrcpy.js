@@ -33,9 +33,9 @@ class Scrcpy {
 
         this.videoWS.addEventListener('message',(event) => {
             if (typeof event.data === 'string'){
-                const scrcpyJson = JSON.parse(event.data);
+                const scrcpyJson = JSON.parse(event.data).data;
                 this.scrcpyID = scrcpyJson.scrcpyID
-                // console.log(scrcpyJson)
+                console.log(scrcpyJson)
             }else {
                 if (this.jmuxer){
                     this.jmuxer.feed({

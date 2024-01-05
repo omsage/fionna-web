@@ -16,13 +16,13 @@ import PerfHome from './view/PerfHome.vue'
 let deviceSerialList = ref([])
 
 getDefaultSerial().then(response => {
-  perfConfig.value.deviceSerial = response.data
+  perfConfig.value.deviceSerial = response.data.data
 })
 
 const serialListSelectOpenCallback = function () {
   getSerialList().then(response => {
     let res = []
-    response.data.forEach(function (item) {
+    response.data.data.forEach(function (item) {
       res.push({
         ProductDevice: item.ProductDevice,
         SerialName: item.SerialName,
@@ -40,7 +40,7 @@ let packageNameList = ref([])
 const packageNameSelectOpenCallback = function (serial) {
   getAndroidPackageList(serial).then(response => {
         let res = []
-        response.data.forEach(function (item) {
+        response.data.data.forEach(function (item) {
           res.push({
             value: item,
             label: item
@@ -54,7 +54,7 @@ const packageNameSelectOpenCallback = function (serial) {
 
 const pickCurrentPackageCallback = function (serial) {
   getAndroidCurrentPackage(serial).then(response => {
-    perfConfig.value.packageName = response.data
+    perfConfig.value.packageName = response.data.data
   })
 }
 
