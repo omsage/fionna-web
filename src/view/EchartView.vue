@@ -86,7 +86,7 @@
 
 <script setup>
 import {nextTick, ref, watch} from "vue";
-import {baseWs} from "@/util/AndroidRequest";
+import {baseWs, startAndroidPerf} from "@/util/AndroidRequest";
 import {getOptionTemplate, getThumbnailOptionTemplate} from "@/util/EchartUtil";
 import * as echarts from 'echarts/core';
 import {
@@ -151,7 +151,7 @@ let connSysCPU;
 let connSysFrame;
 let connSysMem;
 
-let procCpuFn = function () {
+let procCpuFn = function (uuid) {
 
   let cpuPerfEChartDOM = document.getElementById(cpuProcPerfEChartID);
 
@@ -178,15 +178,15 @@ let procCpuFn = function () {
 
   let ProcCPUOptionTemplate = getOptionTemplate("proc-cpu")
 
-  connProcCpu = new WebSocket(baseWs + "/android/perf/proc/cpu");
+  connProcCpu = new WebSocket(baseWs + "/android/perf/proc/cpu?uuid="+uuid);
   connProcCpu.onopen = function (event) {
     // 发送数据到服务器
-    const data = {
-      serial: props.perfConfig.deviceSerial,
-      packageName: props.perfConfig.packageName,
-      intervalTime: 1
-    };
-    connProcCpu.send(JSON.stringify(data));
+    // const data = {
+    //   serial: props.perfConfig.deviceSerial,
+    //   packageName: props.perfConfig.packageName,
+    //   intervalTime: 1
+    // };
+    // connProcCpu.send(JSON.stringify(data));
   };
   connProcCpu.onclose = function (e) {
     console.log(e);
@@ -254,7 +254,7 @@ let procCpuFn = function () {
 
 }
 
-let procMemFn = function () {
+let procMemFn = function (uuid) {
 
   let memPerfEChartDOM = document.getElementById(memProcPerfEChartID);
 
@@ -281,15 +281,15 @@ let procMemFn = function () {
 
   let ProcMemOptionTemplate = getOptionTemplate("proc-mem-pss(MB)")
 
-  connProcMem = new WebSocket(baseWs + "/android/perf/proc/mem");
+  connProcMem = new WebSocket(baseWs + "/android/perf/proc/mem?uuid="+uuid);
   connProcMem.onopen = function (event) {
     // 发送数据到服务器
-    const data = {
-      serial: props.perfConfig.deviceSerial,
-      packageName: props.perfConfig.packageName,
-      intervalTime: 1
-    };
-    connProcMem.send(JSON.stringify(data));
+    // const data = {
+    //   serial: props.perfConfig.deviceSerial,
+    //   packageName: props.perfConfig.packageName,
+    //   intervalTime: 1
+    // };
+    // connProcMem.send(JSON.stringify(data));
   };
   connProcMem.onclose = function (e) {
     console.log(e);
@@ -433,7 +433,7 @@ let procMemFn = function () {
   }
 }
 
-let procThreadFn = function () {
+let procThreadFn = function (uuid) {
 
   let perfEChartDOM = document.getElementById(threadProcPerfEChartID);
 
@@ -460,15 +460,15 @@ let procThreadFn = function () {
 
   let optionTemplate = getOptionTemplate("proc-thread")
 
-  connProcThread = new WebSocket(baseWs + "/android/perf/proc/thread");
+  connProcThread = new WebSocket(baseWs + "/android/perf/proc/thread?uuid="+uuid);
   connProcThread.onopen = function (event) {
     // 发送数据到服务器
-    const data = {
-      serial: props.perfConfig.deviceSerial,
-      packageName: props.perfConfig.packageName,
-      intervalTime: 1
-    };
-    connProcThread.send(JSON.stringify(data));
+    // const data = {
+    //   serial: props.perfConfig.deviceSerial,
+    //   packageName: props.perfConfig.packageName,
+    //   intervalTime: 1
+    // };
+    // connProcThread.send(JSON.stringify(data));
   };
   connProcThread.onclose = function (e) {
     console.log(e);
@@ -533,7 +533,7 @@ let procThreadFn = function () {
 
 }
 
-let sysCPUFn = function () {
+let sysCPUFn = function (uuid) {
 
   let perfEChartDOM = document.getElementById(sysCPUEChartID);
 
@@ -560,14 +560,14 @@ let sysCPUFn = function () {
 
   let optionTemplate = getOptionTemplate("sys-cpu")
 
-  connSysCPU = new WebSocket(baseWs + "/android/perf/sys/cpu");
+  connSysCPU = new WebSocket(baseWs + "/android/perf/sys/cpu?uuid="+uuid);
   connSysCPU.onopen = function (event) {
     // 发送数据到服务器
-    const data = {
-      serial: props.perfConfig.deviceSerial,
-      intervalTime: 1
-    };
-    connSysCPU.send(JSON.stringify(data));
+    // const data = {
+    //   serial: props.perfConfig.deviceSerial,
+    //   intervalTime: 1
+    // };
+    // connSysCPU.send(JSON.stringify(data));
   };
   connSysCPU.onclose = function (e) {
     console.log(e);
@@ -668,7 +668,7 @@ let sysCPUFn = function () {
 
 }
 
-let frameFn = function () {
+let frameFn = function (uuid) {
 
   let perfEChartDOM = document.getElementById(frameEChartID);
 
@@ -695,14 +695,14 @@ let frameFn = function () {
 
   let optionTemplate = getOptionTemplate("FPS")
 
-  connSysFrame = new WebSocket(baseWs + "/android/perf/sys/frame");
+  connSysFrame = new WebSocket(baseWs + "/android/perf/sys/frame?uuid="+uuid);
   connSysFrame.onopen = function (event) {
     // 发送数据到服务器
-    const data = {
-      serial: props.perfConfig.deviceSerial,
-      intervalTime: 1
-    };
-    connSysFrame.send(JSON.stringify(data));
+    // const data = {
+    //   serial: props.perfConfig.deviceSerial,
+    //   intervalTime: 1
+    // };
+    // connSysFrame.send(JSON.stringify(data));
   };
   connSysFrame.onclose = function (e) {
     console.log(e);
@@ -782,7 +782,7 @@ let frameFn = function () {
 
 }
 
-let sysMemFn = function () {
+let sysMemFn = function (uuid) {
 
   let perfEChartDOM = document.getElementById(sysMemEChartID);
 
@@ -809,14 +809,14 @@ let sysMemFn = function () {
 
   let optionTemplate = getOptionTemplate("sys-mem(MB)")
 
-  connSysMem = new WebSocket(baseWs + "/android/perf/sys/mem");
+  connSysMem = new WebSocket(baseWs + "/android/perf/sys/mem?uuid="+uuid);
   connSysMem.onopen = function (event) {
     // 发送数据到服务器
-    const data = {
-      serial: props.perfConfig.deviceSerial,
-      intervalTime: 1
-    };
-    connSysMem.send(JSON.stringify(data));
+    // const data = {
+    //   serial: props.perfConfig.deviceSerial,
+    //   intervalTime: 1
+    // };
+    // connSysMem.send(JSON.stringify(data));
   };
   connSysMem.onclose = function (e) {
     console.log(e);
@@ -905,26 +905,35 @@ let sysMemFn = function () {
 
 watch(() => props.isStartPerf, (isStart) => {
   if (isStart) {
-    nextTick(() => {
-      if (props.perfConfig.procCPU) {
-        procCpuFn()
-      }
-      if (props.perfConfig.procMem) {
-        procMemFn()
-      }
-      if (props.perfConfig.procThread) {
-        procThreadFn()
-      }
-      if (props.perfConfig.sysCpu) {
-        sysCPUFn()
-      }
-      if (props.perfConfig.frame) {
-        frameFn()
-      }
-      if (props.perfConfig.sysMem) {
-        sysMemFn()
+    startAndroidPerf(props.perfConfig.deviceSerial,props.perfConfig.packageName).then(response=>{
+      console.log(response)
+      if (response.data.code===10000){
+        let uuid = response.data.data
+        let uuidParams = encodeURIComponent(uuid)
+        nextTick(() => {
+          if (props.perfConfig.procCPU) {
+            procCpuFn(uuidParams)
+          }
+          if (props.perfConfig.procMem) {
+            procMemFn(uuidParams)
+          }
+          if (props.perfConfig.procThread) {
+            procThreadFn(uuidParams)
+          }
+          if (props.perfConfig.sysCpu) {
+            sysCPUFn(uuidParams)
+          }
+          if (props.perfConfig.frame) {
+            frameFn(uuidParams)
+          }
+          if (props.perfConfig.sysMem) {
+            sysMemFn(uuidParams)
+          }
+        })
       }
     })
+
+
   }else {
     if(connProcCpu!==undefined){
       connProcCpu.close()

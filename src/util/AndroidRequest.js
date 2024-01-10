@@ -13,6 +13,14 @@ export async function getAndroidPackageList(serial) {
     return axios.get(baseUrl + '/android/package/list?serial='+serialParams)
 }
 
+export async function startAndroidPerf(serial,packageName) {
+    // let serialParams = encodeURIComponent(serial)
+    return axios.post(baseUrl + '/android/perf/start',{
+        serial:serial,
+        packageName:packageName,
+    })
+}
+
 export async function getAndroidCurrentPackage(serial){
     let serialParams = encodeURIComponent(serial)
     return axios.get(baseUrl + '/android/package/current?serial='+serialParams)
