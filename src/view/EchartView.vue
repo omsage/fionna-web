@@ -113,7 +113,6 @@ echarts.use(
     ]
 )
 const props = defineProps({
-  isStartPerf: Boolean,
   isLandscapeScreen: Boolean,
   perfConfig: Object,
 })
@@ -903,37 +902,28 @@ let sysMemFn = function (uuid) {
 
 }
 
-watch(() => props.isStartPerf, (isStart) => {
-  if (isStart) {
-    startAndroidPerf(props.perfConfig.deviceSerial,props.perfConfig.packageName).then(response=>{
-      console.log(response)
-      if (response.data.code===10000){
-        let uuid = response.data.data
-        let uuidParams = encodeURIComponent(uuid)
-        nextTick(() => {
-          if (props.perfConfig.procCPU) {
-            procCpuFn(uuidParams)
-          }
-          if (props.perfConfig.procMem) {
-            procMemFn(uuidParams)
-          }
-          if (props.perfConfig.procThread) {
-            procThreadFn(uuidParams)
-          }
-          if (props.perfConfig.sysCpu) {
-            sysCPUFn(uuidParams)
-          }
-          if (props.perfConfig.frame) {
-            frameFn(uuidParams)
-          }
-          if (props.perfConfig.sysMem) {
-            sysMemFn(uuidParams)
-          }
-        })
+watch(() => props.perfConfig.uuid, (uuid) => {
+  if (uuid && props.perfConfig.isStartPerf) {
+    nextTick(() => {
+      if (props.perfConfig.procCPU) {
+        procCpuFn(uuid)
+      }
+      if (props.perfConfig.procMem) {
+        procMemFn(uuid)
+      }
+      if (props.perfConfig.procThread) {
+        procThreadFn(uuid)
+      }
+      if (props.perfConfig.sysCpu) {
+        sysCPUFn(uuid)
+      }
+      if (props.perfConfig.frame) {
+        frameFn(uuid)
+      }
+      if (props.perfConfig.sysMem) {
+        sysMemFn(uuid)
       }
     })
-
-
   }else {
     if(connProcCpu!==undefined){
       connProcCpu.close()

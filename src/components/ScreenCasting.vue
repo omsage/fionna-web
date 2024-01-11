@@ -24,11 +24,11 @@ let rotationWS = undefined;
 let controlWS = undefined;
 let rotation = 0
 const props = defineProps({
+  uuid: String,
   rotationUrl: String,
   h264Url: String,
   controlUrl: String,
   isStart: Boolean,
-  deviceSerial: String,
   nodeID: String,
 })
 
@@ -43,8 +43,9 @@ let scrcpySever = new Scrcpy(
 
 watch(() => props.isStart, (isStart) => {
   if (isStart) {
-    if (props.deviceSerial !== undefined || props.deviceSerial !== "") {
-      scrcpySever.startServer(props.deviceSerial)
+    if (props.uuid !== undefined || props.uuid !== "") {
+      console.log("uuid:",props.uuid,",")
+      scrcpySever.startServer(props.uuid,false)
 
       scrcpySever.getScrcpyID().then(scrcpyID => {
         watchRotation(scrcpySever)
@@ -58,9 +59,15 @@ watch(() => props.isStart, (isStart) => {
     }
   } else {
     console.log("close server")
-    scrcpySever.closeServer()
-    controlWS.close()
-    rotationWS.close()
+    if (scrcpySever!==undefined){
+      scrcpySever.closeServer()
+    }
+    if (controlWS!==undefined){
+      controlWS.close()
+    }
+    if (rotationWS!==undefined){
+      rotationWS.close()
+    }
   }
 })
 
@@ -78,7 +85,7 @@ const watchRotation = (scrcpySever) => {
     rotation = rotationJson.rotation
     scrcpyWidth = rotationJson.width
     scrcpyHeight = rotationJson.height
-    console.log("????????",rotationJson)
+    console.log("????????", rotationJson)
 
     emitRotation(rotationJson.rotation)
   });

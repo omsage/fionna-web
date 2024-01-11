@@ -1,12 +1,13 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
 import {
-  getAndroidPackageList,
   getAndroidCurrentPackage,
-  getSerialList,
+  getAndroidPackageList,
   getDefaultSerial,
+  getSerialList,
+  startAndroidPerf,
 } from "./util/AndroidRequest.js"
-import {VideoPlay, SwitchButton} from '@element-plus/icons-vue'
+import {SwitchButton, VideoPlay} from '@element-plus/icons-vue'
 import PerfHome from './view/PerfHome.vue'
 // let deviceSerialDefault = ''
 //
@@ -65,8 +66,10 @@ const perfConfig = ref({
   frame : true,
   sysCpu : false,
   sysMem : false,
+  isStartPerf : false,
   deviceSerial:"",
-  packageName:""
+  packageName:"",
+  uuid:""
 })
 
 const isRecord = ref(false)
@@ -81,9 +84,21 @@ const MemThreshold = ref(0)
 const JankThreshold = ref(0)
 // const value5 = ref(0)
 
-const isStartPerf = ref(false)
 const startBtnCallback = function () {
-  isStartPerf.value = !isStartPerf.value
+  perfConfig.value.isStartPerf = !perfConfig.value.isStartPerf
+  if (perfConfig.value.isStartPerf) {
+    startAndroidPerf(perfConfig.value.deviceSerial,perfConfig.value.packageName).then(response=>{
+      console.log(response)
+      if (response.data.code===10000){
+        let uuid = response.data.data
+        perfConfig.value.uuid = encodeURIComponent(uuid)
+      }else {
+        perfConfig.value.uuid = undefined
+      }
+    })
+  }else {
+    perfConfig.value.uuid = undefined
+  }
 }
 
 </script>
@@ -94,7 +109,6 @@ const startBtnCallback = function () {
     <el-container>
       <el-header>Header</el-header>
       <el-container>
-<!--        <el-aside v-show="!isStartPerf" width="270px">-->
         <el-aside  width="270px">
           <el-space direction="vertical">
 
@@ -234,8 +248,8 @@ const startBtnCallback = function () {
 
         <el-main style="padding-top: inherit">
             <PerfHome
-            :isStartPerf="isStartPerf"
             :perfConfig = "perfConfig"
+            :showScreenCasting = "isScreenCasting"
             />
 
           <!--          <el-icon :size="size" :color="color">-->
@@ -243,10 +257,10 @@ const startBtnCallback = function () {
           <!--          </el-icon>-->
           <!--          <el-icon><SwitchButton /></el-icon>-->
           <div class="start-to-home" @click="startBtnCallback">
-            <el-icon v-if="!isStartPerf" :size="60" color="#4caf50" class="start-to-home">
+            <el-icon v-if="!perfConfig.isStartPerf" :size="60" color="#4caf50" class="start-to-home">
               <VideoPlay/>
             </el-icon>
-            <el-icon v-if="isStartPerf" :size="60" color="#d80f0f" class="start-to-home">
+            <el-icon v-if="perfConfig.isStartPerf" :size="60" color="#d80f0f" class="start-to-home">
               <SwitchButton/>
             </el-icon>
           </div>

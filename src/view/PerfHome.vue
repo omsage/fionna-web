@@ -1,5 +1,5 @@
 <template>
-  <el-card v-show="props.isStartPerf" class="box-card">
+  <el-card v-show="props.perfConfig.isStartPerf" class="box-card">
 <!--  <el-card  class="box-card">-->
     <div :class="{
       landscapeScreenContainer:isLandscapeScreen ,
@@ -9,19 +9,18 @@
         landscapeScreenTop:isLandscapeScreen,
         portraitScreenLeft:!isLandscapeScreen
       }">
-        <ScreenCasting
+        <ScreenCasting v-show="scrcpy_show"
             :rotationUrl="rotationUrl"
             :h264Url="h264Url"
             :controlUrl="controlUrl"
 
-            :isStart="props.isStartPerf"
-            :deviceSerial="props.perfConfig.deviceSerial"
+            :isStart="scrcpy_show"
+            :uuid="scrcpy_uuid"
             @watchRotation="watchRotation"
             :nodeID="masterID"
         />
       </div>
       <EchartView
-          :isStartPerf="props.isStartPerf"
           :isLandscapeScreen="isLandscapeScreen"
           :perfConfig="props.perfConfig"
       ></EchartView>
@@ -34,7 +33,7 @@
 </template>
 
 <script setup>
-import {ref} from "vue";
+import {ref, watch} from "vue";
 import ScreenCasting from "@/components/ScreenCasting.vue";
 import EchartView from "@/view/EchartView.vue";
 import {h264Url, rotationUrl,controlUrl} from "@/util/AndroidRequest";
@@ -43,11 +42,24 @@ let masterID = "masterVideo"
 
 let isLandscapeScreen = ref(false)
 
+let scrcpy_uuid = ref("")
+let scrcpy_show = ref(false)
+
 // let scrcpySever = new Scrcpy('scrcpy-video', 0, 60, isLandscapeScreen)
 
 const props = defineProps({
-  isStartPerf: Boolean,
+  showScreenCasting:Boolean,
   perfConfig:Object,
+})
+
+watch(() => props.perfConfig.uuid, (uuid) => {
+  if (uuid && props.perfConfig.isStartPerf&&props.showScreenCasting) {
+    scrcpy_uuid.value = uuid
+    scrcpy_show.value = true
+  }else {
+    scrcpy_uuid.value = undefined
+    scrcpy_show.value = false
+  }
 })
 
 const watchRotation = (rotationValue) => {

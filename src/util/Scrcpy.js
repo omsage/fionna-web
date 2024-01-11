@@ -66,8 +66,8 @@ class Scrcpy {
         return new Promise((resolve)=>setTimeout(resolve,ms));
     }
 
-    startServer(deviceSerial){
-        this.h264Url = this.baseH264Url + "?serial=" + deviceSerial
+    startServer(uuid,recording){
+        this.h264Url = this.baseH264Url + "?uuid=" + uuid+"&record="+recording
         this.initJmuxer()
         this.initWS()
     }
