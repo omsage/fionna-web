@@ -86,8 +86,8 @@
 
 <script setup>
 import {nextTick, ref, watch} from "vue";
-import {baseWs, startAndroidPerf} from "@/util/AndroidRequest";
-import {getOptionTemplate, getThumbnailOptionTemplate} from "@/util/EchartUtil";
+import {baseWs, startAndroidPerf} from "@/util_old/AndroidRequest";
+import {getOptionTemplate, getThumbnailOptionTemplate} from "@/util_old/EchartUtil";
 import * as echarts from 'echarts/core';
 import {
   TitleComponent,

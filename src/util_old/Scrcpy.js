@@ -1,5 +1,5 @@
 import JMuxer from "jmuxer";
-import {baseWs} from "@/util/AndroidRequest";
+import {baseWs} from "@/util_old/AndroidRequest";
 
 class Scrcpy {
     constructor(

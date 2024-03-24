@@ -13,8 +13,8 @@
 
 <script setup>
 import {watch} from "vue";
-import Scrcpy from "@/util/Scrcpy";
-import {getScrcpySize} from "@/util/AndroidRequest";
+import Scrcpy from "@/util_old/Scrcpy";
+import {getScrcpySize} from "@/util_old/AndroidRequest";
 
 let isPress = false;
 let scrcpyWidth = 0;

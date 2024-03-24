@@ -34,9 +34,9 @@
 
 <script setup>
 import {ref, watch} from "vue";
-import ScreenCasting from "@/components/ScreenCasting.vue";
-import EchartView from "@/view/EchartView.vue";
-import {h264Url, rotationUrl,controlUrl} from "@/util/AndroidRequest";
+import ScreenCasting from "@/components/ScreenCasting_old.vue";
+import EchartView from "@/view_old/EchartView.vue";
+import {h264Url, rotationUrl,controlUrl} from "@/util_old/AndroidRequest";
 
 let masterID = "masterVideo"
 
