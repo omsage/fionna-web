@@ -3,13 +3,12 @@ import { $tc } from '@/locales/setupI18n';
 
 const getRoutes = () => [
   {
-    path: '/Login',
+    path: '/',
     component: () => import('../views/RemoteEmulator/index.vue'),
-    meta: { title: $tc('routes.remoteControl') },
   },
   {
-    path: '/',
-    redirect: '/Index',
+    path: '/report',
+    component: () => import('../views/Report.vue'),
   },
   {
     path: '/AndroidRemote/:deviceId(\\d+)',

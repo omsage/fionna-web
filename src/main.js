@@ -44,42 +44,17 @@ async function initApp() {
 
 // 创建应用
 initApp().then(() => {
-    router.beforeEach((to, from, next) => {
-        document.title = $tc('devices.title');
-        if (to.meta.title) {
-            document.title += ` - ${to.meta.title}`;
-        }
-        if (to.params.projectId && store.state.project.id === undefined) {
-            axios
-                .get('/controller/projects', {
-                    params: {
-                        id: to.params.projectId,
-                    },
-                })
-                .then((resp) => {
-                    if (resp.code === 2000) {
-                        store.commit('saveProject', resp.data);
-                    }
-                });
-        }
-        if (store.state.token.length !== 0 && !store.state.userInfo.userName) {
-            axios.get('/controller/users').then((resp) => {
-                if (resp.code === 2000) {
-                    store.commit('setUserInfo', resp.data);
-                    ElMessage.success({
-                        message: `${$tc('dialog.welcome')}${store.state.userInfo.userName}`,
-                    });
-                    next();
-                }
-            });
-        }
-        if (store.state.token.length === 0 && to.path !== '/Login') {
-            next({
-                path: '/Login',
-                query: { redirect: to.fullPath },
-            });
-        } else {
-            next();
-        }
-    });
+    // router.beforeEach((to, from, next) => {
+    //     document.title = $tc('devices.title');
+    //     if (to.meta.title) {
+    //         document.title += ` - ${to.meta.title}`;
+    //     }
+    //     if (store.state.token.length === 0 && to.path !== '/') {
+    //         next({
+    //             path: '/',
+    //         });
+    //     } else {
+    //         next();
+    //     }
+    // });
 });
