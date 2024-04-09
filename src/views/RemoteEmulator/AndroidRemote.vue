@@ -945,19 +945,25 @@ const getProjectList = () => {
     store.commit('saveProjectList', resp.data);
   });
 };
+
+const getAndroidDeviceList = () => {
+  axios.get('/android/serial/list').then((resp) => {
+
+  });
+};
+
 let activeTime = 0;
 const idleCount = ref(0);
+
+
 onMounted(() => {
   if (store.state.project.id) {
     project.value = store.state.project;
   } else {
     getProjectList();
   }
-  getDeviceById(route.params.deviceId);
+
   store.commit('autoChangeCollapse');
-  getRemoteTimeout();
-  getIdleTimeout();
-  activeTime = new Date().getTime();
   window.document.onmousedown = (event) => {
     idleCount.value = 0;
     activeTime = new Date().getTime();
@@ -966,7 +972,6 @@ onMounted(() => {
     idleCount.value = 0;
     activeTime = new Date().getTime();
   };
-  checkAlive();
 });
 const remoteTimeout = ref(0);
 const ticker = ref(0);

@@ -23,10 +23,10 @@ import { router } from '../router/index.js';
 
 let baseURL = '';
 if (process.env.NODE_ENV === 'development') {
-  baseURL = 'http://localhost:3000/server/api';
+  baseURL = 'http://localhost:8080/';
 }
 if (process.env.NODE_ENV === 'production') {
-  baseURL = 'http://SONIC_SERVER_HOST:SONIC_SERVER_PORT/server/api';
+  baseURL = 'http://SONIC_SERVER_HOST:SONIC_SERVER_PORT/';
 }
 const $http = axios.create();
 baseURL = baseURL.replace(':80/', '/');

@@ -229,10 +229,7 @@ const findAgentById = (id) => {
                 display: 'flex',
                 'align-items': 'center',
                 color:
-                  device['level'] === 0 ||
-                  (device.status !== 'ONLINE' &&
-                    device.status !== 'DEBUGGING' &&
-                    device.status !== 'TESTING')
+                  device['level'] === 0
                     ? '#606266'
                     : device['level'] <= 30
                     ? '#F56C6C'
@@ -243,10 +240,7 @@ const findAgentById = (id) => {
             >
               <ColorImg
                   v-if="
-                  device['level'] !== 0 &&
-                  (device.status === 'ONLINE' ||
-                    device.status === 'DEBUGGING' ||
-                    device.status === 'TESTING')
+                  device['level'] !== 0
                 "
                   style="margin-right: 5px"
                   :src="
@@ -271,10 +265,7 @@ const findAgentById = (id) => {
                 "
               />
               {{
-                device['level'] === 0 ||
-                (device.status !== 'ONLINE' &&
-                    device.status !== 'DEBUGGING' &&
-                    device.status !== 'TESTING')
+                device['level'] === 0
                     ? $t('form.unknown')
                     : device['level']
               }}
@@ -287,11 +278,7 @@ const findAgentById = (id) => {
                 display: 'flex',
                 'align-items': 'center',
                 color:
-                  device.status !== 'ONLINE' &&
-                  device.status !== 'DEBUGGING' &&
-                  device.status !== 'TESTING'
-                    ? '#606266'
-                    : device['temperature'] < 300
+                    device['temperature'] < 300
                     ? '#67C23A'
                     : device['temperature'] < 350
                     ? '#E6A23C'
@@ -300,10 +287,7 @@ const findAgentById = (id) => {
             >
               <ColorImg
                   v-if="
-                  device['temperature'] !== 0 &&
-                  (device.status === 'ONLINE' ||
-                    device.status === 'DEBUGGING' ||
-                    device.status === 'TESTING')
+                  device['temperature'] !== 0
                 "
                   style="margin-left: -4px; margin-right: 3px"
                   :src="img['./../assets/img/tem.png'].default"
@@ -320,10 +304,7 @@ const findAgentById = (id) => {
                 "
               />
               {{
-                device['temperature'] === 0 ||
-                (device.status !== 'ONLINE' &&
-                    device.status !== 'DEBUGGING' &&
-                    device.status !== 'TESTING')
+                device['temperature'] === 0
                     ? $t('form.unknown')
                     : (device['temperature'] / 10).toFixed(1) + ' ℃'
               }}
@@ -372,20 +353,14 @@ const findAgentById = (id) => {
                 display: 'flex',
                 'align-items': 'center',
                 color:
-                  device['voltage'] === 0 ||
-                  (device.status !== 'ONLINE' &&
-                    device.status !== 'DEBUGGING' &&
-                    device.status !== 'TESTING')
+                  device['voltage'] === 0
                     ? '#606266'
                     : '#67C23A',
               }"
             >
               <ColorImg
                   v-if="
-                  device['voltage'] !== 0 &&
-                  (device.status === 'ONLINE' ||
-                    device.status === 'DEBUGGING' ||
-                    device.status === 'TESTING')
+                  device['voltage'] !== 0
                 "
                   style="margin-right: 5px"
                   :src="img['./../assets/img/voltage.png'].default"
@@ -394,10 +369,7 @@ const findAgentById = (id) => {
                   :color="device['voltage'] === 0 ? '#606266' : '#67C23A'"
               />
               {{
-                device['voltage'] === 0 ||
-                (device.status !== 'ONLINE' &&
-                    device.status !== 'DEBUGGING' &&
-                    device.status !== 'TESTING')
+                device['voltage'] === 0
                     ? $t('form.unknown')
                     : (device['voltage'] / 1000).toFixed(2) + ' V'
               }}
@@ -424,9 +396,9 @@ const findAgentById = (id) => {
             </el-input>
           </el-form-item>
         </el-form>
-        <template #reference>
-          <el-button size="mini">{{ $t('devices.moreDetail') }}</el-button>
-        </template>
+<!--        <template #reference>-->
+<!--          <el-button size="mini">{{ $t('devices.moreDetail') }}</el-button>-->
+<!--        </template>-->
       </el-popover>
     </div>
   </el-card>

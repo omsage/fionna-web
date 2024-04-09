@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { $tc } from '@/locales/setupI18n';
 
 const getRoutes = () => [
   {
@@ -9,11 +8,6 @@ const getRoutes = () => [
   {
     path: '/report',
     component: () => import('../views/Report.vue'),
-  },
-  {
-    path: '/AndroidRemote/:deviceId(\\d+)',
-    component: () => import('../views/RemoteEmulator/index.vue'),
-    meta: { title: $tc('routes.remoteControl') },
   },
 ];
 
