@@ -23,77 +23,64 @@ import { router } from '../router/index.js';
 
 let baseURL = '';
 if (process.env.NODE_ENV === 'development') {
-  baseURL = 'http://localhost:8080/';
+    baseURL = '/serverproxy';
 }
 if (process.env.NODE_ENV === 'production') {
-  baseURL = 'http://SONIC_SERVER_HOST:SONIC_SERVER_PORT/';
+    baseURL = 'http://SONIC_SERVER_HOST:SONIC_SERVER_PORT/';
 }
-const $http = axios.create();
+const $http = axios.create(
+
+);
 baseURL = baseURL.replace(':80/', '/');
 $http.defaults.baseURL = baseURL;
 // $http.defaults.timeout = 20000;
 $http.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 $http.defaults.withCredentials = true;
 $http.defaults.paramsSerializer = (params) =>
-  qs.stringify(params, { arrayFormat: 'brackets' });
+    qs.stringify(params, { arrayFormat: 'brackets' });
 
 $http.interceptors.request.use(
-  (config) => {
-    config.headers = {
-      'Content-Type': 'application/json',
-      'Accept-Language': i18n.global.locale.value,
-    };
-    if (localStorage.getItem('SonicToken')) {
-      config.headers.SonicToken = localStorage.getItem('SonicToken');
+    (config) => {
+        config.headers = {
+            'Content-Type': 'application/json',
+            'Accept-Language': i18n.global.locale.value,
+        };
+        if (localStorage.getItem('SonicToken')) {
+            config.headers.SonicToken = localStorage.getItem('SonicToken');
+        }
+        return config;
+    },
+    (err) => {
+        return Promise.reject(err);
     }
-    return config;
-  },
-  (err) => {
-    return Promise.reject(err);
-  }
 );
 
 $http.interceptors.response.use(
-  (response) => {
-    switch (response.data.code) {
-      case 2000:
-        break;
-      case 1001:
-        if (router.currentRoute.value.path !== '/') {
-          router
-            .replace({
-              path: '/',
-            })
-            .catch((err) => {});
+    (response) => {
+        switch (response.data.code) {
+            case 1000:
+                break;
+            default:
+                if (response.data.message) {
+                    ElMessage.error({
+                        message: response.data.message,
+                    });
+                }
         }
-        localStorage.removeItem('SonicToken');
-        break;
-      case 1003:
-        ElMessage.error({
-          message: $tc('dialog.permissionDenied'),
-        });
-        break;
-      default:
-        if (response.data.message) {
-          ElMessage.error({
-            message: response.data.message,
-          });
+        return response.data;
+    },
+    (err) => {
+        if (err.response.status === 503) {
+            ElMessage.info({
+                message: $tc('dialog.ready'),
+            });
+        } else {
+            ElMessage.error({
+                message: $tc('dialog.error'),
+            });
         }
+        return Promise.reject(err);
     }
-    return response.data;
-  },
-  (err) => {
-    if (err.response.status === 503) {
-      ElMessage.info({
-        message: $tc('dialog.ready'),
-      });
-    } else {
-      ElMessage.error({
-        message: $tc('dialog.error'),
-      });
-    }
-    return Promise.reject(err);
-  }
 );
 
 export default $http;

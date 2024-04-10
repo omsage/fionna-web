@@ -310,9 +310,6 @@ const findAgentById = (id) => {
               }}
             </div>
           </el-form-item>
-          <el-form-item :label="$t('devices.form.agent')">
-            <div>{{ findAgentById(device.agentId) }}</div>
-          </el-form-item>
         </el-form>
       </el-col>
     </el-row>
@@ -323,83 +320,6 @@ const findAgentById = (id) => {
           @click="useScreenCall"
       >使用投屏
       </el-button>
-      <el-popover placement="top" width="340px" trigger="hover">
-        <el-form
-            v-if="device.id"
-            label-position="left"
-            class="demo-table-expand"
-            label-width="90px"
-            style="margin-left: 10px; word-break: break-all"
-        >
-          <el-form-item :label="$t('devices.detail.name')">
-            <span>{{ device.name }}</span>
-          </el-form-item>
-          <el-form-item :label="$t('devices.detail.model')">
-            <span>{{ device.model }}</span>
-          </el-form-item>
-          <el-form-item :label="$t('devices.detail.udId')">
-            <span>{{ device.udId }}</span>
-          </el-form-item>
-          <el-form-item :label="$t('devices.detail.size')">
-            <span>{{ device.size }}</span>
-          </el-form-item>
-          <el-form-item :label="$t('devices.detail.cpu')">
-            <span>{{ device.cpu }}</span>
-          </el-form-item>
-          <el-form-item :label="$t('devices.form.battery.voltage')">
-            <div
-                :style="{
-                position: 'relative',
-                display: 'flex',
-                'align-items': 'center',
-                color:
-                  device['voltage'] === 0
-                    ? '#606266'
-                    : '#67C23A',
-              }"
-            >
-              <ColorImg
-                  v-if="
-                  device['voltage'] !== 0
-                "
-                  style="margin-right: 5px"
-                  :src="img['./../assets/img/voltage.png'].default"
-                  :width="15"
-                  :height="20"
-                  :color="device['voltage'] === 0 ? '#606266' : '#67C23A'"
-              />
-              {{
-                device['voltage'] === 0
-                    ? $t('form.unknown')
-                    : (device['voltage'] / 1000).toFixed(2) + ' V'
-              }}
-            </div>
-          </el-form-item>
-          <el-form-item
-              v-if="device.platform !== 2"
-              :label="$t('devices.detail.pwd')"
-          >
-            <el-input
-                v-model="device.password"
-                show-word-limit
-                type="text"
-                size="mini"
-                :placeholder="$t('devices.detail.pwdPlaceholder')"
-                maxlength="30"
-                style="position: absolute; top: 7px; bottom: 7px"
-            >
-              <template #append>
-                <el-button size="mini" @click="saveDetail(device)"
-                >{{ $t('form.save') }}
-                </el-button>
-              </template>
-            </el-input>
-          </el-form-item>
-        </el-form>
-<!--        <template #reference>-->
-<!--          <el-button size="mini">{{ $t('devices.moreDetail') }}</el-button>-->
-<!--        </template>-->
-      </el-popover>
     </div>
   </el-card>
 </template>

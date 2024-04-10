@@ -946,22 +946,22 @@ const getProjectList = () => {
   });
 };
 
+const udidList = ref([])
 const getAndroidDeviceList = () => {
   axios.get('/android/serial/list').then((resp) => {
-
+    for (let i in resp.data) {
+      udidList.value.push(resp.data[i])
+    }
+    udidListLoading.value = false
   });
 };
 
 let activeTime = 0;
 const idleCount = ref(0);
 
-
+const udidListLoading = ref(true)
 onMounted(() => {
-  if (store.state.project.id) {
-    project.value = store.state.project;
-  } else {
-    getProjectList();
-  }
+  getAndroidDeviceList()
 
   store.commit('autoChangeCollapse');
   window.document.onmousedown = (event) => {
@@ -975,39 +975,17 @@ onMounted(() => {
 });
 const remoteTimeout = ref(0);
 const ticker = ref(0);
-const getRemoteTimeout = () => {
-  axios.get('/controller/confList/getRemoteTimeout').then((resp) => {
-    remoteTimeout.value = resp.data;
-    setInterval(() => {
-      ticker.value += 1;
-    }, 1000);
-  });
-};
-const idleTimeout = ref(0);
-const getIdleTimeout = () => {
-  axios.get('/controller/confList/getIdleTimeout').then((resp) => {
-    idleTimeout.value = resp.data;
-  });
-};
 
-const checkAlive = () => {
-  setInterval(() => {
-    idleCount.value++;
-    const nowTime = new Date().getTime();
-    if (nowTime - activeTime > idleTimeout.value * 60 * 1000) {
-      close();
-    }
-  }, 1000);
-};
 
 const deviceSelected = ref(false)
-const selectDevice = ref("")
-const showDeviceCard = ref(false)
+const selectDeviceUdid = ref("")
+const showCardMode = ref(0)
+const udidInfo = ref({})
+const infoLoading = ref(false)
 
-watch(selectDevice, (selectDevice) => {
-  if (selectDevice !== "") {
+watch(selectDeviceUdid, (selectDeviceUdid) => {
+  if (selectDeviceUdid !== "") {
     deviceSelected.value = true
-    console.log(deviceSelected)
   }
 })
 
@@ -1022,25 +1000,27 @@ const selectGroupDevices = () => {
         type: 'warning',
       }
   ).then(() => {
-    // todo 增加选择设备的方法
-    ElMessage({
-      type: 'success',
-      message: '成功',
-    });
-    showDeviceCard.value = true;
+    showCardMode.value = 1
+    infoLoading.value = true
+    axios.get("/android/serial/info", {params: {udid: selectDeviceUdid.value}}).then((resp) => {
+      ElMessage({
+        type: 'success',
+        message: '成功',
+      });
+      infoLoading.value = false;
+      udidInfo.value = resp.data
+    })
   }).catch((err) => {
     ElMessage({
       type: 'info',
       message: '已取消',
     });
-    selectDevice.value = ""
-    showDeviceCard.value = false;
+    selectDeviceUdid.value = ""
   })
 }
 
-const isShowScreen = ref(false)
 const useScreenCall = () => {
-  isShowScreen.value = true
+  showCardMode.value = 2
 }
 
 const cancelTheCasting = () => {
@@ -1058,7 +1038,7 @@ const cancelTheCasting = () => {
       type: 'success',
       message: '成功',
     });
-    isShowScreen.value = false
+    showCardMode.value = 1
   }).catch((err) => {
     ElMessage({
       type: 'info',
@@ -1069,11 +1049,9 @@ const cancelTheCasting = () => {
 }
 
 const reSelectionDevice = () => {
-  selectDevice.value = ""
-  showDeviceCard.value = false
+  selectDeviceUdid.value = ""
+  showCardMode.value = 0
 }
-
-const mockDeviceInfo = ref({})
 
 const currentTabName = 'perfTest'
 
@@ -1101,37 +1079,29 @@ const currentTabName = 'perfTest'
           transition: !isSplitPressing ? 'flex-basis 0.3s,max-width 0.3s' : '',
         }"
       >
-        <!--        mock 设备列表-->
-        <el-card style="padding-bottom: 20px" v-show=" selectDevice===''">
-          <el-col style="padding-left: 10px; padding-right: 10px; margin-top: 20px;">
-            <el-radio v-model="selectDevice" @input="selectGroupDevices" label="device1" border>设备111111111111111111
+        <el-card style="padding-bottom: 20px" v-show="0 === showCardMode" v-loading="udidListLoading">
+          <el-col style="padding-left: 10px; padding-right: 10px; margin-top: 20px;"
+                  v-for="item in udidList"
+                  :key="item"
+                  :value="item"
+          >
+            <el-radio v-model="selectDeviceUdid" @input="selectGroupDevices" :label="item" border>
+              设备{{ item }}
             </el-radio>
           </el-col>
-          <el-col style="padding-left: 10px; padding-right: 10px; margin-top: 20px;">
-            <el-radio v-model="selectDevice" @input="selectGroupDevices" label="device2" border>设备2</el-radio>
-          </el-col>
-          <el-col style="padding-left: 10px; padding-right: 10px; margin-top: 20px;">
-            <el-radio v-model="selectDevice" @input="selectGroupDevices" label="device3" border>设备33333333333
-            </el-radio>
-          </el-col>
-          <el-col style="padding-left: 10px; padding-right: 10px; margin-top: 20px;">
-            <el-radio v-model="selectDevice" @input="selectGroupDevices" label="device4" border>
-              设备444444444444444444444444444
-            </el-radio>
-          </el-col>
-
         </el-card>
-
+        <!--        这里选择设备后再显示-->
         <device-info-card
-            v-show="!isShowScreen && showDeviceCard"
-            :device="mockDeviceInfo"
+            v-loading="infoLoading"
+            v-show="1 === showCardMode"
+            :device="udidInfo"
             @useScreenCall="useScreenCall"
             @reSelectionDevice="reSelectionDevice"
         />
 
-        <!--        这里选择设备后再显示-->
+
         <el-card
-            v-show="isShowScreen  && showDeviceCard"
+            v-show="2 === showCardMode"
             :element-loading-text="$t('androidRemoteTS.code.preparingImager')"
             element-loading-background="rgba(255, 255, 255, 1)"
             style="font-size: 16px"
@@ -1144,13 +1114,14 @@ const currentTabName = 'perfTest'
         >
           <template #header>
             <div style="position: relative; display: flex; align-items: center">
-              <el-button size="mini" circle icon="el-icon-arrow-left" @click="cancelTheCasting" style="margin-right: 15px"></el-button>
+              <el-button size="mini" circle icon="el-icon-arrow-left" @click="cancelTheCasting"
+                         style="margin-right: 15px"></el-button>
               <el-icon :size="16" style="vertical-align: middle">
                 <Cellphone/>
               </el-icon>
               <RenderDeviceName
                   style="color: #e6a23c; margin-left: 5px"
-                  :device="device"
+                  :device="udidInfo"
               />
               <el-popover placement="bottom-end" width="270" trigger="hover">
                 <el-form
@@ -1160,13 +1131,13 @@ const currentTabName = 'perfTest'
                     style="margin-left: 10px; word-break: break-all"
                 >
                   <el-form-item :label="$t('devices.detail.name')">
-                    <span>{{ device.name }}</span>
+                    <span>{{ udidInfo.name }}</span>
                   </el-form-item>
                   <el-form-item :label="$t('devices.detail.model')">
-                    <span>{{ device['model'] }}</span>
+                    <span>{{ udidInfo['model'] }}</span>
                   </el-form-item>
                   <el-form-item :label="$t('devices.detail.udId')">
-                    <span>{{ device['udId'] }}</span>
+                    <span>{{ udidInfo['udid'] }}</span>
                   </el-form-item>
                   <el-form-item :label="$t('devices.form.system')">
                     <img
@@ -1178,20 +1149,20 @@ const currentTabName = 'perfTest'
                                 left: 7px;
                               "
                         :src="
-                                getImg(device['isHm'] === 1 ? 'HarmonyOs' : 'ANDROID')
+                                getImg(udidInfo['isHm'] === 1 ? 'HarmonyOs' : 'ANDROID')
                               "
                     />
                   </el-form-item>
                   <el-form-item
                       :label="$t('androidRemoteTS.code.systemVersion')"
                   >
-                    <span>{{ device['version'] }}</span>
+                    <span>{{ udidInfo['version'] }}</span>
                   </el-form-item>
                   <el-form-item :label="$t('devices.detail.size')">
-                    <span>{{ device['size'] }}</span>
+                    <span>{{ udidInfo['size'] }}</span>
                   </el-form-item>
                   <el-form-item :label="$t('devices.detail.cpu')">
-                    <span>{{ device['cpu'] }}</span>
+                    <span>{{ udidInfo['cpu'] }}</span>
                   </el-form-item>
                   <el-form-item :label="$t('devices.filter.manufacturer')">
                     <img
@@ -1202,7 +1173,7 @@ const currentTabName = 'perfTest'
                                 bottom: 7px;
                                 left: 7px;
                               "
-                        :src="getImg(device['manufacturer'])"
+                        :src="getImg(udidInfo['manufacturer'])"
                     />
                   </el-form-item>
                 </el-form>
