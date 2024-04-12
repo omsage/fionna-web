@@ -94,7 +94,6 @@ const directionStatus = {
 };
 let moveX = 0;
 let moveY = 0;
-let isFixTouch = false;
 let isPress = false;
 let loop = null;
 let time = 0;
@@ -214,37 +213,42 @@ const copy = (value) => {
 const openSocket = (host, port, key, udId) => {
   if ('WebSocket' in window) {
     //
-    websocket = new WebSocket(
-        `ws://${host}:${port}/websockets/android/${key}/${udId}/${localStorage.getItem(
-            'SonicToken'
-        )}`
-    );
+    // websocket = new WebSocket(
+    //     `ws://${host}:${port}/websockets/android/${key}/${udId}/${localStorage.getItem(
+    //         'SonicToken'
+    //     )}`
+    // );
+    // //
+    // // websocket = new WebSocket('ws://127.0.0.1:8080/android/scrcpy1'
+    // // );
     //
+    // websocket.onopen = function(evt) {
+    //   websocket.send(JSON.stringify({
+    //     "udid":"xxxxx"
+    //   }))
+    // };
     __Scrcpy = new Scrcpy({
-      socketURL: `ws://${host}:${port}/websockets/android/screen/${key}/${udId}/${localStorage.getItem(
-          'SonicToken'
-      )}`,
+      udid: selectDeviceUdid.value,
+      socketURL: `ws://127.0.0.1:8080/android/scrcpy`,
       node: 'scrcpy-video',
       onmessage: screenWebsocketOnmessage,
-      excuteMode: screenMode.value,
     });
     screenWebsocket = __Scrcpy.websocket;
-    changeScreenMode(screenMode.value, 1);
     //
-    terminalWebsocket = new WebSocket(
-        `ws://${host}:${port}/websockets/android/terminal/${key}/${udId}/${localStorage.getItem(
-            'SonicToken'
-        )}`
-    );
+    // terminalWebsocket = new WebSocket(
+    //     `ws://${host}:${port}/websockets/android/terminal/${key}/${udId}/${localStorage.getItem(
+    //         'SonicToken'
+    //     )}`
+    // );
   } else {
     console.error($t('androidRemoteTS.noWebSocket'));
   }
-  websocket.onmessage = websocketOnmessage;
-  websocket.onclose = (e) => {
-  };
-  terminalWebsocket.onmessage = terminalWebsocketOnmessage;
-  terminalWebsocket.onclose = (e) => {
-  };
+  // websocket.onmessage = websocketOnmessage;
+  // websocket.onclose = (e) => {
+  // };
+  // terminalWebsocket.onmessage = terminalWebsocketOnmessage;
+  // terminalWebsocket.onclose = (e) => {
+  // };
   driverLoading.value = true;
 };
 const sendLogcat = () => {
@@ -355,68 +359,38 @@ const terminalWebsocketOnmessage = (message) => {
 };
 const screenWebsocketOnmessage = (message) => {
   // console.log('screenWebsocketOnmessage', message.data);
-  if (typeof message.data === 'object') {
-    oldBlob = message.data;
-    const blob = new Blob([message.data], {type: 'image/jpeg'});
-    const URL = window.URL || window.webkitURL;
-    const img = new Image();
-    const canvas = document.getElementById('canvas');
-    const g = canvas.getContext('2d');
-    img.onload = function () {
-      // 不根据按钮组，使用数据源的分辨率点对点
-      const {width} = img;
-      const {height} = img;
-      canvas.width = width;
-      canvas.height = height;
-      g.drawImage(img, 0, 0, width, height);
-    };
-    const u = URL.createObjectURL(blob);
-    img.src = u;
-  } else {
-    switch (JSON.parse(message.data).msg) {
-      case 'rotation': {
-        if (directionStatus.value !== -1) {
-          loading.value = true;
-          ElMessage.success({
-            message: $t('androidRemoteTS.messageOne'),
-          });
-        }
-        directionStatus.value = JSON.parse(message.data).value; // TODO
-        // 旋转需要重置一下jmuxer
-        if (screenMode.value == 'Scrcpy') {
-          // 重置播放器
-          __Scrcpy.jmuxer && __Scrcpy.jmuxer.reset();
-        }
-        break;
-      }
-      case 'support': {
-        ElMessage.error({
-          message: JSON.parse(message.data).text,
-        });
-        loading.value = false;
-        break;
-      }
-      case 'size': {
-        imgWidth = JSON.parse(message.data).width;
-        imgHeight = JSON.parse(message.data).height;
-        loading.value = false;
-        pocoPaneRef.value.setSize(
-            JSON.parse(message.data).width,
-            JSON.parse(message.data).height
-        );
-        break;
-      }
-      case 'picFinish': {
-        loading.value = false;
-        break;
-      }
-      case 'error':
-        ElMessage.error({
-          message: $t('androidRemoteTS.systemException'),
-        });
-        close();
-        break;
+  switch (JSON.parse(message.data).messageType) {
+    case 'support': {
+      ElMessage.error({
+        message: JSON.parse(message.data).text,
+      });
+      loading.value = false;
+      break;
     }
+    case 'sizeInfo': {
+      loading.value = true;
+
+      imgWidth = JSON.parse(message.data).sizeInfo.width;
+      imgHeight = JSON.parse(message.data).sizeInfo.height;
+      let rotation = JSON.parse(message.data).sizeInfo.rotation;
+
+      if (directionStatus.value % 2 !== rotation % 2) {
+        directionStatus.value = rotation;
+        __Scrcpy.jmuxer && __Scrcpy.jmuxer.reset();
+      }
+      loading.value = false;
+      break;
+    }
+    case 'picFinish': {
+      loading.value = false;
+      break;
+    }
+    case 'error':
+      ElMessage.error({
+        message: $t('androidRemoteTS.systemException'),
+      });
+      close();
+      break;
   }
 };
 const websocketOnmessage = (message) => {
@@ -533,180 +507,106 @@ const closeDriver = () => {
 const getCurLocation = () => {
   let x;
   let y;
-  let _x;
-  let _y;
-  const canvas = touchWrapper;
+  const canvas = document.getElementById('scrcpy-video');
+  ;
   const rect = canvas.getBoundingClientRect();
-  if (directionStatus.value != 0 && directionStatus.value != 180) {
-    // 左右旋转
-    _x = parseInt(
-        (event.clientY - rect.top) * (imgWidth / canvas.clientHeight)
-    );
-    //
-    _y = parseInt(
-        (event.clientX - rect.left) * (imgHeight / canvas.clientWidth)
-    );
-    x = directionStatus.value == 90 ? imgWidth - _x : _x - imgWidth * 3;
-    y = directionStatus.value == 90 ? _y : -_y;
-  } else {
-    _x = parseInt(
-        (event.clientX - rect.left) * (imgWidth / canvas.clientWidth)
-    );
-    x = directionStatus.value == 180 ? imgWidth - _x : _x;
-    //
-    _y = parseInt(
-        (event.clientY - rect.top) * (imgHeight / canvas.clientHeight)
-    );
-    y = directionStatus.value == 180 ? imgHeight - _y : _y;
-  }
+  x = parseInt(
+      (event.clientX - rect.left) * (imgWidth / canvas.clientWidth)
+  );
+  y = parseInt(
+      (event.clientY - rect.top) * (imgHeight / canvas.clientHeight)
+  );
   inputBoxStyle.value = {
     left: `${event.clientX - rect.left}px`,
     top: `${event.clientY - rect.top}px`,
   };
-  return {
-    x,
-    y,
-  };
-};
-const getCurLocationForAdb = () => {
-  let x;
-  let y;
-  let _x;
-  let _y;
-  const canvas = touchWrapper;
-  const rect = canvas.getBoundingClientRect();
-  if (directionStatus.value != 0 && directionStatus.value != 180) {
-    // 左右旋转
-    _x = parseInt(
-        (event.clientY - rect.top) * (imgWidth / canvas.clientHeight)
-    );
-    _y = parseInt(
-        (event.clientX - rect.left) * (imgHeight / canvas.clientWidth)
-    );
-    x = _y;
-    y = _x;
-  } else {
-    _x = parseInt(
-        (event.clientX - rect.left) * (imgWidth / canvas.clientWidth)
-    );
-    x = directionStatus.value == 180 ? imgWidth - _x : _x;
-    //
-    _y = parseInt(
-        (event.clientY - rect.top) * (imgHeight / canvas.clientHeight)
-    );
-    y = directionStatus.value == 180 ? imgHeight - _y : _y;
+  if (x < 0 || x === -0) {
+    x = 0
   }
-  inputBoxStyle.value = {
-    left: `${event.clientX - rect.left}px`,
-    top: `${event.clientY - rect.top}px`,
-  };
+  if (x > imgWidth) {
+    x = imgWidth
+  }
+  if (y < 0 || y === -0) {
+    y = 0
+  }
+  if (y > imgHeight) {
+    y = imgHeight
+  }
   return {
     x,
     y,
   };
 };
 const mouseup = (event) => {
-  if (!isFixTouch) {
-    if (isPress) {
-      isPress = false;
-      websocket.send(
-          JSON.stringify({
-            type: 'touch',
-            detail: 'up\n',
-          })
-      );
-      inputBox.value.focus();
-    }
-  } else {
-    clearInterval(loop);
-    time = 0;
-    const {x, y} = getCurLocationForAdb();
-    if (moveX === x && moveY === y) {
-      if (!isLongPress) {
-        websocket.send(
-            JSON.stringify({
-              type: 'debug',
-              detail: 'tap',
-              point: `${x},${y}`,
-            })
-        );
-        inputBox.value.focus();
-      }
-    } else {
-      websocket.send(
-          JSON.stringify({
-            type: 'debug',
-            detail: 'swipe',
-            pointA: `${moveX},${moveY}`,
-            pointB: `${x},${y}`,
-          })
-      );
-      inputBox.value.focus();
-    }
-    isLongPress = false;
+  if (isPress) {
+    isPress = false;
+    const {x, y} = getCurLocation();
+    isPress = false;
+    __Scrcpy.touch(
+        JSON.stringify({
+          messageType: 'touch',
+          data: {
+            actionType: 1,
+            x: x,
+            y: y,
+            width: imgWidth,
+            height: imgHeight,
+          },
+        })
+    );
+    inputBox.value.focus();
   }
 };
 const mouseleave = () => {
-  if (isFixTouch) {
-    clearInterval(loop);
-    isLongPress = false;
-  } else if (isPress) {
+  if (isPress) {
+    const {x, y} = getCurLocation();
     isPress = false;
-    websocket.send(
+    __Scrcpy.touch(
         JSON.stringify({
-          type: 'touch',
-          detail: 'up\n',
+          messageType: 'touch',
+          data: {
+            actionType: 1,
+            x: x,
+            y: y,
+            width: imgWidth,
+            height: imgHeight,
+          },
         })
     );
   }
 };
 const mousedown = (event) => {
-  if (!isFixTouch) {
-    // 安卓高版本
-    const {x, y} = getCurLocation();
-    isPress = true;
-    websocket.send(
-        JSON.stringify({
-          type: 'touch',
-          detail: `down ${x} ${y}\n`,
-        })
-    );
-  } else {
-    const {x, y} = getCurLocationForAdb();
-    moveX = x;
-    moveY = y;
-    clearInterval(loop);
-    loop = setInterval(() => {
-      time += 500;
-      if (time >= 1000 && isLongPress === false) {
-        websocket.send(
-            JSON.stringify({
-              type: 'debug',
-              detail: 'longPress',
-              point: `${moveX},${moveY}`,
-            })
-        );
-        isLongPress = true;
-      }
-    }, 500);
-  }
+  const {x, y} = getCurLocation();
+  isPress = true;
+  __Scrcpy.touch(
+      JSON.stringify({
+        messageType: 'touch',
+        data: {
+          actionType: 0,
+          x: x,
+          y: y,
+          width: imgWidth,
+          height: imgHeight,
+        }
+      })
+  )
 };
 const mousemove = (event) => {
-  if (!isFixTouch) {
-    if (isPress) {
-      if (mouseMoveTime < 1) {
-        mouseMoveTime++;
-      } else {
-        const {x, y} = getCurLocation();
-        websocket.send(
-            JSON.stringify({
-              type: 'touch',
-              detail: `move ${x} ${y}\n`,
-            })
-        );
-        mouseMoveTime = 0;
-      }
-    }
+  if (isPress) {
+    const {x, y} = getCurLocation();
+    __Scrcpy.touch(
+        JSON.stringify({
+          messageType: 'touch',
+          data: {
+            actionType: 2,
+            x: x,
+            y: y,
+            width: imgWidth,
+            height: imgHeight,
+          }
+
+        })
+    )
   }
 };
 const findElementByPoint = (ele, x, y) => {
@@ -854,22 +754,7 @@ const changePic = (type) => {
       })
   );
 };
-const changeScreenMode = (type, isInit) => {
-  if (isInit !== 1) {
-    loading.value = true;
-    __Scrcpy.switchMode(type);
-    screenMode.value = type;
-    oldBlob = undefined;
-  }
-  if (type === 'Minicap') {
-    touchWrapper = document.getElementById('canvas');
-  } else {
-    oldBlob = undefined; // 清除记录
-    touchWrapper = document.getElementById('scrcpy-video');
-  }
-  // 储存最后模式
-  window.localStorage.setItem('screenMode', type);
-};
+
 const scan = (url) => {
   websocket.send(
       JSON.stringify({
@@ -1021,6 +906,7 @@ const selectGroupDevices = () => {
 
 const useScreenCall = () => {
   showCardMode.value = 2
+  openSocket()
 }
 
 const cancelTheCasting = () => {
@@ -1038,6 +924,7 @@ const cancelTheCasting = () => {
       type: 'success',
       message: '成功',
     });
+    __Scrcpy.destroy()
     showCardMode.value = 1
   }).catch((err) => {
     ElMessage({
@@ -1271,41 +1158,6 @@ const currentTabName = 'perfTest'
           </div>
           <!--一些细节按钮-->
           <div style="position: absolute; right: 5px; top: 10px">
-            <el-tooltip
-                :enterable="false"
-                effect="dark"
-                :content="$t('androidRemoteTS.code.projectionMode')"
-                :placement="tabPosition == 'left' ? 'right' : 'left'"
-                :offset="15"
-            >
-              <div>
-                <el-dropdown
-                    :hide-on-click="false"
-                    trigger="click"
-                    placement="right"
-                    style="margin-top: 4px"
-                >
-                  <el-button size="small" type="info" circle>
-                    <el-icon :size="12" style="vertical-align: middle">
-                      <VideoCamera/>
-                    </el-icon>
-                  </el-button>
-                  <template #dropdown>
-                    <el-dropdown-menu class="divider">
-                      <el-radio-group
-                          v-model="screenMode"
-                          v-loading="loading"
-                          size="mini"
-                          @change="changeScreenMode"
-                      >
-                        <el-radio-button label="Scrcpy"></el-radio-button>
-                        <el-radio-button label="Minicap"></el-radio-button>
-                      </el-radio-group>
-                    </el-dropdown-menu>
-                  </template>
-                </el-dropdown>
-              </div>
-            </el-tooltip>
             <el-tooltip
                 :enterable="false"
                 effect="dark"
