@@ -16,27 +16,42 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import { View, VideoPause, Delete } from '@element-plus/icons';
-import { useI18n } from 'vue-i18n';
-import { ref } from 'vue';
+import {View, VideoPause, Delete} from '@element-plus/icons';
+import {useI18n} from 'vue-i18n';
+import {ref, watch} from 'vue';
 import AndroidPerfChart from './AndroidPerfChart.vue';
+import axios from "@/http/axios";
 
 const androidPerfChart = ref(null);
-const { t: $t } = useI18n();
-const emit = defineEmits(['startPerfmon', 'stopPerfmon']);
+const {t: $t} = useI18n();
+const emit = defineEmits(['pickCurrentApp', 'startPerfmon', 'stopPerfmon', 'refreshAppList']);
 const isStart = ref(false);
+const isPackageLoading = ref(false)
 const perfBundleId = ref('');
 const props = defineProps({
+  udid: String,
   appList: Array,
 });
+
+watch(props, (props) => {
+  isPackageLoading.value = props.appList.length === 0;
+})
+
 const startPerfmon = () => {
+  isStart.value = true; // 简单模拟下
   emit('startPerfmon', perfBundleId.value);
   isStart.value = true;
 };
 const stopPerfmon = () => {
+  isStart.value = false; // 简单模拟下
   emit('stopPerfmon');
   isStart.value = false;
 };
+// const refreshAppList = (isVisible) => {
+//   if (isVisible){
+//     emit('refreshAppList');
+//   }
+// }
 const clearPerfmon = () => {
   sysCpu.value = [];
   sysMem.value = [];
@@ -88,76 +103,137 @@ const procCpu = ref([]);
 const procMem = ref([]);
 const procFps = ref([]);
 const procThread = ref([]);
-defineExpose({ setData });
+defineExpose({setData});
+
+const getCurrentAppName = () => {
+  isPackageLoading.value = true
+  axios.get("/android/app/current", {params: {udid: props.udid}}).then((resp) => {
+    perfBundleId.value = resp.data
+    isPackageLoading.value = false
+  })
+}
+
+const perfConfig = ref({
+  cpuConfig: ['sys-cpu'],
+  memConfig: ['sys-mem'],
+  frameConfig: ['FPS'],
+  networkConfig: false,
+  threadCount: false,
+  desc: ''
+})
+
 </script>
 
 <template>
   <div>
     <el-select
-      v-model="perfBundleId"
-      style="margin-right: 10px; width: 280px"
-      filterable
-      clearable
-      size="mini"
-      :placeholder="$t('perf.select')"
+        v-model="perfBundleId"
+        style="margin-right: 10px; width: 280px"
+        filterable
+        clearable
+        size="mini"
+        :placeholder="$t('perf.select')"
+        v-loading="isPackageLoading"
     >
-      <el-option v-for="a in appList" :value="a.packageName">
+      <el-option v-for="packageName in appList" :value="packageName">
         <div style="display: flex; align-items: center">
-          <el-avatar
-            style="margin-right: 10px"
-            :size="30"
-            :src="'data:image/png;base64,' + a.appIcon"
-            shape="square"
-          ></el-avatar>
-          {{ a.appName }}
-          <span
-            style="
-              float: right;
-              margin-left: 15px;
-              color: #909399;
-              font-size: 13px;
-              font-style: italic;
-            "
-            >{{ a.packageName }}</span
-          >
+          {{ packageName }}
         </div>
       </el-option>
     </el-select>
     <el-button
-      type="primary"
-      size="mini"
-      :loading="isStart"
-      @click="startPerfmon"
+        @click="getCurrentAppName"
+        icon="el-icon-aim"
+        type="primary"
+        size="mini"
+    >
+      当前应用
+    </el-button>
+    <el-button
+        type="primary"
+        size="mini"
+        :loading="isStart"
+        @click="startPerfmon"
     >
       <el-icon :size="12" style="vertical-align: middle">
-        <View />
+        <View/>
       </el-icon>
       {{ $t('perf.start') }}
     </el-button>
     <el-button type="warning" size="mini" @click="stopPerfmon">
       <el-icon :size="12" style="vertical-align: middle">
-        <VideoPause />
+        <VideoPause/>
       </el-icon>
       {{ $t('perf.stop') }}
     </el-button>
     <el-button type="danger" size="mini" @click="clearPerfmon">
       <el-icon :size="12" style="vertical-align: middle">
-        <Delete />
+        <Delete/>
       </el-icon>
       {{ $t('perf.clear') }}
     </el-button>
+    <!--    性能配置-->
+    <div v-show="!isStart" style="margin-top: 10px">
+      <el-card style="height: 100%">
+
+        <el-form ref="form" :model="perfConfig" label-width="auto">
+
+
+          <el-form-item label="CPU">
+            <el-checkbox-group v-model="perfConfig.cpuConfig">
+              <el-checkbox border label="sys-cpu" name="sys" size="small"></el-checkbox>
+              <el-checkbox border label="proc-cpu" name="proc" size="small"></el-checkbox>
+
+            </el-checkbox-group>
+          </el-form-item>
+
+          <el-divider></el-divider>
+
+          <el-form-item label="Memory">
+            <el-checkbox-group v-model="perfConfig.memConfig">
+              <el-checkbox border label="sys-mem" name="sys" size="small"></el-checkbox>
+              <el-checkbox border label="proc-mem" name="proc" size="small"></el-checkbox>
+
+            </el-checkbox-group>
+          </el-form-item>
+
+          <el-divider></el-divider>
+
+          <el-form-item label="Frame">
+            <el-checkbox-group v-model="perfConfig.frameConfig">
+              <el-checkbox border label="FPS" name="FPS" size="small"></el-checkbox>
+              <el-checkbox border label="jank" name="jank" size="small"></el-checkbox>
+            </el-checkbox-group>
+          </el-form-item>
+
+          <el-divider></el-divider>
+
+          <el-form-item label-width="0px">
+            network
+            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.networkConfig"></el-switch>
+            thread
+            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.threadCount"></el-switch>
+          </el-form-item>
+
+        </el-form>
+      </el-card>
+    </div>
+
+    <!--性能图表-->
     <android-perf-chart
-      ref="androidPerfChart"
-      :cid="0"
-      :rid="0"
-      :did="0"
-      :sys-cpu="sysCpu"
-      :sys-mem="sysMem"
-      :sys-network="sysNetwork"
-      :proc-cpu="procCpu"
-      :proc-mem="procMem"
-      :proc-fps="procFps"
-      :proc-thread="procThread"
+        v-show="isStart"
+        ref="androidPerfChart"
+        :cid="0"
+        :rid="0"
+        :did="0"
+        :is-start-perf="isStart"
+        :sys-cpu="sysCpu"
+        :sys-mem="sysMem"
+        :sys-network="sysNetwork"
+        :proc-cpu="procCpu"
+        :proc-mem="procMem"
+        :proc-fps="procFps"
+        :proc-thread="procThread"
     />
   </div>
 </template>

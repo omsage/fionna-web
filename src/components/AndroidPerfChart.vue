@@ -17,7 +17,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 import moment from 'moment/moment';
-import { useI18n } from 'vue-i18n';
+import {useI18n} from 'vue-i18n';
 import * as echarts from 'echarts/core';
 import {
   TitleComponent,
@@ -27,9 +27,9 @@ import {
   LegendComponent,
   DataZoomComponent,
 } from 'echarts/components';
-import { LineChart } from 'echarts/charts';
-import { CanvasRenderer } from 'echarts/renderers';
-import { nextTick } from 'vue';
+import {LineChart} from 'echarts/charts';
+import {CanvasRenderer} from 'echarts/renderers';
+import {nextTick} from 'vue';
 
 echarts.use([
   DataZoomComponent,
@@ -42,8 +42,9 @@ echarts.use([
   TooltipComponent,
 ]);
 
-const { t: $t } = useI18n();
+const {t: $t} = useI18n();
 const props = defineProps({
+  isStartPerf: Boolean,
   rid: String,
   cid: Number,
   did: Number,
@@ -169,15 +170,15 @@ const getCpuGroup = () => {
 };
 const printSingleCpu = () => {
   let chart = echarts.getInstanceByDom(
-    document.getElementById(
-      `${props.rid}-${props.cid}-${props.did}-` + `sysSingleCpuChart`
-    )
+      document.getElementById(
+          `${props.rid}-${props.cid}-${props.did}-` + `sysSingleCpuChart`
+      )
   );
   if (chart == null) {
     chart = echarts.init(
-      document.getElementById(
-        `${props.rid}-${props.cid}-${props.did}-` + `sysSingleCpuChart`
-      )
+        document.getElementById(
+            `${props.rid}-${props.cid}-${props.did}-` + `sysSingleCpuChart`
+        )
     );
   }
   chart.resize();
@@ -193,7 +194,7 @@ const printSingleCpu = () => {
     tooltip: {
       trigger: 'axis',
       position(pos, params, dom, rect, size) {
-        const obj = { top: 60 };
+        const obj = {top: 60};
         obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 5;
         return obj;
       },
@@ -203,10 +204,10 @@ const printSingleCpu = () => {
       top: '8%',
       data: getCpuLegend(),
     },
-    grid: { top: '26%' },
+    grid: {top: '26%'},
     toolbox: {
       feature: {
-        saveAsImage: { show: true, title: 'Save' },
+        saveAsImage: {show: true, title: 'Save'},
       },
     },
     xAxis: {
@@ -225,22 +226,22 @@ const printSingleCpu = () => {
         xAxisIndex: [0, 1],
       },
     ],
-    yAxis: [{ name: `${$t('perf.singleCpu')}(%)`, min: 0 }],
+    yAxis: [{name: `${$t('perf.singleCpu')}(%)`, min: 0}],
     series: getCpuGroup(),
   };
   chart.setOption(option);
 };
 const printCpu = () => {
   let chart = echarts.getInstanceByDom(
-    document.getElementById(
-      `${props.rid}-${props.cid}-${props.did}-` + `sysCpuChart`
-    )
+      document.getElementById(
+          `${props.rid}-${props.cid}-${props.did}-` + `sysCpuChart`
+      )
   );
   if (chart == null) {
     chart = echarts.init(
-      document.getElementById(
-        `${props.rid}-${props.cid}-${props.did}-` + `sysCpuChart`
-      )
+        document.getElementById(
+            `${props.rid}-${props.cid}-${props.did}-` + `sysCpuChart`
+        )
     );
   }
   chart.resize();
@@ -256,7 +257,7 @@ const printCpu = () => {
     tooltip: {
       trigger: 'axis',
       position(pos, params, dom, rect, size) {
-        const obj = { top: 60 };
+        const obj = {top: 60};
         obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 5;
         return obj;
       },
@@ -266,10 +267,10 @@ const printCpu = () => {
       top: '8%',
       data: getCpuDataLegend(),
     },
-    grid: { top: '28%' },
+    grid: {top: '28%'},
     toolbox: {
       feature: {
-        saveAsImage: { show: true, title: 'Save' },
+        saveAsImage: {show: true, title: 'Save'},
       },
     },
     xAxis: {
@@ -288,22 +289,22 @@ const printCpu = () => {
         xAxisIndex: [0, 1],
       },
     ],
-    yAxis: [{ name: `${$t('perf.totalCpu')}(%)`, min: 0 }],
+    yAxis: [{name: `${$t('perf.totalCpu')}(%)`, min: 0}],
     series: getCpuDataGroup(),
   };
   chart.setOption(option);
 };
 const printMem = () => {
   let chart = echarts.getInstanceByDom(
-    document.getElementById(
-      `${props.rid}-${props.cid}-${props.did}-` + `sysMemChart`
-    )
+      document.getElementById(
+          `${props.rid}-${props.cid}-${props.did}-` + `sysMemChart`
+      )
   );
   if (chart == null) {
     chart = echarts.init(
-      document.getElementById(
-        `${props.rid}-${props.cid}-${props.did}-` + `sysMemChart`
-      )
+        document.getElementById(
+            `${props.rid}-${props.cid}-${props.did}-` + `sysMemChart`
+        )
     );
   }
   chart.resize();
@@ -320,10 +321,10 @@ const printMem = () => {
     tooltip: {
       trigger: 'axis',
     },
-    grid: { top: '30%', left: '20%' },
+    grid: {top: '30%', left: '20%'},
     toolbox: {
       feature: {
-        saveAsImage: { show: true, title: 'Save' },
+        saveAsImage: {show: true, title: 'Save'},
       },
     },
     legend: {
@@ -353,7 +354,7 @@ const printMem = () => {
         xAxisIndex: [0, 1],
       },
     ],
-    yAxis: [{ name: `${$t('perf.memUsage')}(b)`, min: 0 }],
+    yAxis: [{name: `${$t('perf.memUsage')}(b)`, min: 0}],
     series: [
       {
         name: 'Mem Buffers',
@@ -415,15 +416,15 @@ const printMem = () => {
 };
 const printProcFps = () => {
   let chart = echarts.getInstanceByDom(
-    document.getElementById(
-      `${props.rid}-${props.cid}-${props.did}-` + `sysFpsChart`
-    )
+      document.getElementById(
+          `${props.rid}-${props.cid}-${props.did}-` + `sysFpsChart`
+      )
   );
   if (chart == null) {
     chart = echarts.init(
-      document.getElementById(
-        `${props.rid}-${props.cid}-${props.did}-` + `sysFpsChart`
-      )
+        document.getElementById(
+            `${props.rid}-${props.cid}-${props.did}-` + `sysFpsChart`
+        )
     );
   }
   chart.resize();
@@ -440,10 +441,10 @@ const printProcFps = () => {
     tooltip: {
       trigger: 'axis',
     },
-    grid: { top: '15%' },
+    grid: {top: '15%'},
     toolbox: {
       feature: {
-        saveAsImage: { show: true, title: 'Save' },
+        saveAsImage: {show: true, title: 'Save'},
       },
     },
     xAxis: {
@@ -460,7 +461,7 @@ const printProcFps = () => {
         xAxisIndex: [0, 1],
       },
     ],
-    yAxis: [{ name: 'FPS', min: 0 }],
+    yAxis: [{name: 'FPS', min: 0}],
     series: [
       {
         type: 'line',
@@ -475,15 +476,15 @@ const printProcFps = () => {
 };
 const printProcThread = () => {
   let chart = echarts.getInstanceByDom(
-    document.getElementById(
-      `${props.rid}-${props.cid}-${props.did}-` + `procThreadChart`
-    )
+      document.getElementById(
+          `${props.rid}-${props.cid}-${props.did}-` + `procThreadChart`
+      )
   );
   if (chart == null) {
     chart = echarts.init(
-      document.getElementById(
-        `${props.rid}-${props.cid}-${props.did}-` + `procThreadChart`
-      )
+        document.getElementById(
+            `${props.rid}-${props.cid}-${props.did}-` + `procThreadChart`
+        )
     );
   }
   chart.resize();
@@ -500,10 +501,10 @@ const printProcThread = () => {
     tooltip: {
       trigger: 'axis',
     },
-    grid: { top: '15%' },
+    grid: {top: '15%'},
     toolbox: {
       feature: {
-        saveAsImage: { show: true, title: 'Save' },
+        saveAsImage: {show: true, title: 'Save'},
       },
     },
     xAxis: {
@@ -520,7 +521,7 @@ const printProcThread = () => {
         xAxisIndex: [0, 1],
       },
     ],
-    yAxis: [{ name: 'Count', min: 0 }],
+    yAxis: [{name: 'Count', min: 0}],
     series: [
       {
         type: 'line',
@@ -535,15 +536,15 @@ const printProcThread = () => {
 };
 const printNetwork = () => {
   let chart = echarts.getInstanceByDom(
-    document.getElementById(
-      `${props.rid}-${props.cid}-${props.did}-` + `sysNetworkChart`
-    )
+      document.getElementById(
+          `${props.rid}-${props.cid}-${props.did}-` + `sysNetworkChart`
+      )
   );
   if (chart == null) {
     chart = echarts.init(
-      document.getElementById(
-        `${props.rid}-${props.cid}-${props.did}-` + `sysNetworkChart`
-      )
+        document.getElementById(
+            `${props.rid}-${props.cid}-${props.did}-` + `sysNetworkChart`
+        )
     );
   }
   chart.resize();
@@ -560,10 +561,10 @@ const printNetwork = () => {
     tooltip: {
       trigger: 'axis',
     },
-    grid: { top: '20%', left: '18%' },
+    grid: {top: '20%', left: '18%'},
     toolbox: {
       feature: {
-        saveAsImage: { show: true, title: 'Save' },
+        saveAsImage: {show: true, title: 'Save'},
       },
     },
     xAxis: {
@@ -578,22 +579,22 @@ const printNetwork = () => {
         xAxisIndex: [0, 1],
       },
     ],
-    yAxis: [{ name: `${$t('perf.network')}(b)`, min: 0 }],
+    yAxis: [{name: `${$t('perf.network')}(b)`, min: 0}],
     series: getNetworkDataGroup(),
   };
   chart.setOption(option);
 };
 const printPerfCpu = () => {
   let chart = echarts.getInstanceByDom(
-    document.getElementById(
-      `${props.rid}-${props.cid}-${props.did}-` + `perfCpuChart`
-    )
+      document.getElementById(
+          `${props.rid}-${props.cid}-${props.did}-` + `perfCpuChart`
+      )
   );
   if (chart == null) {
     chart = echarts.init(
-      document.getElementById(
-        `${props.rid}-${props.cid}-${props.did}-` + `perfCpuChart`
-      )
+        document.getElementById(
+            `${props.rid}-${props.cid}-${props.did}-` + `perfCpuChart`
+        )
     );
   }
   chart.resize();
@@ -610,10 +611,10 @@ const printPerfCpu = () => {
       trigger: 'axis',
       valueFormatter: (value) => `${value.toFixed(3)} %`,
     },
-    grid: { top: '15%' },
+    grid: {top: '15%'},
     toolbox: {
       feature: {
-        saveAsImage: { show: true, title: 'Save' },
+        saveAsImage: {show: true, title: 'Save'},
       },
     },
     xAxis: {
@@ -632,7 +633,7 @@ const printPerfCpu = () => {
         xAxisIndex: [0, 1],
       },
     ],
-    yAxis: [{ name: `${$t('perf.procCpu')}(%)`, min: 0 }],
+    yAxis: [{name: `${$t('perf.procCpu')}(%)`, min: 0}],
     series: [
       {
         type: 'line',
@@ -649,15 +650,15 @@ const printPerfCpu = () => {
 };
 const printPerfMem = () => {
   let chart = echarts.getInstanceByDom(
-    document.getElementById(
-      `${props.rid}-${props.cid}-${props.did}-` + `perfMemChart`
-    )
+      document.getElementById(
+          `${props.rid}-${props.cid}-${props.did}-` + `perfMemChart`
+      )
   );
   if (chart == null) {
     chart = echarts.init(
-      document.getElementById(
-        `${props.rid}-${props.cid}-${props.did}-` + `perfMemChart`
-      )
+        document.getElementById(
+            `${props.rid}-${props.cid}-${props.did}-` + `perfMemChart`
+        )
     );
   }
   chart.resize();
@@ -674,10 +675,10 @@ const printPerfMem = () => {
     tooltip: {
       trigger: 'axis',
     },
-    grid: { top: '20%', left: '20%' },
+    grid: {top: '20%', left: '20%'},
     toolbox: {
       feature: {
-        saveAsImage: { show: true, title: 'Save' },
+        saveAsImage: {show: true, title: 'Save'},
       },
     },
     xAxis: {
@@ -700,7 +701,7 @@ const printPerfMem = () => {
       top: '8%',
       data: ['Phy RSS', 'VM RSS', 'Total PSS'],
     },
-    yAxis: [{ name: `${$t('perf.memUsage')}(kb)`, min: 0 }],
+    yAxis: [{name: `${$t('perf.memUsage')}(kb)`, min: 0}],
     series: [
       {
         name: 'Phy RSS',
@@ -747,54 +748,54 @@ const switchTab = (e) => {
   if (e.index == 1) {
     nextTick(() => {
       const memChart = echarts.getInstanceByDom(
-        document.getElementById(
-          `${props.rid}-${props.cid}-${props.did}-` + `perfMemChart`
-        )
+          document.getElementById(
+              `${props.rid}-${props.cid}-${props.did}-` + `perfMemChart`
+          )
       );
       memChart.resize();
       const cpuChart = echarts.getInstanceByDom(
-        document.getElementById(
-          `${props.rid}-${props.cid}-${props.did}-` + `perfCpuChart`
-        )
+          document.getElementById(
+              `${props.rid}-${props.cid}-${props.did}-` + `perfCpuChart`
+          )
       );
       cpuChart.resize();
       const fpsChart = echarts.getInstanceByDom(
-        document.getElementById(
-          `${props.rid}-${props.cid}-${props.did}-` + `sysFpsChart`
-        )
+          document.getElementById(
+              `${props.rid}-${props.cid}-${props.did}-` + `sysFpsChart`
+          )
       );
       fpsChart.resize();
       const threadChart = echarts.getInstanceByDom(
-        document.getElementById(
-          `${props.rid}-${props.cid}-${props.did}-` + `procThreadChart`
-        )
+          document.getElementById(
+              `${props.rid}-${props.cid}-${props.did}-` + `procThreadChart`
+          )
       );
       threadChart.resize();
     });
   } else {
     nextTick(() => {
       const memChart = echarts.getInstanceByDom(
-        document.getElementById(
-          `${props.rid}-${props.cid}-${props.did}-` + `sysMemChart`
-        )
+          document.getElementById(
+              `${props.rid}-${props.cid}-${props.did}-` + `sysMemChart`
+          )
       );
       memChart.resize();
       const cpuChart = echarts.getInstanceByDom(
-        document.getElementById(
-          `${props.rid}-${props.cid}-${props.did}-` + `sysSingleCpuChart`
-        )
+          document.getElementById(
+              `${props.rid}-${props.cid}-${props.did}-` + `sysSingleCpuChart`
+          )
       );
       cpuChart.resize();
       const cpuChart2 = echarts.getInstanceByDom(
-        document.getElementById(
-          `${props.rid}-${props.cid}-${props.did}-` + `sysCpuChart`
-        )
+          document.getElementById(
+              `${props.rid}-${props.cid}-${props.did}-` + `sysCpuChart`
+          )
       );
       cpuChart2.resize();
       const networkChart = echarts.getInstanceByDom(
-        document.getElementById(
-          `${props.rid}-${props.cid}-${props.did}-` + `sysNetworkChart`
-        )
+          document.getElementById(
+              `${props.rid}-${props.cid}-${props.did}-` + `sysNetworkChart`
+          )
       );
       networkChart.resize();
     });
@@ -804,104 +805,136 @@ const switchTab = (e) => {
 
 <template>
   <el-tabs
-    style="margin-top: 10px"
-    stretch
-    type="border-card"
-    @tab-click="switchTab"
+      style="margin-top: 10px"
+      stretch
+      type="border-card"
+      @tab-click="switchTab"
   >
-    <el-tab-pane label="System PerfMon">
+    <el-tab-pane label="CPU">
       <el-row :gutter="10">
         <el-col :span="12">
-          <el-card style="margin-top: 10px">
-            <div
-              :id="rid + '-' + cid + '-' + did + '-' + 'sysSingleCpuChart'"
-              v-loading="sysCpu.length === 0"
-              :element-loading-text="$t('perf.emptyData')"
-              element-loading-spinner="el-icon-box"
-              style="width: 100%; height: 350px"
-            ></div>
-          </el-card>
+          <el-tooltip class="item" :disabled="procCpu.length !== 0" content="proc cpu" placement="top">
+            <el-card style="margin-top: 10px">
+              <div
+                  :id="rid + '-' + cid + '-' + did + '-' + 'perfCpuChart'"
+                  v-loading="procCpu.length === 0"
+                  :element-loading-text="$t('perf.emptyData')"
+                  element-loading-spinner="el-icon-box"
+                  style="width: 100%; height: 350px"
+              ></div>
+            </el-card>
+          </el-tooltip>
         </el-col>
+
         <el-col :span="12">
-          <el-card style="margin-top: 10px">
-            <div
-              :id="rid + '-' + cid + '-' + did + '-' + 'sysCpuChart'"
-              v-loading="sysCpu.length === 0"
-              :element-loading-text="$t('perf.emptyData')"
-              element-loading-spinner="el-icon-box"
-              style="width: 100%; height: 350px"
-            ></div>
-          </el-card>
+          <el-tooltip class="item" :disabled="sysCpu.length !== 0" content="sys cpu" placement="top">
+            <el-card style="margin-top: 10px">
+              <div
+                  :id="rid + '-' + cid + '-' + did + '-' + 'sysCpuChart'"
+                  v-loading="sysCpu.length === 0"
+                  :element-loading-text="$t('perf.emptyData')"
+                  element-loading-spinner="el-icon-box"
+                  style="width: 100%; height: 350px"
+              ></div>
+            </el-card>
+          </el-tooltip>
         </el-col>
-        <el-col :span="12">
-          <el-card style="margin-top: 10px">
-            <div
-              :id="rid + '-' + cid + '-' + did + '-' + 'sysMemChart'"
-              v-loading="sysMem.length === 0"
-              :element-loading-text="$t('perf.emptyData')"
-              element-loading-spinner="el-icon-box"
-              style="width: 100%; height: 350px"
-            ></div>
-          </el-card>
-        </el-col>
-        <el-col :span="12">
-          <el-card style="margin-top: 10px">
-            <div
-              :id="rid + '-' + cid + '-' + did + '-' + 'sysNetworkChart'"
-              v-loading="sysNetwork.length === 0"
-              :element-loading-text="$t('perf.emptyData')"
-              element-loading-spinner="el-icon-box"
-              style="width: 100%; height: 350px"
-            ></div>
-          </el-card>
-        </el-col>
+
       </el-row>
     </el-tab-pane>
-    <el-tab-pane label="Process PerfMon">
+    <el-tab-pane label="Frame">
       <el-row :gutter="10">
         <el-col :span="12">
-          <el-card style="margin-top: 10px">
-            <div
-              :id="rid + '-' + cid + '-' + did + '-' + 'perfCpuChart'"
-              v-loading="procCpu.length === 0"
-              :element-loading-text="$t('perf.emptyData')"
-              element-loading-spinner="el-icon-box"
-              style="width: 100%; height: 350px"
-            ></div>
-          </el-card>
+          <el-tooltip class="item" :disabled="procFps.length !== 0" content="sys FPS" placement="top">
+            <el-card style="margin-top: 10px">
+              <div
+                  :id="rid + '-' + cid + '-' + did + '-' + 'sysFpsChart'"
+                  v-loading="procFps.length === 0"
+                  :element-loading-text="$t('perf.emptyData')"
+                  element-loading-spinner="el-icon-box"
+                  style="width: 100%; height: 350px"
+              ></div>
+            </el-card>
+          </el-tooltip>
         </el-col>
+
+        <el-col :span="12">
+          <el-tooltip class="item" :disabled="sysCpu.length !== 0" content="jank info" placement="top">
+            <el-card style="margin-top: 10px">
+              <div
+                  :id="rid + '-' + cid + '-' + did + '-' + 'sysCpuChart'"
+                  v-loading="sysCpu.length === 0"
+                  :element-loading-text="$t('perf.emptyData')"
+                  element-loading-spinner="el-icon-box"
+                  style="width: 100%; height: 350px"
+              ></div>
+            </el-card>
+          </el-tooltip>
+        </el-col>
+
+      </el-row>
+    </el-tab-pane>
+
+    <el-tab-pane label="Memory">
+      <el-row :gutter="10">
+
+        <el-col :span="12">
+          <el-tooltip class="item" :disabled="procMem.length !== 0" content="proc mem" placement="top">
+            <el-card style="margin-top: 10px">
+              <div
+                  :id="rid + '-' + cid + '-' + did + '-' + 'perfMemChart'"
+                  v-loading="procMem.length === 0"
+                  :element-loading-text="$t('perf.emptyData')"
+                  element-loading-spinner="el-icon-box"
+                  style="width: 100%; height: 350px"
+              ></div>
+            </el-card>
+          </el-tooltip>
+        </el-col>
+
+        <el-col :span="12">
+          <el-tooltip class="item" :disabled="sysMem.length !== 0" content="sys mem" placement="top">
+            <el-card style="margin-top: 10px">
+              <div
+                  :id="rid + '-' + cid + '-' + did + '-' + 'sysMemChart'"
+                  v-loading="sysMem.length === 0"
+                  :element-loading-text="$t('perf.emptyData')"
+                  element-loading-spinner="el-icon-box"
+                  style="width: 100%; height: 350px"
+              ></div>
+            </el-card>
+          </el-tooltip>
+        </el-col>
+
+      </el-row>
+    </el-tab-pane>
+    <el-tab-pane label="Other">
+      <el-row :gutter="10">
+
         <el-col :span="12">
           <el-card style="margin-top: 10px">
             <div
-              :id="rid + '-' + cid + '-' + did + '-' + 'perfMemChart'"
-              v-loading="procMem.length === 0"
-              :element-loading-text="$t('perf.emptyData')"
-              element-loading-spinner="el-icon-box"
-              style="width: 100%; height: 350px"
+                :id="rid + '-' + cid + '-' + did + '-' + 'procThreadChart'"
+                v-loading="procThread.length === 0"
+                :element-loading-text="$t('perf.emptyData')"
+                element-loading-spinner="el-icon-box"
+                style="width: 100%; height: 350px"
             ></div>
           </el-card>
         </el-col>
+
         <el-col :span="12">
-          <el-card style="margin-top: 10px">
-            <div
-              :id="rid + '-' + cid + '-' + did + '-' + 'sysFpsChart'"
-              v-loading="procFps.length === 0"
-              :element-loading-text="$t('perf.emptyData')"
-              element-loading-spinner="el-icon-box"
-              style="width: 100%; height: 350px"
-            ></div>
-          </el-card>
-        </el-col>
-        <el-col :span="12">
-          <el-card style="margin-top: 10px">
-            <div
-              :id="rid + '-' + cid + '-' + did + '-' + 'procThreadChart'"
-              v-loading="procThread.length === 0"
-              :element-loading-text="$t('perf.emptyData')"
-              element-loading-spinner="el-icon-box"
-              style="width: 100%; height: 350px"
-            ></div>
-          </el-card>
+          <el-tooltip class="item" :disabled="sysNetwork.length !== 0" content="sys network" placement="top">
+            <el-card style="margin-top: 10px">
+              <div
+                  :id="rid + '-' + cid + '-' + did + '-' + 'sysNetworkChart'"
+                  v-loading="sysNetwork.length === 0"
+                  :element-loading-text="$t('perf.emptyData')"
+                  element-loading-spinner="el-icon-box"
+                  style="width: 100%; height: 350px"
+              ></div>
+            </el-card>
+          </el-tooltip>
         </el-col>
       </el-row>
     </el-tab-pane>

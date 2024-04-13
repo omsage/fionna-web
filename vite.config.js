@@ -6,6 +6,8 @@ import vue from '@vitejs/plugin-vue';
 export default defineConfig({
   plugins: [vue()],
   server:{
+    host:true,
+    hmr: true,
     port: 3003,
     proxy: {
       '/serverproxy': {

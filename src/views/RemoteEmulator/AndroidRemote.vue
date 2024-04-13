@@ -68,7 +68,6 @@ import Scrcpy from './Scrcpy';
 import AndroidPerf from '../../components/AndroidPerf.vue';
 import DeviceInfoCard from "@/components/DeviceInfoCard.vue";
 
-const pocoPaneRef = ref(null);
 const androidPerfRef = ref(null);
 const {t: $t} = useI18n();
 
@@ -134,9 +133,6 @@ const element = ref({
   projectId: 0,
 });
 const switchTabs = (e) => {
-  if (e.props.name === 'proxy') {
-    getWifiList();
-  }
   if (e.props.name === 'apps' || e.props.name === 'perfmon') {
     if (appList.value.length === 0) {
       refreshAppList();
@@ -144,11 +140,6 @@ const switchTabs = (e) => {
   }
   if (e.props.name === 'terminal') {
     terminalHeight.value = document.getElementById('pressKey').offsetTop - 150;
-  }
-  if (e.props.name === 'webview') {
-    if (webViewListDetail.value.length === 0) {
-      getWebViewForward();
-    }
   }
 };
 const startPerfmon = (bundleId) => {
@@ -312,10 +303,6 @@ const terminalWebsocketOnmessage = (message) => {
     case 'wifiListDetail': {
       isConnectWifi.value = JSON.parse(message.data).detail.isConnectWifi;
       currentWifi.value = JSON.parse(message.data).detail.connectedWifi.SSID;
-      break;
-    }
-    case 'appListDetail': {
-      appList.value.push(JSON.parse(message.data).detail);
       break;
     }
     case 'logcat':
@@ -483,27 +470,6 @@ const enterInputHandle = () => {
       })
   );
 };
-const openDriver = () => {
-  driverLoading.value = true;
-  websocket.send(
-      JSON.stringify({
-        type: 'debug',
-        detail: 'openDriver',
-      })
-  );
-};
-const closeDriver = () => {
-  isDriverFinish.value = false;
-  websocket.send(
-      JSON.stringify({
-        type: 'debug',
-        detail: 'closeDriver',
-      })
-  );
-  ElMessage.success({
-    message: $t('androidRemoteTS.code.closeDriverMessage'),
-  });
-};
 const getCurLocation = () => {
   let x;
   let y;
@@ -668,22 +634,17 @@ const refreshAppList = () => {
   ElMessage.success({
     message: $t('androidRemoteTS.loadIng'),
   });
-  terminalWebsocket.send(
-      JSON.stringify({
-        type: 'appList',
-      })
-  );
+  getAppList();
 };
-const clearProxy = () => {
-  ElMessage.success({
-    message: $t('androidRemoteTS.messageTwo'),
-  });
-  websocket.send(
-      JSON.stringify({
-        type: 'clearProxy',
-      })
-  );
-};
+
+const getAppList = () => {
+  axios.get("/android/app/list", {params: {udid: selectDeviceUdid.value}}).then((resp) => {
+    for (let i in resp.data) {
+      appList.value.push(resp.data[i])
+    }
+  })
+}
+
 const uninstallApp = (pkg) => {
   ElMessage.success({
     message: $t('androidRemoteTS.startUninstall'),
@@ -895,6 +856,7 @@ const selectGroupDevices = () => {
       infoLoading.value = false;
       udidInfo.value = resp.data
     })
+    refreshAppList()
   }).catch((err) => {
     ElMessage({
       type: 'info',
@@ -1258,6 +1220,7 @@ const currentTabName = 'perfTest'
             <android-perf
                 ref="androidPerfRef"
                 :app-list="appList"
+                :udid="selectDeviceUdid"
                 @start-perfmon="startPerfmon"
                 @stop-perfmon="stopPerfmon"
             />
