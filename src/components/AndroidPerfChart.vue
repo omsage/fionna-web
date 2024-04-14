@@ -54,6 +54,7 @@ const props = defineProps({
   procCpu: Object,
   procMem: Object,
   sysFps: Object,
+  sysJank:Object,
   procThread: Object,
 });
 
@@ -308,7 +309,7 @@ const printCpu = () => {
       top: '8%',
       data: cpuDataLegend.legend,
     },
-    grid: {top: '28%'},
+    grid: {top: '28%',left:'20%'},
     toolbox: {
       feature: {
         saveAsImage: {show: true, title: 'Save'},
@@ -495,6 +496,80 @@ const printFps = () => {
   };
   chart.setOption(option);
 };
+
+const printJank = () => {
+  let chart = echarts.getInstanceByDom(
+      document.getElementById(
+          `${props.rid}-${props.cid}-${props.did}-` + `sysJankChart`
+      )
+  );
+  if (chart == null) {
+    chart = echarts.init(
+        document.getElementById(
+            `${props.rid}-${props.cid}-${props.did}-` + `sysJankChart`
+        )
+    );
+  }
+  chart.resize();
+  const option = {
+    color: ['#f1df80','#e03b16'],
+    title: {
+      text: 'System FPS',
+      textStyle: {
+        color: '#606266',
+      },
+      x: 'center',
+      y: 'top',
+    },
+    tooltip: {
+      trigger: 'axis',
+    },
+    grid: {top: '15%'},
+    toolbox: {
+      feature: {
+        saveAsImage: {show: true, title: 'Save'},
+      },
+    },
+    xAxis: {
+      data: sysFrameOption.categorySysFrameList,
+    },
+    dataZoom: [
+      {
+        show: true,
+        realtime: true,
+        start: 30,
+        end: 100,
+        xAxisIndex: [0, 1],
+      },
+    ],
+    yAxis: [{name: 'Jank', min: 0}],
+    legend: {
+      top: '8%',
+      data: [
+        'jank',
+        'big jank',
+      ],
+    },
+    series: [
+      {
+        name: 'jank',
+        type: 'line',
+        data: sysFrameOption.jankCount,
+        showSymbol: false,
+        boundaryGap: false,
+      },
+      {
+        name: 'big jank',
+        type: 'line',
+        data: sysFrameOption.bigJankCount,
+        showSymbol: false,
+        boundaryGap: false,
+      },
+    ],
+  };
+  chart.setOption(option);
+};
+
 const printProcThread = () => {
   let chart = echarts.getInstanceByDom(
       document.getElementById(
@@ -578,7 +653,7 @@ const printNetwork = () => {
     tooltip: {
       trigger: 'axis',
     },
-    grid: {top: '20%', left: '18%'},
+    grid: {top: '35%', left: '20%'},
     toolbox: {
       feature: {
         saveAsImage: {show: true, title: 'Save'},
@@ -692,7 +767,7 @@ const printPerfMem = () => {
     tooltip: {
       trigger: 'axis',
     },
-    grid: {top: '20%', left: '20%'},
+    grid: {top: '30%', left: '20%'},
     toolbox: {
       feature: {
         saveAsImage: {show: true, title: 'Save'},
@@ -781,6 +856,7 @@ defineExpose({
   printPerfCpu,
   printPerfMem,
   printFps,
+  printJank,
   printProcThread,
 });
 const switchTab = (e) => {
@@ -815,6 +891,15 @@ const switchTab = (e) => {
       );
       if (sysFrameOption.categorySysFrameList !== 0) {
         fpsChart.resize();
+      }
+
+      const jankChart = echarts.getInstanceByDom(
+          document.getElementById(
+              `${props.rid}-${props.cid}-${props.did}-` + `sysJankChart`
+          )
+      );
+      if (sysFrameOption.categorySysFrameList !== 0) {
+        jankChart.resize();
       }
     })
   } else if (e.index == 3) {
@@ -912,11 +997,11 @@ const switchTab = (e) => {
         </el-col>
 
         <el-col :span="12">
-          <el-tooltip class="item" :disabled="sysCpu!==null" content="jank info" placement="top">
+          <el-tooltip class="item" :disabled="sysJank!==null" content="jank info" placement="top">
             <el-card style="margin-top: 10px">
               <div
-                  :id="rid + '-' + cid + '-' + did + '-' + 'sysCpuChart'"
-                  v-loading="sysCpu === null"
+                  :id="rid + '-' + cid + '-' + did + '-' + 'sysJankChart'"
+                  v-loading="sysJank === null"
                   :element-loading-text="$t('perf.emptyData')"
                   element-loading-spinner="el-icon-box"
                   style="width: 100%; height: 350px"

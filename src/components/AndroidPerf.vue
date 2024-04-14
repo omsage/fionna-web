@@ -89,7 +89,12 @@ const setData = (data) => {
     if (data.system.frame) {
       // console.log(data.system.frame)
       sysFps.value = data.system.frame;
-      androidPerfChart.value.printFps();
+      if (perfConfig.value.FPS){
+        androidPerfChart.value.printFps();
+      }
+      if (perfConfig.value.jank){
+        androidPerfChart.value.printJank();
+      }
     }
   }
 };
@@ -99,6 +104,7 @@ const sysNetwork = ref(null);
 const procCpu = ref(null);
 const procMem = ref(null);
 const sysFps = ref(null);
+const sysJank = ref(null);
 const procThread = ref(null);
 defineExpose({setData});
 
@@ -226,6 +232,7 @@ const perfConfig = ref({
         :sys-mem="sysMem"
         :sys-network="sysNetwork"
         :sys-fps="sysFps"
+        :sys-jank="sysJank"
         :proc-cpu="procCpu"
         :proc-mem="procMem"
         :proc-thread="procThread"

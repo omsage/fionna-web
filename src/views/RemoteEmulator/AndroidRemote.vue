@@ -60,7 +60,6 @@ const terminalHeight = ref(0);
 const loading = ref(false);
 const driverLoading = ref(false);
 const appList = ref([]);
-const device = ref({});
 const text = ref({content: ''});
 let imgWidth = 0;
 let imgHeight = 0;
@@ -72,14 +71,8 @@ let isPress = false;
 const pic = ref('高');
 const _screenMode = window.localStorage.getItem('screenMode');
 const screenMode = ref(_screenMode || 'Scrcpy'); // Scrcpy,Minicap
-const testCase = ref({});
 const activeTab = ref('perfmon');
-const activeTab2 = ref('step');
-const stepLog = ref([]);
-const debugLoading = ref(false);
-const webViewListDetail = ref([]);
 const title = ref('');
-const webViewLoading = ref(false);
 const cmdInput = ref('');
 const cmdOutPut = ref([]);
 const cmdUser = ref('');
@@ -113,6 +106,16 @@ const switchTabs = (e) => {
 
 let perfPongId;
 const startPerfmon = (perfConfig, isStart) => {
+  if (perfConfig.procCpu || perfConfig.procMem || perfConfig.procThread){
+    if (perfConfig.packageName===""){
+      ElMessage.error({
+        message: '请选择需要采集的应用',
+      });
+      isStart.value = false
+      return
+    }
+
+  }
   if (currentSleccutDeviceUdid.value === "") {
     ElMessage.error({
       message: '未选择设备',
@@ -376,23 +379,23 @@ const inputBox = ref(null);
 const inputBoxStyle = ref({});
 const paste = ref('');
 const changeInputHandle = () => {
-  if (inputValue.value) {
-    websocket.send(
-        JSON.stringify({
-          type: 'text',
-          detail: inputValue.value,
-        })
-    );
-    inputValue.value = '';
-  }
+  // if (inputValue.value) {
+  //   websocket.send(
+  //       JSON.stringify({
+  //         type: 'text',
+  //         detail: inputValue.value,
+  //       })
+  //   );
+  //   inputValue.value = '';
+  // }
 };
 const deleteInputHandle = () => {
-  websocket.send(
-      JSON.stringify({
-        type: 'text',
-        detail: 'CODE_AC_BACK',
-      })
-  );
+  // websocket.send(
+  //     JSON.stringify({
+  //       type: 'text',
+  //       detail: 'CODE_AC_BACK',
+  //     })
+  // );
 };
 const setPasteboard = (text) => {
   websocket.send(
@@ -413,12 +416,12 @@ const getPasteboard = () => {
   );
 };
 const enterInputHandle = () => {
-  websocket.send(
-      JSON.stringify({
-        type: 'text',
-        detail: 'CODE_AC_ENTER',
-      })
-  );
+  // websocket.send(
+  //     JSON.stringify({
+  //       type: 'text',
+  //       detail: 'CODE_AC_ENTER',
+  //     })
+  // );
 };
 const getCurLocation = () => {
   let x;
@@ -543,12 +546,15 @@ const getAppList = () => {
 
 
 const pressKey = (keyNum) => {
-  websocket.send(
-      JSON.stringify({
-        type: 'keyEvent',
-        detail: keyNum,
-      })
-  );
+  axios.get("/android/serial/keycode",{params: {udid: currentSleccutDeviceUdid.value,keycode:keyNum}}).then((resp)=>{
+
+  })
+  // websocket.send(
+  //     JSON.stringify({
+  //       type: 'keyEvent',
+  //       detail: keyNum,
+  //     })
+  // );
 };
 const changePic = (type) => {
   loading.value = true;
