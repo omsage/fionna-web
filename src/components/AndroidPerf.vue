@@ -27,7 +27,6 @@ const {t: $t} = useI18n();
 const emit = defineEmits(['pickCurrentApp', 'startPerfmon', 'stopPerfmon', 'refreshAppList']);
 const isStart = ref(false);
 const isPackageLoading = ref(false)
-const perfBundleId = ref('');
 const props = defineProps({
   udid: String,
   appList: Array,
@@ -38,14 +37,12 @@ watch(props, (props) => {
 })
 
 const startPerfmon = () => {
-  isStart.value = true; // 简单模拟下
-  emit('startPerfmon', perfBundleId.value);
-  isStart.value = true;
+  emit('startPerfmon', perfConfig.value, isStart);
+  // isStart.value = true;
 };
 const stopPerfmon = () => {
-  isStart.value = false; // 简单模拟下
-  emit('stopPerfmon');
-  isStart.value = false;
+  emit('stopPerfmon', isStart);
+  // isStart.value = false;
 };
 // const refreshAppList = (isVisible) => {
 //   if (isVisible){
@@ -53,81 +50,85 @@ const stopPerfmon = () => {
 //   }
 // }
 const clearPerfmon = () => {
-  sysCpu.value = [];
-  sysMem.value = [];
-  sysNetwork.value = [];
-  procCpu.value = [];
-  procMem.value = [];
-  procFps.value = [];
-  procThread.value = [];
+  sysCpu.value = {};
+  sysMem.value = {};
+  sysNetwork.value = {};
+  procCpu.value = {};
+  procMem.value = {};
+  sysFps.value = {};
+  procThread.value = {};
 };
 const setData = (data) => {
   if (data.process) {
     if (data.process.cpuInfo) {
-      procCpu.value.push(data.process.cpuInfo);
+      procCpu.value = data.process.cpuInfo;
       androidPerfChart.value.printPerfCpu();
     }
     if (data.process.memInfo) {
-      procMem.value.push(data.process.memInfo);
+      procMem.value = data.process.memInfo;
       androidPerfChart.value.printPerfMem();
     }
-    if (data.process.fpsInfo) {
-      procFps.value.push(data.process.fpsInfo);
-      androidPerfChart.value.printProcFps();
-    }
     if (data.process.threadInfo) {
-      procThread.value.push(data.process.threadInfo);
+      procThread.value = data.process.threadInfo;
       androidPerfChart.value.printProcThread();
     }
   }
   if (data.system) {
     if (data.system.cpuInfo) {
-      sysCpu.value.push(data.system.cpuInfo);
+      sysCpu.value = data.system.cpuInfo;
       androidPerfChart.value.printCpu();
-      androidPerfChart.value.printSingleCpu();
     }
     if (data.system.memInfo) {
-      sysMem.value.push(data.system.memInfo);
+      sysMem.value = data.system.memInfo;
       androidPerfChart.value.printMem();
     }
     if (data.system.networkInfo) {
-      sysNetwork.value.push(data.system.networkInfo);
+      sysNetwork.value = data.system.networkInfo;
       androidPerfChart.value.printNetwork();
+    }
+    if (data.system.frame) {
+      // console.log(data.system.frame)
+      sysFps.value = data.system.frame;
+      androidPerfChart.value.printFps();
     }
   }
 };
-const sysCpu = ref([]);
-const sysMem = ref([]);
-const sysNetwork = ref([]);
-const procCpu = ref([]);
-const procMem = ref([]);
-const procFps = ref([]);
-const procThread = ref([]);
+const sysCpu = ref(null);
+const sysMem = ref(null);
+const sysNetwork = ref(null);
+const procCpu = ref(null);
+const procMem = ref(null);
+const sysFps = ref(null);
+const procThread = ref(null);
 defineExpose({setData});
 
 const getCurrentAppName = () => {
   isPackageLoading.value = true
   axios.get("/android/app/current", {params: {udid: props.udid}}).then((resp) => {
-    perfBundleId.value = resp.data
+    perfConfig.value.packageName = resp.data
     isPackageLoading.value = false
   })
 }
 
 const perfConfig = ref({
-  cpuConfig: ['sys-cpu'],
-  memConfig: ['sys-mem'],
-  frameConfig: ['FPS'],
-  networkConfig: false,
-  threadCount: false,
-  desc: ''
+  sysCpu: true,
+  sysMem: true,
+  sysNetwork: false,
+  FPS: true,
+  jank: false,
+  procCpu: false,
+  procMem: false,
+  procThread: false,
+  packageName: "",
 })
+
 
 </script>
 
 <template>
   <div>
     <el-select
-        v-model="perfBundleId"
+        v-model="perfConfig.packageName "
         style="margin-right: 10px; width: 280px"
         filterable
         clearable
@@ -179,41 +180,35 @@ const perfConfig = ref({
         <el-form ref="form" :model="perfConfig" label-width="auto">
 
 
-          <el-form-item label="CPU">
-            <el-checkbox-group v-model="perfConfig.cpuConfig">
-              <el-checkbox border label="sys-cpu" name="sys" size="small"></el-checkbox>
-              <el-checkbox border label="proc-cpu" name="proc" size="small"></el-checkbox>
+          <el-form-item>
+            <span>sys-cpu</span>
+            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.sysCpu"></el-switch>
+            <span>sys-mem</span>
+            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.sysMem"></el-switch>
 
-            </el-checkbox-group>
+            <span>network</span>
+            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.sysNetwork"></el-switch>
+          </el-form-item>
+<!--          <el-divider></el-divider>-->
+
+          <el-form-item>
+            <span>proc-cpu</span>
+            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.procCpu"></el-switch>
+            <span>proc-mem</span>
+            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.procMem"></el-switch>
+            <span>thread</span>
+            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.procThread"></el-switch>
           </el-form-item>
 
-          <el-divider></el-divider>
-
-          <el-form-item label="Memory">
-            <el-checkbox-group v-model="perfConfig.memConfig">
-              <el-checkbox border label="sys-mem" name="sys" size="small"></el-checkbox>
-              <el-checkbox border label="proc-mem" name="proc" size="small"></el-checkbox>
-
-            </el-checkbox-group>
+<!--          <el-divider></el-divider>-->
+          <el-form-item>
+            <span>FPS</span>
+            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.FPS"></el-switch>
+            <span>Jank</span>
+            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.jank"></el-switch>
           </el-form-item>
+          <!--          <el-divider></el-divider>-->
 
-          <el-divider></el-divider>
-
-          <el-form-item label="Frame">
-            <el-checkbox-group v-model="perfConfig.frameConfig">
-              <el-checkbox border label="FPS" name="FPS" size="small"></el-checkbox>
-              <el-checkbox border label="jank" name="jank" size="small"></el-checkbox>
-            </el-checkbox-group>
-          </el-form-item>
-
-          <el-divider></el-divider>
-
-          <el-form-item label-width="0px">
-            network
-            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.networkConfig"></el-switch>
-            thread
-            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.threadCount"></el-switch>
-          </el-form-item>
 
         </el-form>
       </el-card>
@@ -224,15 +219,15 @@ const perfConfig = ref({
         v-show="isStart"
         ref="androidPerfChart"
         :cid="0"
-        :rid="0"
+        :rid="''"
         :did="0"
         :is-start-perf="isStart"
         :sys-cpu="sysCpu"
         :sys-mem="sysMem"
         :sys-network="sysNetwork"
+        :sys-fps="sysFps"
         :proc-cpu="procCpu"
         :proc-mem="procMem"
-        :proc-fps="procFps"
         :proc-thread="procThread"
     />
   </div>

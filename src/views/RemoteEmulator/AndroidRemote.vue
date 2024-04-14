@@ -30,24 +30,7 @@ import axios from '@/http/axios';
 import {ElMessage, ElMessageBox} from 'element-plus';
 import useClipboard from 'vue-clipboard3';
 import {
-  VideoPause,
-  Refresh,
-  Connection,
-  Place,
-  Search,
   SwitchButton,
-  Position,
-  Pointer,
-  Camera,
-  Sunny,
-  Phone,
-  PhoneFilled,
-  Minus,
-  MuteNotification,
-  Plus,
-  CaretRight,
-  CaretLeft,
-  Operation,
   Cellphone,
   Menu,
   CopyDocument,
@@ -55,10 +38,6 @@ import {
   Back,
   View,
   InfoFilled,
-  Bell,
-  Service,
-  VideoCamera,
-  Postcard,
 } from '@element-plus/icons';
 
 import {useI18n} from 'vue-i18n';
@@ -67,15 +46,14 @@ import RenderDeviceName from '../../components/RenderDeviceName.vue';
 import Scrcpy from './Scrcpy';
 import AndroidPerf from '../../components/AndroidPerf.vue';
 import DeviceInfoCard from "@/components/DeviceInfoCard.vue";
+import WSUri from '@/http/webUrl';
 
 const androidPerfRef = ref(null);
 const {t: $t} = useI18n();
 
 const {toClipboard} = useClipboard();
-const route = useRoute();
 const store = useStore();
 const router = useRouter();
-const wifiList = ref([]);
 const currentWifi = ref('');
 const isConnectWifi = ref(false);
 const terminalHeight = ref(0);
@@ -83,7 +61,6 @@ const loading = ref(false);
 const driverLoading = ref(false);
 const appList = ref([]);
 const device = ref({});
-const agent = ref({});
 const text = ref({content: ''});
 let imgWidth = 0;
 let imgHeight = 0;
@@ -91,19 +68,10 @@ let imgHeight = 0;
 const directionStatus = {
   value: -1,
 };
-let moveX = 0;
-let moveY = 0;
 let isPress = false;
-let loop = null;
-let time = 0;
-let isLongPress = false;
-let mouseMoveTime = 0;
-let touchWrapper = null;
 const pic = ref('高');
 const _screenMode = window.localStorage.getItem('screenMode');
 const screenMode = ref(_screenMode || 'Scrcpy'); // Scrcpy,Minicap
-const isDriverFinish = ref(false);
-const project = ref(null);
 const testCase = ref({});
 const activeTab = ref('perfmon');
 const activeTab2 = ref('step');
@@ -142,20 +110,47 @@ const switchTabs = (e) => {
     terminalHeight.value = document.getElementById('pressKey').offsetTop - 150;
   }
 };
-const startPerfmon = (bundleId) => {
-  websocket.send(
-      JSON.stringify({
-        type: 'startPerfmon',
-        bundleId,
-      })
-  );
+
+let perfPongId;
+const startPerfmon = (perfConfig, isStart) => {
+  if (currentSleccutDeviceUdid.value === "") {
+    ElMessage.error({
+      message: '未选择设备',
+    });
+    isStart.value = false
+  } else {
+    websocket = new WebSocket(WSUri + 'android/perf?udid=' + currentSleccutDeviceUdid.value);
+    websocket.onopen = () => {
+      websocket.send(
+          JSON.stringify({
+            messageType: 'startPerfmon',
+            data: perfConfig,
+          })
+      );
+      perfPongId = setTimeout(() => {
+        websocket.send(JSON.stringify({
+          messageType: 'pongPerfmon'
+        }));
+      }, 2000);
+
+      websocket.onmessage = websocketOnmessage;
+      isStart.value = true
+    }
+
+  }
 };
-const stopPerfmon = () => {
+const stopPerfmon = (isStart) => {
+  isStart.value = false
   websocket.send(
       JSON.stringify({
-        type: 'stopPerfmon',
+        messageType: 'closePerfmon',
       })
   );
+  if (perfPongId !== null) {
+    clearTimeout(perfPongId);
+    perfPongId = null;
+  }
+
 };
 const img = import.meta.globEager('../../assets/img/*');
 let websocket = null;
@@ -218,13 +213,7 @@ const openSocket = (host, port, key, udId) => {
     //     "udid":"xxxxx"
     //   }))
     // };
-    __Scrcpy = new Scrcpy({
-      udid: selectDeviceUdid.value,
-      socketURL: `ws://127.0.0.1:8080/android/scrcpy`,
-      node: 'scrcpy-video',
-      onmessage: screenWebsocketOnmessage,
-    });
-    screenWebsocket = __Scrcpy.websocket;
+
     //
     // terminalWebsocket = new WebSocket(
     //     `ws://${host}:${port}/websockets/android/terminal/${key}/${udId}/${localStorage.getItem(
@@ -248,13 +237,6 @@ const sendLogcat = () => {
         type: 'logcat',
         level: logcatFilter.value.level,
         filter: logcatFilter.value.filter,
-      })
-  );
-};
-const getWifiList = () => {
-  terminalWebsocket.send(
-      JSON.stringify({
-        type: 'wifiList',
       })
   );
 };
@@ -347,13 +329,6 @@ const terminalWebsocketOnmessage = (message) => {
 const screenWebsocketOnmessage = (message) => {
   // console.log('screenWebsocketOnmessage', message.data);
   switch (JSON.parse(message.data).messageType) {
-    case 'support': {
-      ElMessage.error({
-        message: JSON.parse(message.data).text,
-      });
-      loading.value = false;
-      break;
-    }
     case 'sizeInfo': {
       loading.value = true;
 
@@ -368,10 +343,10 @@ const screenWebsocketOnmessage = (message) => {
       loading.value = false;
       break;
     }
-    case 'picFinish': {
-      loading.value = false;
-      break;
-    }
+      // case 'picFinish': {
+      //   loading.value = false;
+      //   break;
+      // }
     case 'error':
       ElMessage.error({
         message: $t('androidRemoteTS.systemException'),
@@ -381,36 +356,11 @@ const screenWebsocketOnmessage = (message) => {
   }
 };
 const websocketOnmessage = (message) => {
-  switch (JSON.parse(message.data).msg) {
-    case 'perfDetail':
-      androidPerfRef.value.setData(JSON.parse(message.data).detail);
+  // console.log(message.data)
+  switch (JSON.parse(message.data).messageType) {
+    case 'perfdata':
+      androidPerfRef.value.setData(JSON.parse(message.data).perfData);
       break;
-    case 'paste': {
-      paste.value = JSON.parse(message.data).detail;
-      ElMessage.success({
-        message: $t('IOSRemote.clipboard.text'),
-      });
-      break;
-    }
-    case 'step': {
-      setStepLog(JSON.parse(message.data));
-      break;
-    }
-    case 'status': {
-      debugLoading.value = false;
-      ElMessage.info({
-        message: $t('androidRemoteTS.runOver'),
-      });
-      break;
-    }
-    case 'forwardView': {
-      webViewLoading.value = false;
-      ElMessage.success({
-        message: $t('androidRemoteTS.getSuccess'),
-      });
-      webViewListDetail.value = JSON.parse(message.data).detail;
-      break;
-    }
     case 'error': {
       ElMessage.error({
         message: $t('androidRemoteTS.systemException'),
@@ -575,60 +525,6 @@ const mousemove = (event) => {
     )
   }
 };
-const findElementByPoint = (ele, x, y) => {
-  const result = [];
-  for (const i in ele) {
-    const eleStartX = ele[i].detail.bStart.substring(
-        0,
-        ele[i].detail.bStart.indexOf(',')
-    );
-    const eleStartY = ele[i].detail.bStart.substring(
-        ele[i].detail.bStart.indexOf(',') + 1
-    );
-    const eleEndX = ele[i].detail.bEnd.substring(
-        0,
-        ele[i].detail.bEnd.indexOf(',')
-    );
-    const eleEndY = ele[i].detail.bEnd.substring(
-        ele[i].detail.bEnd.indexOf(',') + 1
-    );
-    if (x >= eleStartX && x <= eleEndX && y >= eleStartY && y <= eleEndY) {
-      result.push({
-        ele: ele[i],
-        size: (eleEndY - eleStartY) * (eleEndX - eleStartX),
-      });
-    }
-    if (ele[i].children) {
-      const childrenResult = findElementByPoint(ele[i].children, x, y);
-      if (childrenResult.length > 0) {
-        result.push.apply(result, childrenResult);
-      }
-    }
-  }
-  return result;
-};
-
-const openApp = (pkg) => {
-  websocket.send(
-      JSON.stringify({
-        type: 'debug',
-        detail: 'openApp',
-        pkg,
-      })
-  );
-};
-const killApp = (pkg) => {
-  websocket.send(
-      JSON.stringify({
-        type: 'debug',
-        detail: 'killApp',
-        pkg,
-      })
-  );
-  ElMessage.success({
-    message: $t('androidRemoteTS.code.killMsg'),
-  });
-};
 const refreshAppList = () => {
   appList.value = [];
   ElMessage.success({
@@ -638,51 +534,14 @@ const refreshAppList = () => {
 };
 
 const getAppList = () => {
-  axios.get("/android/app/list", {params: {udid: selectDeviceUdid.value}}).then((resp) => {
+  axios.get("/android/app/list", {params: {udid: currentSleccutDeviceUdid.value}}).then((resp) => {
     for (let i in resp.data) {
       appList.value.push(resp.data[i])
     }
   })
 }
 
-const uninstallApp = (pkg) => {
-  ElMessage.success({
-    message: $t('androidRemoteTS.startUninstall'),
-  });
-  websocket.send(
-      JSON.stringify({
-        type: 'uninstallApp',
-        detail: pkg,
-      })
-  );
-};
-const setStepLog = (data) => {
-  stepLog.value.push(data);
-};
-const runStep = () => {
-  debugLoading.value = true;
-  activeTab2.value = 'log';
-  websocket.send(
-      JSON.stringify({
-        type: 'debug',
-        detail: 'runStep',
-        caseId: testCase.value.id,
-        pwd: device.value.password,
-      })
-  );
-};
-const stopStep = () => {
-  debugLoading.value = false;
-  websocket.send(
-      JSON.stringify({
-        type: 'debug',
-        detail: 'stopStep',
-        udId: device.value.udId,
-        caseId: testCase.value.id,
-        pf: device.value.platform,
-      })
-  );
-};
+
 const pressKey = (keyNum) => {
   websocket.send(
       JSON.stringify({
@@ -753,44 +612,15 @@ const close = () => {
     terminalWebsocket.close();
     terminalWebsocket = null;
   }
+  if (perfPongId !== null) {
+    clearTimeout(perfPongId);
+    perfPongId = null;
+  }
   window.close();
 };
 onBeforeUnmount(() => {
   close();
 });
-const getDeviceById = (id) => {
-  loading.value = true;
-  axios.get('/controller/devices', {params: {id}}).then((resp) => {
-    if (resp.code === 2000) {
-      device.value = resp.data;
-      if (device.value.status !== 'ONLINE') {
-        ElMessage.error({
-          message: $t('androidRemoteTS.deviceFail'),
-        });
-        router.replace('/Index/Devices');
-        return;
-      }
-      axios
-          .get('/controller/agents', {params: {id: device.value.agentId}})
-          .then((resp) => {
-            if (resp.code === 2000) {
-              agent.value = resp.data;
-              openSocket(
-                  agent.value.host,
-                  agent.value.port,
-                  agent.value.secretKey,
-                  device.value.udId
-              );
-            }
-          });
-    }
-  });
-};
-const getProjectList = () => {
-  axios.get('/controller/projects/list').then((resp) => {
-    store.commit('saveProjectList', resp.data);
-  });
-};
 
 const udidList = ref([])
 const getAndroidDeviceList = () => {
@@ -819,17 +649,15 @@ onMounted(() => {
     activeTime = new Date().getTime();
   };
 });
-const remoteTimeout = ref(0);
-const ticker = ref(0);
 
 
 const deviceSelected = ref(false)
-const selectDeviceUdid = ref("")
+const currentSleccutDeviceUdid = ref("")
 const showCardMode = ref(0)
 const udidInfo = ref({})
 const infoLoading = ref(false)
 
-watch(selectDeviceUdid, (selectDeviceUdid) => {
+watch(currentSleccutDeviceUdid, (selectDeviceUdid) => {
   if (selectDeviceUdid !== "") {
     deviceSelected.value = true
   }
@@ -848,7 +676,7 @@ const selectGroupDevices = () => {
   ).then(() => {
     showCardMode.value = 1
     infoLoading.value = true
-    axios.get("/android/serial/info", {params: {udid: selectDeviceUdid.value}}).then((resp) => {
+    axios.get("/android/serial/info", {params: {udid: currentSleccutDeviceUdid.value}}).then((resp) => {
       ElMessage({
         type: 'success',
         message: '成功',
@@ -862,13 +690,19 @@ const selectGroupDevices = () => {
       type: 'info',
       message: '已取消',
     });
-    selectDeviceUdid.value = ""
+    currentSleccutDeviceUdid.value = ""
   })
 }
 
 const useScreenCall = () => {
   showCardMode.value = 2
-  openSocket()
+  __Scrcpy = new Scrcpy({
+    udid: currentSleccutDeviceUdid.value,
+    socketURL: WSUri + `android/scrcpy`,
+    node: 'scrcpy-video',
+    onmessage: screenWebsocketOnmessage,
+  });
+  screenWebsocket = __Scrcpy.websocket;
 }
 
 const cancelTheCasting = () => {
@@ -898,7 +732,7 @@ const cancelTheCasting = () => {
 }
 
 const reSelectionDevice = () => {
-  selectDeviceUdid.value = ""
+  currentSleccutDeviceUdid.value = ""
   showCardMode.value = 0
 }
 
@@ -934,7 +768,7 @@ const currentTabName = 'perfTest'
                   :key="item"
                   :value="item"
           >
-            <el-radio v-model="selectDeviceUdid" @input="selectGroupDevices" :label="item" border>
+            <el-radio v-model="currentSleccutDeviceUdid" @input="selectGroupDevices" :label="item" border>
               设备{{ item }}
             </el-radio>
           </el-col>
@@ -1220,7 +1054,7 @@ const currentTabName = 'perfTest'
             <android-perf
                 ref="androidPerfRef"
                 :app-list="appList"
-                :udid="selectDeviceUdid"
+                :udid="currentSleccutDeviceUdid"
                 @start-perfmon="startPerfmon"
                 @stop-perfmon="stopPerfmon"
             />
