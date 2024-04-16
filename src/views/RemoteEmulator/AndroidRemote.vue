@@ -54,11 +54,8 @@ const {t: $t} = useI18n();
 const {toClipboard} = useClipboard();
 const store = useStore();
 const router = useRouter();
-const currentWifi = ref('');
-const isConnectWifi = ref(false);
 const terminalHeight = ref(0);
 const loading = ref(false);
-const driverLoading = ref(false);
 const appList = ref([]);
 const text = ref({content: ''});
 let imgWidth = 0;
@@ -100,14 +97,17 @@ const switchTabs = (e) => {
     }
   }
   if (e.props.name === 'terminal') {
+    if (terminalWebsocket === null && currentSleccutDeviceUdid.value !=="") {
+      initTerminalWebsocket()
+    }
     terminalHeight.value = document.getElementById('pressKey').offsetTop - 150;
   }
 };
 
 let perfPongId;
 const startPerfmon = (perfConfig, isStart) => {
-  if (perfConfig.procCpu || perfConfig.procMem || perfConfig.procThread){
-    if (perfConfig.packageName===""){
+  if (perfConfig.procCpu || perfConfig.procMem || perfConfig.procThread) {
+    if (perfConfig.packageName === "") {
       ElMessage.error({
         message: '请选择需要采集的应用',
       });
@@ -122,21 +122,21 @@ const startPerfmon = (perfConfig, isStart) => {
     });
     isStart.value = false
   } else {
-    websocket = new WebSocket(WSUri + 'android/perf?udid=' + currentSleccutDeviceUdid.value);
-    websocket.onopen = () => {
-      websocket.send(
+    perfWebsocket = new WebSocket(WSUri + 'android/perf?udid=' + currentSleccutDeviceUdid.value);
+    perfWebsocket.onopen = () => {
+      perfWebsocket.send(
           JSON.stringify({
             messageType: 'startPerfmon',
             data: perfConfig,
           })
       );
       perfPongId = setTimeout(() => {
-        websocket.send(JSON.stringify({
+        perfWebsocket.send(JSON.stringify({
           messageType: 'pongPerfmon'
         }));
       }, 2000);
 
-      websocket.onmessage = websocketOnmessage;
+      perfWebsocket.onmessage = perfWebsocketOnmessage;
       isStart.value = true
     }
 
@@ -144,7 +144,7 @@ const startPerfmon = (perfConfig, isStart) => {
 };
 const stopPerfmon = (isStart) => {
   isStart.value = false
-  websocket.send(
+  perfWebsocket.send(
       JSON.stringify({
         messageType: 'closePerfmon',
       })
@@ -156,7 +156,7 @@ const stopPerfmon = (isStart) => {
 
 };
 const img = import.meta.globEager('../../assets/img/*');
-let websocket = null;
+let perfWebsocket = null;
 let screenWebsocket = null;
 let __Scrcpy = null; // 实例
 let terminalWebsocket = null;
@@ -171,6 +171,8 @@ defineProps({
   lineMousedown: Function,
   lineMouseleave: Function,
 });
+
+const terminalLoading = ref(false)
 
 const getImg = (name) => {
   let result;
@@ -199,47 +201,21 @@ const copy = (value) => {
     });
   }
 };
-const openSocket = (host, port, key, udId) => {
-  if ('WebSocket' in window) {
-    //
-    // websocket = new WebSocket(
-    //     `ws://${host}:${port}/websockets/android/${key}/${udId}/${localStorage.getItem(
-    //         'SonicToken'
-    //     )}`
-    // );
-    // //
-    // // websocket = new WebSocket('ws://127.0.0.1:8080/android/scrcpy1'
-    // // );
-    //
-    // websocket.onopen = function(evt) {
-    //   websocket.send(JSON.stringify({
-    //     "udid":"xxxxx"
-    //   }))
-    // };
-
-    //
-    // terminalWebsocket = new WebSocket(
-    //     `ws://${host}:${port}/websockets/android/terminal/${key}/${udId}/${localStorage.getItem(
-    //         'SonicToken'
-    //     )}`
-    // );
-  } else {
-    console.error($t('androidRemoteTS.noWebSocket'));
-  }
-  // websocket.onmessage = websocketOnmessage;
-  // websocket.onclose = (e) => {
-  // };
-  // terminalWebsocket.onmessage = terminalWebsocketOnmessage;
-  // terminalWebsocket.onclose = (e) => {
-  // };
-  driverLoading.value = true;
-};
 const sendLogcat = () => {
+  console.log(      JSON.stringify({
+    messageType: 'logcat',
+    data: {
+      level: logcatFilter.value.level,
+      filter: logcatFilter.value.filter,
+    }
+  }))
   terminalWebsocket.send(
       JSON.stringify({
-        type: 'logcat',
-        level: logcatFilter.value.level,
-        filter: logcatFilter.value.filter,
+        messageType: 'logcat',
+        data: {
+          level: logcatFilter.value.level,
+          filter: logcatFilter.value.filter,
+        }
       })
   );
 };
@@ -249,28 +225,57 @@ const clearLogcat = () => {
 const stopLogcat = () => {
   terminalWebsocket.send(
       JSON.stringify({
-        type: 'stopLogcat',
+        messageType: 'stopLogcat',
+        uuid:logcatUUID.value,
       })
   );
 };
-const sendCmd = () => {
-  if (cmdInput.value.length > 0 && cmdIsDone.value === true) {
-    cmdIsDone.value = false;
-    cmdOutPut.value.push(
-        JSON.parse(
-            JSON.stringify(
-                `<span style='color: #409EFF'>${cmdUser.value}</span>:/ $ ${cmdInput.value}`
-            )
-        )
-    );
-    terminalWebsocket.send(
-        JSON.stringify({
-          type: 'command',
-          detail: cmdInput.value,
-        })
-    );
-    cmdInput.value = '';
+
+let terminalPongId = null;
+const initTerminalWebsocket = () => {
+  if (currentSleccutDeviceUdid.value===""){
+    ElMessage.error({
+      message: '请选择设备',
+    });
+    return
   }
+  terminalLoading.value = true
+  terminalWebsocket = new WebSocket(WSUri + 'android/terminal?udid=' + currentSleccutDeviceUdid.value);
+  terminalWebsocket.onmessage = terminalWebsocketOnmessage;
+  terminalWebsocket.onopen = () => {
+    terminalLoading.value = false
+    terminalPongId = setTimeout(() => {
+      terminalWebsocket.send(JSON.stringify({
+        messageType: 'pongTerminal'
+      }));
+    }, 2000);
+  }
+}
+const sendCmd = () => {
+  if (terminalWebsocket === null) {
+    initTerminalWebsocket()
+  }
+  if (terminalWebsocket!==null){
+    if (cmdInput.value.length > 0 && cmdIsDone.value === true) {
+      cmdIsDone.value = false;
+      cmdOutPut.value.push(
+          JSON.parse(
+              JSON.stringify(
+                  `<span style='color: #409EFF'>${cmdUser.value}</span>:/ $ ${cmdInput.value}`
+              )
+          )
+      );
+      terminalWebsocket.send(
+          JSON.stringify({
+            messageType: 'command',
+            uuid:commandUUID.value,
+            data: cmdInput.value,
+          })
+      );
+      cmdInput.value = '';
+    }
+  }
+
 };
 const clearCmd = () => {
   cmdOutPut.value = [];
@@ -279,24 +284,26 @@ const stopCmd = () => {
   cmdIsDone.value = true;
   terminalWebsocket.send(
       JSON.stringify({
-        type: 'stopCmd',
+        messageType: 'stopCommand',
+        uuid:commandUUID.value,
       })
   );
 };
+
+const commandUUID = ref("")
+const logcatUUID = ref("")
 const terminalWebsocketOnmessage = (message) => {
-  switch (JSON.parse(message.data).msg) {
-    case 'wifiListDetail': {
-      isConnectWifi.value = JSON.parse(message.data).detail.isConnectWifi;
-      currentWifi.value = JSON.parse(message.data).detail.connectedWifi.SSID;
-      break;
-    }
+  console.log(message)
+  switch (JSON.parse(message.data).messageType) {
     case 'logcat':
+      logcatUUID.value = JSON.parse(message.data).uuid
       logcatOutPut.value.push($t('androidRemoteTS.connection'));
       break;
     case 'logcatResp':
+      logcatUUID.value = JSON.parse(message.data).uuid
       logcatOutPut.value.push(
           JSON.parse(message.data)
-              .detail.replace(/ I /g, "<span style='color: #0d84ff'> I </span>")
+              .data.replace(/ I /g, "<span style='color: #0d84ff'> I </span>")
               .replace(/ V /g, "<span style='color: #0d84ff'> I </span>")
               .replace(/ D /g, "<span style='color: #0d84ff'> D </span>")
               .replace(/ W /g, "<span style='color: #E6A23C'> W </span>")
@@ -308,18 +315,24 @@ const terminalWebsocketOnmessage = (message) => {
             logcatScroll.value.wrap.scrollHeight;
       });
       break;
+    case 'logcatRespEnd':
+      logcatOutPut.value = []
+      logcatUUID.value = ""
+      break;
     case 'terminal':
       cmdUser.value = JSON.parse(message.data).user;
       cmdOutPut.value.push($t('androidRemoteTS.connection'));
       break;
-    case 'terResp':
-      cmdOutPut.value.push(JSON.parse(message.data).detail);
+    case 'commandResp':
+      cmdOutPut.value.push(JSON.parse(message.data).data);
+      commandUUID.value = JSON.parse(message.data).uuid
       nextTick(() => {
         terScroll.value.wrap.scrollTop = terScroll.value.wrap.scrollHeight;
       });
       break;
-    case 'terDone':
+    case 'commandRespEnd':
       cmdIsDone.value = true;
+      commandUUID.value = ""
       break;
     case 'error':
       ElMessage.error({
@@ -358,7 +371,7 @@ const screenWebsocketOnmessage = (message) => {
       break;
   }
 };
-const websocketOnmessage = (message) => {
+const perfWebsocketOnmessage = (message) => {
   // console.log(message.data)
   switch (JSON.parse(message.data).messageType) {
     case 'perfdata':
@@ -398,7 +411,7 @@ const deleteInputHandle = () => {
   // );
 };
 const setPasteboard = (text) => {
-  websocket.send(
+  perfWebsocket.send(
       JSON.stringify({
         type: 'setPasteboard',
         detail: text,
@@ -409,7 +422,7 @@ const setPasteboard = (text) => {
   });
 };
 const getPasteboard = () => {
-  websocket.send(
+  perfWebsocket.send(
       JSON.stringify({
         type: 'getPasteboard',
       })
@@ -546,7 +559,12 @@ const getAppList = () => {
 
 
 const pressKey = (keyNum) => {
-  axios.get("/android/serial/keycode",{params: {udid: currentSleccutDeviceUdid.value,keycode:keyNum}}).then((resp)=>{
+  axios.get("/android/serial/keycode", {
+    params: {
+      udid: currentSleccutDeviceUdid.value,
+      keycode: keyNum
+    }
+  }).then((resp) => {
 
   })
   // websocket.send(
@@ -582,7 +600,7 @@ const changePic = (type) => {
 };
 
 const scan = (url) => {
-  websocket.send(
+  perfWebsocket.send(
       JSON.stringify({
         type: 'scan',
         url,
@@ -590,23 +608,23 @@ const scan = (url) => {
   );
 };
 const startKeyboard = () => {
-  websocket.send(
+  perfWebsocket.send(
       JSON.stringify({
         type: 'startKeyboard',
       })
   );
 };
 const stopKeyboard = () => {
-  websocket.send(
+  perfWebsocket.send(
       JSON.stringify({
         type: 'stopKeyboard',
       })
   );
 };
 const close = () => {
-  if (websocket !== null) {
-    websocket.close();
-    websocket = null;
+  if (perfWebsocket !== null) {
+    perfWebsocket.close();
+    perfWebsocket = null;
   }
   if (screenWebsocket !== null) {
     screenWebsocket.close();
@@ -621,6 +639,10 @@ const close = () => {
   if (perfPongId !== null) {
     clearTimeout(perfPongId);
     perfPongId = null;
+  }
+  if (terminalPongId !== null){
+    clearTimeout(terminalPongId);
+    terminalPongId = null;
   }
   window.close();
 };
@@ -644,6 +666,7 @@ const idleCount = ref(0);
 const udidListLoading = ref(true)
 onMounted(() => {
   getAndroidDeviceList()
+  // initTerminalWebsocket()
 
   store.commit('autoChangeCollapse');
   window.document.onmousedown = (event) => {
@@ -1065,7 +1088,8 @@ const currentTabName = 'perfTest'
                 @stop-perfmon="stopPerfmon"
             />
           </el-tab-pane>
-          <el-tab-pane label="Terminal" name="terminal">
+
+          <el-tab-pane v-loading="terminalLoading" label="Terminal" name="terminal">
             <el-alert
                 :title="$t('androidRemoteTS.code.precautions')"
                 type="warning"
@@ -1088,6 +1112,7 @@ const currentTabName = 'perfTest'
                   <el-scrollbar
                       ref="terScroll"
                       noresize
+                      :native="true"
                       :style="'height:' + terminalHeight + 'px;min-height:450px'"
                   >
                     <div
@@ -1196,135 +1221,8 @@ const currentTabName = 'perfTest'
             </el-tabs>
           </el-tab-pane>
           <!--          可做可不做，做的话需要有opencv计算ssim-->
-          <el-tab-pane label="过程耗时(可做可不做)" name="processTime">
-            <el-alert
-                :title="$t('androidRemoteTS.code.precautions')"
-                type="warning"
-                :description="$t('androidRemoteTS.code.precautionsText')"
-                show-icon
-                :closable="false"
-                style="margin-bottom: 10px"
-            />
-            <el-tabs stretch type="border-card">
-              <el-tab-pane label="Shell">
-                <el-card
-                    style="border: 0px"
-                    :body-style="{
-                    color: '#FFFFFF',
-                    backgroundColor: '#303133',
-                    lineHeight: '1.5',
-                  }"
-                >
-                  <el-scrollbar
-                      ref="terScroll"
-                      noresize
-                      :style="'height:' + terminalHeight + 'px;min-height:450px'"
-                  >
-                    <div
-                        v-for="c in cmdOutPut"
-                        style="white-space: pre-wrap"
-                        v-html="c"
-                    ></div>
-                  </el-scrollbar>
-                  <div style="display: flex; margin-top: 10px">
-                    <el-input
-                        v-model="cmdInput"
-                        size="mini"
-                        :placeholder="$t('androidRemoteTS.code.inputSend')"
-                        @keyup.enter="sendCmd"
-                    >
-                      <template #prepend>{{ cmdUser + ':/ $' }}</template>
-                    </el-input>
-                    <el-button
-                        size="mini"
-                        :disabled="cmdInput.length === 0 || !cmdIsDone"
-                        style="margin-left: 5px"
-                        type="primary"
-                        @click="sendCmd"
-                    >Send
-                    </el-button>
-                    <el-button
-                        size="mini"
-                        :disabled="cmdIsDone"
-                        style="margin-left: 5px"
-                        type="danger"
-                        @click="stopCmd"
-                    >Stop
-                    </el-button>
-                    <el-button
-                        size="mini"
-                        style="margin-left: 5px"
-                        type="warning"
-                        @click="clearCmd"
-                    >Clear
-                    </el-button>
-                  </div>
-                </el-card>
-              </el-tab-pane>
-              <el-tab-pane label="Logcat">
-                <el-card
-                    style="border: 0px"
-                    :body-style="{
-                    color: '#FFFFFF',
-                    backgroundColor: '#303133',
-                    lineHeight: '1.5',
-                  }"
-                >
-                  <div style="display: flex; margin-bottom: 10px">
-                    <el-select v-model="logcatFilter.level" size="mini">
-                      <el-option label="VERBOSE" value="V"></el-option>
-                      <el-option label="DEBUG" value="D"></el-option>
-                      <el-option label="INFO" value="I"></el-option>
-                      <el-option label="WARN" value="W"></el-option>
-                      <el-option label="ERROR" value="E"></el-option>
-                      <el-option label="FATAL" value="F"></el-option>
-                      <el-option label="SILENT" value="S"></el-option>
-                    </el-select>
-                    <el-input
-                        v-model="logcatFilter.filter"
-                        style="margin-left: 5px"
-                        size="mini"
-                        :placeholder="$t('androidRemoteTS.code.enterInput')"
-                    >
-                      <template #prepend>| grep</template>
-                    </el-input>
-                    <el-button
-                        size="mini"
-                        style="margin-left: 5px"
-                        type="primary"
-                        @click="sendLogcat"
-                    >Search
-                    </el-button>
-                    <el-button
-                        size="mini"
-                        style="margin-left: 5px"
-                        type="danger"
-                        @click="stopLogcat"
-                    >Stop
-                    </el-button>
-                    <el-button
-                        size="mini"
-                        style="margin-left: 5px"
-                        type="warning"
-                        @click="clearLogcat"
-                    >Clear
-                    </el-button>
-                  </div>
-                  <el-scrollbar
-                      ref="logcatScroll"
-                      noresize
-                      :style="'height:' + terminalHeight + 'px;min-height:450px'"
-                  >
-                    <div
-                        v-for="l in logcatOutPut"
-                        style="white-space: pre-wrap"
-                        v-html="l"
-                    ></div>
-                  </el-scrollbar>
-                </el-card>
-              </el-tab-pane>
-            </el-tabs>
-          </el-tab-pane>
+<!--          <el-tab-pane label="过程耗时(可做可不做)" name="processTime">-->
+<!--          </el-tab-pane>-->
         </el-tabs>
       </el-col>
     </el-row>
