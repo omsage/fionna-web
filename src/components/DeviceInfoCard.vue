@@ -65,22 +65,6 @@ const reSelectionDevice = () => {
     });
   })
 }
-
-const saveDetail = (device) => {
-  axios
-      .put('/controller/devices/saveDetail', {
-        id: device.id,
-        password: device.password,
-        nickName: device.nickName,
-      })
-      .then((resp) => {
-        if (resp.code === 2000) {
-          ElMessage.success({
-            message: resp.message,
-          });
-        }
-      });
-};
 const getPhoneImg = (name, url) => {
   let result;
   if (url === null || !url || (url && url.length === 0)) {
@@ -102,16 +86,6 @@ const getImg = (name) => {
     result = img[`./../assets/img/${name}.jpg`].default;
   } catch {
     result = img['./../assets/img/unName.jpg'].default;
-  }
-  return result;
-};
-const findAgentById = (id) => {
-  let result = $t('form.unknown');
-  for (const i in props.agentList) {
-    if (props.agentList[i].id === id) {
-      result = props.agentList[i].name;
-      break;
-    }
   }
   return result;
 };

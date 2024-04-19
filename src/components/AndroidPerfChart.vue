@@ -26,12 +26,16 @@ import {
   GridComponent,
   LegendComponent,
   DataZoomComponent,
+  MarkPointComponent,
+  MarkLineComponent,
 } from 'echarts/components';
 import {LineChart} from 'echarts/charts';
 import {CanvasRenderer} from 'echarts/renderers';
 import {nextTick, watch} from 'vue';
 
 echarts.use([
+  MarkPointComponent,
+  MarkLineComponent,
   DataZoomComponent,
   ToolboxComponent,
   GridComponent,
@@ -54,7 +58,7 @@ const props = defineProps({
   procCpu: Object,
   procMem: Object,
   sysFps: Object,
-  sysJank:Object,
+  sysJank: Object,
   procThread: Object,
 });
 
@@ -68,35 +72,6 @@ const getNetworkTimeStamp = () => {
         });
         break;
       }
-    }
-  }
-  return result;
-};
-
-const getNetworkDataGroup = () => {
-  const result = [];
-  if (props.sysNetwork.length > 0) {
-    for (const i in props.sysNetwork[0]) {
-      const tx = [];
-      const rx = [];
-      props.sysNetwork.map((obj) => {
-        tx.push(obj[i].tx);
-        rx.push(obj[i].rx);
-      });
-      result.push({
-        type: 'line',
-        name: `${i}_tx`,
-        data: tx,
-        showSymbol: false,
-        boundaryGap: false,
-      });
-      result.push({
-        type: 'line',
-        name: `${i}_rx`,
-        data: rx,
-        showSymbol: false,
-        boundaryGap: false,
-      });
     }
   }
   return result;
@@ -120,30 +95,30 @@ watch(() => props.sysNetwork, () => {
     }
 
     if (networkDataLegend.isInit) {
-      networkDataLegend.legend.push(i+'_rx')
-      networkDataLegend.legend.push(i+'_tx')
+      networkDataLegend.legend.push(i + '_rx')
+      networkDataLegend.legend.push(i + '_tx')
     }
 
-    if (seriesSysNetworkMap[i+'_rx'] === undefined) {
-      seriesSysNetworkMap[i+'_rx'] = {
+    if (seriesSysNetworkMap[i + '_rx'] === undefined) {
+      seriesSysNetworkMap[i + '_rx'] = {
         type: 'line',
-        name: i+'_rx',
+        name: i + '_rx',
         data: [props.sysNetwork[i].rx],
         showSymbol: false,
         boundaryGap: false,
       }
-      seriesSysNetworkMap[i+'_tx'] = {
+      seriesSysNetworkMap[i + '_tx'] = {
         type: 'line',
-        name: i+'_tx',
+        name: i + '_tx',
         data: [props.sysNetwork[i].tx],
         showSymbol: false,
         boundaryGap: false,
       }
-      seriesSysNetworkList.push(seriesSysNetworkMap[i+'_rx']);
-      seriesSysNetworkList.push(seriesSysNetworkMap[i+'_tx']);
+      seriesSysNetworkList.push(seriesSysNetworkMap[i + '_rx']);
+      seriesSysNetworkList.push(seriesSysNetworkMap[i + '_tx']);
     } else {
-      seriesSysNetworkMap[i+'_rx'].data.push(props.sysNetwork[i].rx)
-      seriesSysNetworkMap[i+'_tx'].data.push(props.sysNetwork[i].tx)
+      seriesSysNetworkMap[i + '_rx'].data.push(props.sysNetwork[i].rx)
+      seriesSysNetworkMap[i + '_tx'].data.push(props.sysNetwork[i].tx)
     }
   }
 })
@@ -309,7 +284,7 @@ const printCpu = () => {
       top: '8%',
       data: cpuDataLegend.legend,
     },
-    grid: {top: '28%',left:'20%'},
+    grid: {top: '28%', left: '20%'},
     toolbox: {
       feature: {
         saveAsImage: {show: true, title: 'Save'},
@@ -512,9 +487,9 @@ const printJank = () => {
   }
   chart.resize();
   const option = {
-    color: ['#f1df80','#e03b16'],
+    color: ['#f1df80', '#e03b16'],
     title: {
-      text: 'System FPS',
+      text: 'Jank Info',
       textStyle: {
         color: '#606266',
       },
@@ -868,7 +843,7 @@ const switchTab = (e) => {
               `${props.rid}-${props.cid}-${props.did}-` + `perfCpuChart`
           )
       );
-      if (procCpuOption.xTimeList!==0){
+      if (procCpuOption.xTimeList !== 0) {
         cpuChart.resize();
       }
 

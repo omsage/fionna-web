@@ -32,8 +32,13 @@ const props = defineProps({
   appList: Array,
 });
 
-watch(props, (props) => {
-  isPackageLoading.value = props.appList.length === 0;
+watch(()=>props.udid, (udid) => {
+  if (udid!==""){
+    isPackageLoading.value = props.appList.length === 0;
+  }else {
+    isPackageLoading.value = false
+  }
+
 })
 
 const startPerfmon = () => {
@@ -179,11 +184,11 @@ const perfConfig = ref({
       </el-icon>
       {{ $t('perf.clear') }}
     </el-button>
-    <!--    性能配置-->
+    <!--    性能配置   -->
     <div v-show="!isStart" style="margin-top: 10px">
       <el-card style="height: 100%">
 
-        <el-form ref="form" :model="perfConfig" label-width="auto">
+        <el-form v-show="!isStart" ref="form" :model="perfConfig" label-width="10px">
 
 
           <el-form-item>
