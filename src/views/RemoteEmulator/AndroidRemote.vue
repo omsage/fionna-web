@@ -60,7 +60,6 @@ const appList = ref([]);
 const text = ref({content: ''});
 let imgWidth = 0;
 let imgHeight = 0;
-// 旋转状态 // 0 90 180 270
 const directionStatus = {
   value: -1,
 };
@@ -82,7 +81,7 @@ const logcatFilter = ref({
   level: 'E',
   filter: '',
 });
-let oldBlob;
+
 const element = ref({
   id: null,
   moduleId: 0,
@@ -123,8 +122,11 @@ const startPerfmon = (perfConfig, isStart) => {
     });
     isStart.value = false
   } else {
-    perfWebsocket = new WebSocket(WSUri + 'android/perf?udid=' + selectDeviceUdid.value);
+    perfWebsocket = new WebSocket(WSUri + 'android/perf');
     perfWebsocket.onopen = () => {
+      // console.log(JSON.stringify(udidInfo.value))
+      perfWebsocket.send(JSON.stringify(udidInfo.value))
+
       perfWebsocket.send(
           JSON.stringify({
             messageType: 'startPerfmon',
@@ -387,7 +389,6 @@ const perfWebsocketOnmessage = (message) => {
 const inputValue = ref('');
 const inputBox = ref(null);
 const inputBoxStyle = ref({});
-const paste = ref('');
 const changeInputHandle = () => {
   // if (inputValue.value) {
   //   websocket.send(
@@ -437,7 +438,7 @@ const getCurLocation = () => {
   let x;
   let y;
   const canvas = document.getElementById('scrcpy-video');
-  ;
+
   const rect = canvas.getBoundingClientRect();
   x = parseInt(
       (event.clientX - rect.left) * (imgWidth / canvas.clientWidth)
@@ -647,11 +648,17 @@ onBeforeUnmount(() => {
   close();
 });
 
-const udidList = ref([])
+const serialInfoList = ref([])
 const getAndroidDeviceList = () => {
   axios.get('/android/serial/list').then((resp) => {
     for (let i in resp.data) {
-      udidList.value.push(resp.data[i])
+      serialInfoList.value.push(resp.data[i])
+    }
+    if (serialInfoList.value.length===0){
+      ElMessage({
+        type: 'error',
+        message: '未找到设备',
+      });
     }
     udidListLoading.value = false
   });
@@ -785,265 +792,269 @@ const currentTabName = 'perfTest'
         }"
       >
 
-          <el-card style="padding-bottom: 20px" v-show="0 === showCardMode" v-loading="udidListLoading">
-            <el-col style="padding-left: 10px; padding-right: 10px; margin-top: 20px;"
-                    v-for="item in udidList"
-                    :key="item"
-                    :value="item"
-            >
-              <el-tooltip class="item" effect="dark" content="Top Center 提示文字" placement="top">
-                <el-radio v-model="selectDeviceUdid" @input="selectGroupDevices" :label="item" border>
-                  设备{{ item }}
-                </el-radio>
-              </el-tooltip>
+        <el-card style="padding-bottom: 20px" v-show="0 === showCardMode" v-loading="udidListLoading">
+          <el-col v-show="serialInfoList.length!==0" style="padding-left: 10px; padding-right: 10px; margin-top: 20px;"
+                  v-for="item in serialInfoList"
+                  :key="item.udid"
+                  :value="item.udid"
+          >
+            <el-tooltip class="item" effect="dark" :content=" '产品:'+item.productDevice +' 型号:'+item.model"
+                        placement="top">
+              <el-radio v-model="selectDeviceUdid" @input="selectGroupDevices" :label="item.udid" border>
+                设备{{ item.udid }}
+              </el-radio>
+            </el-tooltip>
 
-            </el-col>
-          </el-card>
-          <!--        这里选择设备后再显示-->
-          <device-info-card
-              v-loading="infoLoading"
-              v-show="1 === showCardMode"
-              :device="udidInfo"
-              @useScreenCall="useScreenCall"
-              @reSelectionDevice="reSelectionDevice"
-          />
+          </el-col>
+          <el-empty v-show="serialInfoList.length===0" description="not device!" >
+            <el-button type="primary" @click="getAndroidDeviceList">刷新</el-button>
+          </el-empty>
+        </el-card>
+        <!--        这里选择设备后再显示-->
+        <device-info-card
+            v-loading="infoLoading"
+            v-show="1 === showCardMode"
+            :device="udidInfo"
+            @useScreenCall="useScreenCall"
+            @reSelectionDevice="reSelectionDevice"
+        />
 
 
-          <el-card
-              v-show="2 === showCardMode"
-              :element-loading-text="$t('androidRemoteTS.code.preparingImager')"
-              element-loading-background="rgba(255, 255, 255, 1)"
-              style="font-size: 16px"
-              :body-style="{
+        <el-card
+            v-show="2 === showCardMode"
+            :element-loading-text="$t('androidRemoteTS.code.preparingImager')"
+            element-loading-background="rgba(255, 255, 255, 1)"
+            style="font-size: 16px"
+            :body-style="{
                     padding: '10px',
                     background: '#ccc',
                     position: 'relative',
                     minHeight: '340px',
                   }"
-          >
-            <template #header>
-              <div style="position: relative; display: flex; align-items: center">
-                <el-button size="mini" circle icon="el-icon-arrow-left" @click="cancelTheCasting"
-                           style="margin-right: 15px"></el-button>
-                <el-icon :size="16" style="vertical-align: middle">
-                  <Cellphone/>
-                </el-icon>
-                <RenderDeviceName
-                    style="color: #e6a23c; margin-left: 5px"
-                    :device="udidInfo"
-                />
-                <el-popover placement="bottom-end" width="270" trigger="hover">
-                  <el-form
-                      v-show="2 === showCardMode"
-                      label-position="left"
-                      class="demo-table-expand"
-                      label-width="90px"
-                      style="margin-left: 10px; word-break: break-all"
-                  >
-                    <el-form-item :label="$t('devices.detail.name')">
-                      <span>{{ udidInfo.name }}</span>
-                    </el-form-item>
-                    <el-form-item :label="$t('devices.detail.model')">
-                      <span>{{ udidInfo['model'] }}</span>
-                    </el-form-item>
-                    <el-form-item :label="$t('devices.detail.udId')">
-                      <span>{{ udidInfo['udid'] }}</span>
-                    </el-form-item>
-                    <el-form-item :label="$t('devices.form.system')">
-                      <img
-                          height="25"
-                          style="
+        >
+          <template #header>
+            <div style="position: relative; display: flex; align-items: center">
+              <el-button size="mini" circle icon="el-icon-arrow-left" @click="cancelTheCasting"
+                         style="margin-right: 15px"></el-button>
+              <el-icon :size="16" style="vertical-align: middle">
+                <Cellphone/>
+              </el-icon>
+              <RenderDeviceName
+                  style="color: #e6a23c; margin-left: 5px"
+                  :device="udidInfo"
+              />
+              <el-popover placement="bottom-end" width="270" trigger="hover">
+                <el-form
+                    v-show="2 === showCardMode"
+                    label-position="left"
+                    class="demo-table-expand"
+                    label-width="90px"
+                    style="margin-left: 10px; word-break: break-all"
+                >
+                  <el-form-item :label="$t('devices.detail.name')">
+                    <span>{{ udidInfo.name }}</span>
+                  </el-form-item>
+                  <el-form-item :label="$t('devices.detail.model')">
+                    <span>{{ udidInfo['model'] }}</span>
+                  </el-form-item>
+                  <el-form-item :label="$t('devices.detail.udId')">
+                    <span>{{ udidInfo['udid'] }}</span>
+                  </el-form-item>
+                  <el-form-item :label="$t('devices.form.system')">
+                    <img
+                        height="25"
+                        style="
                                 position: absolute;
                                 top: 7px;
                                 bottom: 7px;
                                 left: 7px;
                               "
-                          :src="
+                        :src="
                                 getImg(udidInfo['isHm'] === 1 ? 'HarmonyOs' : 'ANDROID')
                               "
-                      />
-                    </el-form-item>
-                    <el-form-item
-                        :label="$t('androidRemoteTS.code.systemVersion')"
-                    >
-                      <span>{{ udidInfo['version'] }}</span>
-                    </el-form-item>
-                    <el-form-item :label="$t('devices.detail.size')">
-                      <span>{{ udidInfo['size'] }}</span>
-                    </el-form-item>
-                    <el-form-item :label="$t('devices.detail.cpu')">
-                      <span>{{ udidInfo['cpu'] }}</span>
-                    </el-form-item>
-                    <el-form-item :label="$t('devices.filter.manufacturer')">
-                      <img
-                          height="25"
-                          style="
+                    />
+                  </el-form-item>
+                  <el-form-item
+                      :label="$t('androidRemoteTS.code.systemVersion')"
+                  >
+                    <span>{{ udidInfo['version'] }}</span>
+                  </el-form-item>
+                  <el-form-item :label="$t('devices.detail.size')">
+                    <span>{{ udidInfo['size'] }}</span>
+                  </el-form-item>
+                  <el-form-item :label="$t('devices.detail.cpu')">
+                    <span>{{ udidInfo['cpu'] }}</span>
+                  </el-form-item>
+                  <el-form-item :label="$t('devices.filter.manufacturer')">
+                    <img
+                        height="25"
+                        style="
                                 position: absolute;
                                 top: 7px;
                                 bottom: 7px;
                                 left: 7px;
                               "
-                          :src="getImg(udidInfo['manufacturer'])"
-                      />
-                    </el-form-item>
-                  </el-form>
-                  <template #reference>
-                    <div style="position: absolute; right: 0px; color: #909399">
-                      <el-icon :size="15" style="vertical-align: middle">
-                        <InfoFilled/>
-                      </el-icon>
-                    </div>
-                  </template>
-                </el-popover>
-              </div>
-            </template>
-
-            <!--          投屏-->
-            <div style="margin-right: 40px; text-align: center">
-              <div>
-                <input
-                    ref="inputBox"
-                    v-model="inputValue"
-                    class="input-box"
-                    type="text"
-                    :style="inputBoxStyle"
-                    @input="changeInputHandle"
-                    @keyup.delete="deleteInputHandle"
-                    @keyup.enter="enterInputHandle"
-                />
-                <video
-                    v-show="screenMode == 'Scrcpy'"
-                    id="scrcpy-video"
-                    style="display: inline-block; min-height: 100%"
-                    :style="canvasRectInfo"
-                    autoplay
-                    muted
-                    @mouseup="mouseup"
-                    @mousemove="mousemove"
-                    @mousedown="mousedown"
-                    @mouseleave="mouseleave"
-                />
-                <canvas
-                    v-show="screenMode != 'Scrcpy'"
-                    id="canvas"
-                    style="display: inline-block"
-                    :style="canvasRectInfo"
-                    @mouseup="mouseup"
-                    @mousemove="mousemove"
-                    @mousedown="mousedown"
-                    @mouseleave="mouseleave"
-                />
-                <audio id="audio-player" hidden></audio>
-              </div>
-              <!--            三大金刚键-->
-              <el-button-group id="pressKey">
-                <el-button
-                    size="small"
-                    style="width: 25%"
-                    type="info"
-                    @click="pressKey(82)"
-                >
-                  <el-icon :size="13" style="vertical-align: middle">
-                    <Menu/>
-                  </el-icon>
-                </el-button>
-                <el-button
-                    size="small"
-                    style="width: 25%"
-                    type="info"
-                    @click="pressKey(187)"
-                >
-                  <el-icon :size="13" style="vertical-align: middle">
-                    <CopyDocument/>
-                  </el-icon>
-                </el-button>
-                <el-button
-                    size="small"
-                    style="width: 25%"
-                    type="info"
-                    @click="pressKey(3)"
-                >
-                  <el-icon :size="13" style="vertical-align: middle">
-                    <House/>
-                  </el-icon>
-                </el-button>
-                <el-button
-                    size="small"
-                    style="width: 25%"
-                    type="info"
-                    @click="pressKey(4)"
-                >
-                  <el-icon :size="13" style="vertical-align: middle">
-                    <Back/>
-                  </el-icon>
-                </el-button>
-              </el-button-group>
+                        :src="getImg(udidInfo['manufacturer'])"
+                    />
+                  </el-form-item>
+                </el-form>
+                <template #reference>
+                  <div style="position: absolute; right: 0px; color: #909399">
+                    <el-icon :size="15" style="vertical-align: middle">
+                      <InfoFilled/>
+                    </el-icon>
+                  </div>
+                </template>
+              </el-popover>
             </div>
-            <!--一些细节按钮-->
-            <div style="position: absolute; right: 5px; top: 10px">
-              <el-tooltip
-                  :enterable="false"
-                  effect="dark"
-                  :content="$t('androidRemoteTS.code.frameNumber')"
-                  :placement="tabPosition == 'left' ? 'right' : 'left'"
-                  :offset="15"
+          </template>
+
+          <!--          投屏-->
+          <div style="margin-right: 40px; text-align: center">
+            <div>
+              <input
+                  ref="inputBox"
+                  v-model="inputValue"
+                  class="input-box"
+                  type="text"
+                  :style="inputBoxStyle"
+                  @input="changeInputHandle"
+                  @keyup.delete="deleteInputHandle"
+                  @keyup.enter="enterInputHandle"
+              />
+              <video
+                  v-show="screenMode == 'Scrcpy'"
+                  id="scrcpy-video"
+                  style="display: inline-block; min-height: 100%"
+                  :style="canvasRectInfo"
+                  autoplay
+                  muted
+                  @mouseup="mouseup"
+                  @mousemove="mousemove"
+                  @mousedown="mousedown"
+                  @mouseleave="mouseleave"
+              />
+              <canvas
+                  v-show="screenMode != 'Scrcpy'"
+                  id="canvas"
+                  style="display: inline-block"
+                  :style="canvasRectInfo"
+                  @mouseup="mouseup"
+                  @mousemove="mousemove"
+                  @mousedown="mousedown"
+                  @mouseleave="mouseleave"
+              />
+              <audio id="audio-player" hidden></audio>
+            </div>
+            <!--            三大金刚键-->
+            <el-button-group id="pressKey">
+              <el-button
+                  size="small"
+                  style="width: 25%"
+                  type="info"
+                  @click="pressKey(82)"
               >
-                <div>
-                  <el-dropdown
-                      :hide-on-click="false"
-                      trigger="click"
-                      placement="right"
-                      style="margin-top: 4px"
-                  >
-                    <el-button size="small" type="info" circle>
-                      <el-icon :size="12" style="vertical-align: middle">
-                        <View/>
-                      </el-icon>
-                    </el-button>
-                    <template #dropdown>
-                      <el-dropdown-menu class="divider">
-                        <el-radio-group
-                            v-model="pic"
-                            v-loading="loading"
-                            size="mini"
-                            @change="changePic"
-                        >
-                          <el-radio-button
-                              :label="$t('androidRemoteTS.low')"
-                          ></el-radio-button>
-                          <el-radio-button
-                              :label="$t('androidRemoteTS.middle')"
-                          ></el-radio-button>
-                          <el-radio-button
-                              :label="$t('androidRemoteTS.high')"
-                          ></el-radio-button>
-                        </el-radio-group>
-                      </el-dropdown-menu>
-                    </template>
-                  </el-dropdown>
-                </div>
-              </el-tooltip>
-              <el-tooltip
-                  effect="dark"
-                  :content="$t('androidRemoteTS.code.LUS')"
-                  :placement="tabPosition == 'left' ? 'right' : 'left'"
+                <el-icon :size="13" style="vertical-align: middle">
+                  <Menu/>
+                </el-icon>
+              </el-button>
+              <el-button
+                  size="small"
+                  style="width: 25%"
+                  type="info"
+                  @click="pressKey(187)"
               >
-                <div style="margin-top: 4px">
-                  <el-button
-                      size="small"
-                      type="primary"
-                      circle
-                      @click="pressKey(26)"
-                  >
+                <el-icon :size="13" style="vertical-align: middle">
+                  <CopyDocument/>
+                </el-icon>
+              </el-button>
+              <el-button
+                  size="small"
+                  style="width: 25%"
+                  type="info"
+                  @click="pressKey(3)"
+              >
+                <el-icon :size="13" style="vertical-align: middle">
+                  <House/>
+                </el-icon>
+              </el-button>
+              <el-button
+                  size="small"
+                  style="width: 25%"
+                  type="info"
+                  @click="pressKey(4)"
+              >
+                <el-icon :size="13" style="vertical-align: middle">
+                  <Back/>
+                </el-icon>
+              </el-button>
+            </el-button-group>
+          </div>
+          <!--一些细节按钮-->
+          <div style="position: absolute; right: 5px; top: 10px">
+            <el-tooltip
+                :enterable="false"
+                effect="dark"
+                :content="$t('androidRemoteTS.code.frameNumber')"
+                :placement="tabPosition == 'left' ? 'right' : 'left'"
+                :offset="15"
+            >
+              <div>
+                <el-dropdown
+                    :hide-on-click="false"
+                    trigger="click"
+                    placement="right"
+                    style="margin-top: 4px"
+                >
+                  <el-button size="small" type="info" circle>
                     <el-icon :size="12" style="vertical-align: middle">
-                      <SwitchButton/>
+                      <View/>
                     </el-icon>
                   </el-button>
-                </div>
-              </el-tooltip>
-            </div>
+                  <template #dropdown>
+                    <el-dropdown-menu class="divider">
+                      <el-radio-group
+                          v-model="pic"
+                          v-loading="loading"
+                          size="mini"
+                          @change="changePic"
+                      >
+                        <el-radio-button
+                            :label="$t('androidRemoteTS.low')"
+                        ></el-radio-button>
+                        <el-radio-button
+                            :label="$t('androidRemoteTS.middle')"
+                        ></el-radio-button>
+                        <el-radio-button
+                            :label="$t('androidRemoteTS.high')"
+                        ></el-radio-button>
+                      </el-radio-group>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
+            </el-tooltip>
+            <el-tooltip
+                effect="dark"
+                :content="$t('androidRemoteTS.code.LUS')"
+                :placement="tabPosition == 'left' ? 'right' : 'left'"
+            >
+              <div style="margin-top: 4px">
+                <el-button
+                    size="small"
+                    type="primary"
+                    circle
+                    @click="pressKey(26)"
+                >
+                  <el-icon :size="12" style="vertical-align: middle">
+                    <SwitchButton/>
+                  </el-icon>
+                </el-button>
+              </div>
+            </el-tooltip>
+          </div>
 
-          </el-card>
+        </el-card>
 
       </el-col>
 

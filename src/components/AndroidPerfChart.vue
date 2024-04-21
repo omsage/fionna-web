@@ -62,13 +62,13 @@ const props = defineProps({
   procThread: Object,
 });
 
-const getNetworkTimeStamp = () => {
+const getNetworktimestamp = () => {
   const result = [];
   if (props.sysNetwork.length > 0) {
     for (const i in props.sysNetwork[0]) {
       if (i) {
         props.sysNetwork.map((obj) => {
-          result.push(moment(new Date(obj[i].timeStamp)).format('HH:mm:ss'));
+          result.push(moment(new Date(obj[i].timestamp)).format('HH:mm:ss'));
         });
         break;
       }
@@ -90,7 +90,7 @@ watch(() => props.sysNetwork, () => {
   let isAddTime = true;
   for (const i in props.sysNetwork) {
     if (isAddTime) {
-      categorySysNetworkList.push(moment(new Date(props.sysNetwork[i].timeStamp)).format('HH:mm:ss'));
+      categorySysNetworkList.push(moment(new Date(props.sysNetwork[i].timestamp)).format('HH:mm:ss'));
       isAddTime = false;
     }
 
@@ -136,7 +136,7 @@ watch(() => props.sysCpu, () => {
   let isAddTime = true;
   for (const i in props.sysCpu) {
     if (isAddTime) {
-      categorySysCpuList.push(moment(new Date(props.sysCpu[i].timeStamp)).format('HH:mm:ss'));
+      categorySysCpuList.push(moment(new Date(props.sysCpu[i].timestamp)).format('HH:mm:ss'));
       isAddTime = false;
     }
 
@@ -172,7 +172,7 @@ let sysMemOption = {
 }
 
 watch(() => props.sysMem, () => {
-  sysMemOption.categorySysMemList.push(moment(new Date(props.sysMem.timeStamp)).format('HH:mm:ss'));
+  sysMemOption.categorySysMemList.push(moment(new Date(props.sysMem.timestamp)).format('HH:mm:ss'));
   for (const i in props.sysMem) {
     // console.log(props.sysMem[i])
     if (sysMemOption[i] !== undefined) {
@@ -189,7 +189,7 @@ let sysFrameOption = {
 }
 
 watch(() => props.sysFps, () => {
-  sysFrameOption.categorySysFrameList.push(moment(new Date(props.sysFps.timeStamp)).format('HH:mm:ss'));
+  sysFrameOption.categorySysFrameList.push(moment(new Date(props.sysFps.timestamp)).format('HH:mm:ss'));
   for (const i in props.sysFps) {
     if (sysFrameOption[i] !== undefined) {
       sysFrameOption[i].push(props.sysFps[i])
@@ -203,7 +203,7 @@ let procCpuOption = {
 }
 
 watch(() => props.procCpu, () => {
-  procCpuOption.xTimeList.push(moment(new Date(props.procCpu.timeStamp)).format('HH:mm:ss'));
+  procCpuOption.xTimeList.push(moment(new Date(props.procCpu.timestamp)).format('HH:mm:ss'));
   for (const i in props.procCpu) {
     if (procCpuOption[i] !== undefined) {
       procCpuOption[i].push(props.procCpu[i])
@@ -225,7 +225,7 @@ let procMemOption = {
 }
 
 watch(() => props.procMem, () => {
-  procMemOption.xTimeList.push(moment(new Date(props.procMem.timeStamp)).format('HH:mm:ss'));
+  procMemOption.xTimeList.push(moment(new Date(props.procMem.timestamp)).format('HH:mm:ss'));
   for (const i in props.procMem) {
     if (procMemOption[i] !== undefined) {
       procMemOption[i].push(props.procMem[i])
@@ -239,7 +239,7 @@ let procThreadOption = {
 }
 
 watch(() => props.procThread, () => {
-  procThreadOption.xTimeList.push(moment(new Date(props.procThread.timeStamp)).format('HH:mm:ss'));
+  procThreadOption.xTimeList.push(moment(new Date(props.procThread.timestamp)).format('HH:mm:ss'));
   for (const i in props.procThread) {
     if (procThreadOption[i] !== undefined) {
       procThreadOption[i].push(props.procThread[i])
@@ -367,7 +367,7 @@ const printMem = () => {
         xAxisIndex: [0, 1],
       },
     ],
-    yAxis: [{name: `${$t('perf.memUsage')}(b)`, min: 0}],
+    yAxis: [{name: `${$t('perf.memUsage')}(MB)`, min: 0}],
     series: [
       {
         name: 'Mem Buffers',
@@ -650,7 +650,7 @@ const printNetwork = () => {
         xAxisIndex: [0, 1],
       },
     ],
-    yAxis: [{name: `${$t('perf.network')}(b)`, min: 0}],
+    yAxis: [{name: `${$t('perf.network')}(MB)`, min: 0}],
     series: seriesSysNetworkList,
   };
   chart.setOption(option);
@@ -766,7 +766,7 @@ const printPerfMem = () => {
       top: '8%',
       data: procMemOption.legend,
     },
-    yAxis: [{name: `${$t('perf.memUsage')}(kb)`, min: 0}],
+    yAxis: [{name: `${$t('perf.memUsage')}(MB)`, min: 0}],
     series: [
       {
         name: 'totalPSS',
