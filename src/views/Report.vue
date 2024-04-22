@@ -17,8 +17,8 @@
 
         </div>
       </template>
-      <el-row :gutter="24">
-        <el-col :span="4" v-show="perfConfig.procCpu">
+      <el-row v-loading="summaryLoading" :gutter="24">
+        <el-col :span="4" v-if="perfConfig.procCpu">
           <el-card :style="{
 
             height: '75px'
@@ -26,7 +26,7 @@
             程序CPU平均使用率:{{ summaryInfo.procCpuSummary.avgProcCPU.toFixed(2) }}%
           </el-card>
         </el-col>
-        <el-col :span="4" v-show="perfConfig.procMem">
+        <el-col :span="4" v-if="perfConfig.procMem">
           <el-card :style="{
 
             height: '75px'
@@ -34,7 +34,7 @@
             程序PSS峰值:{{ summaryInfo.procMemSummary.maxTotalPSS.toFixed(2) }}MB
           </el-card>
         </el-col>
-        <el-col :span="4" v-show="perfConfig.FPS">
+        <el-col :span="4" v-if="perfConfig.FPS">
           <el-card :style="{
 
             height: '75px'
@@ -43,7 +43,7 @@
           </el-card>
 
         </el-col>
-        <el-col :span="4" v-show="perfConfig.jank">
+        <el-col :span="4" v-if="perfConfig.jank">
           <el-card :style="{
 
             height: '75px'
@@ -58,7 +58,7 @@
 
         </el-col>
 
-        <el-col :span="4" v-show="perfConfig.sysCpu">
+        <el-col :span="4" v-if="perfConfig.sysCpu">
           <el-card :style="{
             height: '75px'
           }">
@@ -76,11 +76,11 @@
           </el-card>
         </el-col>
 
-        <el-col :span="4" v-show="perfConfig.sysMem">
+        <el-col :span="4" v-if="perfConfig.sysMem">
           <el-card :style="{
             height: '75px'
           }">
-            系统使用内存峰值:{{summaryInfo.sysMemSummary.maxMemTotal}}MB
+            系统使用内存峰值:{{ summaryInfo.sysMemSummary.maxMemTotal }}MB
           </el-card>
         </el-col>
 
@@ -91,12 +91,12 @@
         <el-tab-pane v-loading="sysFrameOption.loading" label="Frame" name="Frame">
 
           <el-collapse v-show="perfConfig.jank || perfConfig.FPS" v-model="FPSActiveName" @change="handleChange">
-            <el-collapse-item v-show="perfConfig.FPS" title="FPS" name="sys-FPS">
+            <el-collapse-item v-if="perfConfig.FPS" title="FPS" name="sys-FPS">
               <div>
                 当前所测试阶段的FPS均值是:{{ summaryInfo.sysFrameSummary.avgFPS.toFixed(2) }}
               </div>
             </el-collapse-item>
-            <el-collapse-item v-show="perfConfig.jank && summaryInfo.sysFrameSummary.allJankCount!==null"
+            <el-collapse-item v-if="perfConfig.jank && summaryInfo.sysFrameSummary.allJankCount!==null"
                               title="Jank info" name="sys-jank">
               <div>
                 当前测试阶段jank数量为:{{
@@ -145,22 +145,22 @@
             </el-row>
           </div>
 
-          <div class="card-echart-parent" v-show="!perfConfig.FPS && !perfConfig.jank">
+          <div class="card-echart-parent" v-if="!perfConfig.FPS && !perfConfig.jank">
             <el-empty description="frame perf data is empty!"/>
           </div>
 
         </el-tab-pane>
 
         <el-tab-pane label="CPU" name="CPU">
-          <el-collapse v-show="perfConfig.sysCpu||perfConfig.procCpu" v-model="CPUActAiveName" @change="handleChange">
-            <el-collapse-item v-show="perfConfig.procCpu" title="Process CPU" name="proc-cpu">
+          <el-collapse v-loading="summaryLoading" v-if="perfConfig.sysCpu||perfConfig.procCpu" v-model="CPUActAiveName" @change="handleChange">
+            <el-collapse-item v-if="perfConfig.procCpu" title="Process CPU" name="proc-cpu">
               <div>
                 当前所测试程序的CPU均值是:{{
                   summaryInfo.procCpuSummary.avgProcCPU.toFixed(2)
                 }}%,最大峰值是:{{ summaryInfo.procCpuSummary.maxProcCPU.toFixed(2) }}%
               </div>
             </el-collapse-item>
-            <el-collapse-item v-show="perfConfig.sysCpu" title="System CPU" name="sys-cpu">
+            <el-collapse-item v-if="perfConfig.sysCpu" title="System CPU" name="sys-cpu">
               <div v-for="item in summaryInfo.sysCpuSummary">
                 <div v-if="item.cpuName!==undefined">
                   <div v-if="item.cpuName==='cpu'">
@@ -177,27 +177,27 @@
             </el-collapse-item>
           </el-collapse>
 
-          <el-row v-show="perfConfig.procCpu || perfConfig.sysCpu" class="card-echart-parent" :gutter="20">
-            <el-col :span="24" style="margin-bottom: 10px" v-show="perfConfig.procCpu">
+          <el-row v-if="perfConfig.procCpu || perfConfig.sysCpu" class="card-echart-parent" :gutter="20">
+            <el-col :span="24" style="margin-bottom: 10px" v-if="perfConfig.procCpu">
               <el-card>
                 <div style="width: auto; height: 350px" :id="'proc-cpu-echart'"></div>
               </el-card>
             </el-col>
-            <el-col :span="24" v-show="perfConfig.sysCpu">
+            <el-col :span="24" v-if="perfConfig.sysCpu">
               <el-card>
                 <div style="width: 100%; height: 350px" :id="'sys-cpu-echart'"></div>
               </el-card>
             </el-col>
           </el-row>
-          <div class="card-echart-parent" v-show="!perfConfig.procCpu && !perfConfig.sysCpu">
+          <div class="card-echart-parent" v-if="!perfConfig.procCpu && !perfConfig.sysCpu">
             <el-empty description="cpu perf data is empty!"/>
           </div>
         </el-tab-pane>
 
 
         <el-tab-pane label="Memory" name="Memory">
-          <el-collapse v-show="perfConfig.sysMem||perfConfig.procMem" v-model="MemActAiveName" @change="handleChange">
-            <el-collapse-item v-show="perfConfig.procMem" title="Process Memory" name="proc-mem">
+          <el-collapse v-loading="summaryLoading" v-if="perfConfig.sysMem||perfConfig.procMem" v-model="MemActAiveName" @change="handleChange">
+            <el-collapse-item v-if="perfConfig.procMem" title="Process Memory" name="proc-mem">
               <div>
                 当前测试阶段程序的总PSS均值是:{{
                   summaryInfo.procMemSummary.avgTotalPSS.toFixed(2)
@@ -245,7 +245,7 @@
               <!--                }}%,最大峰值是:{{ summaryInfo.procCpuSummary.maxProcCPU.toFixed(2) }}%-->
               <!--              </div>-->
             </el-collapse-item>
-            <el-collapse-item v-show="perfConfig.sysMem" title="System memory" name="sys-mem">
+            <el-collapse-item v-if="perfConfig.sysMem" title="System memory" name="sys-mem">
               <div>
                 当前系统程序的内存使用均值是:{{
                   summaryInfo.sysMemSummary.avgMemTotal.toFixed(2)
@@ -266,12 +266,52 @@
               </el-card>
             </el-col>
           </el-row>
-          <div class="card-echart-parent" v-show="!perfConfig.sysMem && !perfConfig.procMem">
+          <div class="card-echart-parent" v-if="!perfConfig.sysMem && !perfConfig.procMem">
             <el-empty description="mem perf data is empty!"/>
           </div>
         </el-tab-pane>
 
-        <el-tab-pane label="Other" name="Other">定时任务补偿</el-tab-pane>
+        <el-tab-pane label="Other" name="Other">
+          <el-collapse v-loading="summaryLoading" v-if="perfConfig.sysNetwork||perfConfig.procThread||perfConfig.sysTemperature" v-model="MemActAiveName" @change="handleChange">
+            <el-collapse-item v-if="perfConfig.sysNetwork" title="System network" name="system-network">
+              <div v-for="item in summaryInfo.networkSummary">
+                <div v-if="item.name!==undefined">
+                  当前测试阶段系统{{ item.name }}上行流量为:{{
+                      item.allSysTxData.toFixed(2)
+                    }}MB,下行流量:{{ item.allSysRxData.toFixed(2) }}MB
+                </div>
+              </div>
+            </el-collapse-item>
+            <el-collapse-item v-loading="summaryLoading" v-if="perfConfig.sysTemperature" title="System temperature" name="system-temperature">
+              <div>
+                当前测试阶段系统温度的峰值是:{{
+                  summaryInfo.sysTemperatureSummary.mxTemperature.toFixed(2)
+                }} ℃,与初始温度的差值是:{{ summaryInfo.sysTemperatureSummary.diffTemperature.toFixed(2) }} ℃
+              </div>
+            </el-collapse-item>
+          </el-collapse>
+
+          <el-row class="card-echart-parent" :gutter="20">
+            <el-col :span="24" style="margin-bottom: 10px" v-if="perfConfig.sysNetwork">
+              <el-card>
+                <div style="width: auto; height: 350px" :id="'sys-network-echart'"></div>
+              </el-card>
+            </el-col>
+            <el-col :span="24" v-if="perfConfig.sysTemperature">
+              <el-card>
+                <div style="width: 100%; height: 350px" :id="'sys-temperature-echart'"></div>
+              </el-card>
+            </el-col>
+            <el-col style="margin-top: 10px" :span="24" v-show="perfConfig.procThread">
+              <el-card>
+                <div style="width: 100%; height: 350px" :id="'proc-thread-echart'"></div>
+              </el-card>
+            </el-col>
+          </el-row>
+          <div class="card-echart-parent" v-if="!perfConfig.sysNetwork && !perfConfig.sysTemperature && !perfConfig.procThread">
+            <el-empty description="perf data is empty!"/>
+          </div>
+        </el-tab-pane>
       </el-tabs>
     </el-card>
 
@@ -326,7 +366,7 @@ const CPUActAiveName = ref(['proc-cpu'])
 const MemActAiveName = ref(['proc-mem'])
 const FPSActiveName = ref(['sys-FPS'])
 
-const uuid = ref("dbdd28ee-adcb-4eda-8fee-e98b4ba838e6")
+const uuid = ref("5c3747cf-b234-4def-a025-c77ce6554255")
 
 
 const handleChange = (val) => {
@@ -398,6 +438,33 @@ watch(tabActiveName, (activeName) => {
       }
     })
   }
+  if (activeName ==="Other"){
+    nextTick(() => {
+      if (perfConfig.value.sysNetwork) {
+        let chart = echarts.getInstanceByDom(
+            document.getElementById(`sys-network-echart`
+            )
+        );
+        if (chart !== null && chart !== undefined) {
+          chart.resize()
+        }
+      }
+      if (perfConfig.value.sysTemperature) {
+        let chart = echarts.getInstanceByDom(
+            document.getElementById(`sys-temperature-echart`
+            )
+        );
+        chart.resize()
+      }
+      if (perfConfig.value.procThread) {
+        let chart = echarts.getInstanceByDom(
+            document.getElementById(`proc-thread-echart`
+            )
+        );
+        chart.resize()
+      }
+    })
+  }
 })
 
 const perfConfig = ref({
@@ -409,6 +476,7 @@ const perfConfig = ref({
   procCpu: false,
   procMem: false,
   procThread: false,
+  sysTemperature:false,
 })
 
 const getPerfConfig = () => {
@@ -429,6 +497,15 @@ const getPerfConfig = () => {
     if (perfConfig.value.sysMem) {
       getSysMemData()
     }
+    if (perfConfig.value.sysNetwork){
+      getSysNetworkData()
+    }
+    if (perfConfig.value.sysTemperature){
+      getSysTemperatureData()
+    }
+    if (perfConfig.value.procThread){
+      getProcThreadData()
+    }
   })
 }
 
@@ -438,6 +515,10 @@ const summaryInfo = ref({
   sysMemSummary: {
     maxMemTotal: 0,
     avgMemTotal: 0
+  },
+  sysTemperatureSummary:{
+    diffTemperature:0,
+    mxTemperature:0,
   },
   sysFrameSummary: {
     avgFPS: 0,
@@ -472,11 +553,165 @@ const summaryInfo = ref({
   }
 })
 
+const summaryLoading = ref(false)
+
 const getSummary = () => {
+  summaryLoading.value = true
   axios.get("/report/summary", {params: {uuid: uuid.value}}).then((resp) => {
     console.log(resp)
     summaryInfo.value = resp.data;
+    summaryLoading.value = false;
   })
+}
+
+
+
+let procThreadOption = {
+  loading: false,
+  threadCount: [],
+  xTimeList: []
+}
+
+const getProcThreadData = () => {
+  axios.get("/report/proc/thread", {params: {uuid: uuid.value}}).then((resp) => {
+    let procThreadDataList = resp.data;
+    procThreadOption.loading = true
+
+    for (let index in procThreadDataList) {
+      let threadData = procThreadDataList[index]
+
+      let xTimestr = moment(new Date(threadData.timestamp)).format('HH:mm:ss');
+
+      procThreadOption.xTimeList.push(xTimestr);
+      procThreadOption.threadCount.push(threadData.threadCount)
+
+    }
+
+    procThreadOption.loading = false
+    printProcThread()
+  })
+}
+
+const printProcThread = () => {
+  let chart = echarts.init(
+      document.getElementById(`proc-thread-echart`)
+  );
+  let option = {
+    title: {
+      text: 'proc thread count'
+    },
+    tooltip: {
+      trigger: 'axis'
+    },
+    legend: {},
+    toolbox: {
+      show: true,
+      feature: {
+        dataZoom: {
+          yAxisIndex: 'none'
+        },
+        dataView: {readOnly: false},
+        magicType: {type: ['line', 'bar']},
+        restore: {},
+        saveAsImage: {}
+      }
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: procThreadOption.xTimeList
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: {
+        formatter: '{value} '
+      }
+    },
+    series: [
+      {
+        name: 'thread count',
+        type: 'line',
+        data: procThreadOption.threadCount,
+      }
+    ]
+  };
+  chart.setOption(option);
+}
+
+
+let sysTemperatureOption = {
+  loading: false,
+  temperature: [],
+  xTimeList: []
+}
+
+const getSysTemperatureData = () => {
+  axios.get("/report/sys/temperature", {params: {uuid: uuid.value}}).then((resp) => {
+    let sysTemperatureDataList = resp.data;
+    sysTemperatureOption.loading = true
+
+    for (let index in sysTemperatureDataList) {
+      let temperatureData = sysTemperatureDataList[index]
+
+      let xTimestr = moment(new Date(temperatureData.timestamp)).format('HH:mm:ss');
+
+      sysTemperatureOption.xTimeList.push(xTimestr);
+      sysTemperatureOption.temperature.push(temperatureData.temperature)
+
+    }
+
+    sysTemperatureOption.loading = false
+    printSysTemperature()
+  })
+}
+
+const printSysTemperature = () => {
+  let chart = echarts.init(
+      document.getElementById(`sys-temperature-echart`)
+  );
+  let option = {
+    title: {
+      text: 'system temperature'
+    },
+    tooltip: {
+      trigger: 'axis'
+    },
+    legend: {},
+    toolbox: {
+      show: true,
+      feature: {
+        dataZoom: {
+          yAxisIndex: 'none'
+        },
+        dataView: {readOnly: false},
+        magicType: {type: ['line', 'bar']},
+        restore: {},
+        saveAsImage: {}
+      }
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: sysTemperatureOption.xTimeList
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: {
+        formatter: '{value}  ℃'
+      }
+    },
+    series: [
+      {
+        name: 'temperature',
+        type: 'line',
+        data: sysTemperatureOption.temperature,
+        markLine: {
+          data: [{type: 'average', name: 'Avg'}]
+        }
+      }
+    ]
+  };
+  chart.setOption(option);
 }
 
 
@@ -986,7 +1221,6 @@ const getSysCpuData = () => {
 }
 
 const printSysCPU = () => {
-  // console.log(document.getElementById(`sys-cpu`))
   let chart = echarts.init(
       document.getElementById(`sys-cpu-echart`)
   );
@@ -1025,6 +1259,95 @@ const printSysCPU = () => {
       }
     },
     series: sysCPUOption.cpuUtilizationSeriesList
+  };
+  chart.setOption(option);
+}
+
+let sysNetworkOption = {
+  loading: false,
+  networkSeriesMap: {},
+  networkSeriesList: [],
+  xTimeList: [],
+  xTimeMap: {}
+}
+const getSysNetworkData = () => {
+  axios.get("/report/sys/network", {params: {uuid: uuid.value}}).then((resp) => {
+    let sysNetworkDataList = resp.data;
+    sysNetworkOption.loading = true
+
+    for (let index in sysNetworkDataList) {
+      let sysNetData = sysNetworkDataList[index]
+
+      let xTimestr = moment(new Date(sysNetData.timestamp)).format('HH:mm:ss');
+
+      if (sysNetworkOption.xTimeMap[xTimestr] === undefined || sysNetworkOption.xTimeMap[xTimestr] === null) {
+        sysNetworkOption.xTimeList.push(xTimestr);
+        sysNetworkOption.xTimeMap[xTimestr] = 1
+      }
+      if (sysNetworkOption.networkSeriesMap[sysNetData.interfaceName+"_tx"] === undefined) {
+        sysNetworkOption.networkSeriesMap[sysNetData.interfaceName+"_tx"] = {
+          name: sysNetData.interfaceName+"_tx",
+          type: 'line',
+          data: [],
+          showSymbol: false,
+          areaStyle: {},
+        }
+        sysNetworkOption.networkSeriesMap[sysNetData.interfaceName+"_rx"] = {
+          name: sysNetData.name+"_rx",
+          type: 'line',
+          data: [],
+          showSymbol: false,
+          areaStyle: {},
+        }
+        sysNetworkOption.networkSeriesList.push(sysNetworkOption.networkSeriesMap[sysNetData.interfaceName+"_tx"])
+        sysNetworkOption.networkSeriesList.push(sysNetworkOption.networkSeriesMap[sysNetData.interfaceName+"_rx"])
+      }
+      sysNetworkOption.networkSeriesMap[sysNetData.interfaceName+"_tx"].data.push(sysNetData.tx)
+      sysNetworkOption.networkSeriesMap[sysNetData.interfaceName+"_rx"].data.push(sysNetData.rx)
+    }
+    sysNetworkOption.loading = false
+    printSysNetwork()
+  })
+}
+
+const printSysNetwork = () => {
+  let chart = echarts.init(
+      document.getElementById(`sys-network-echart`)
+  );
+  let option = {
+    title: {
+      text: 'sys network info'
+    },
+    tooltip: {
+      trigger: 'axis'
+    },
+    legend: {
+      top: '8%',
+    },
+    toolbox: {
+      show: true,
+      feature: {
+        dataZoom: {
+          yAxisIndex: 'none'
+        },
+        dataView: {readOnly: false},
+        magicType: {type: ['line', 'bar']},
+        restore: {},
+        saveAsImage: {}
+      }
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: sysNetworkOption.xTimeList
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: {
+        formatter: '{value} MB'
+      }
+    },
+    series: sysNetworkOption.networkSeriesList
   };
   chart.setOption(option);
 }

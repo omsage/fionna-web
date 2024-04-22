@@ -55,27 +55,13 @@ const props = defineProps({
   sysCpu: Object,
   sysMem: Object,
   sysNetwork: Object,
+  sysTemperature:Object,
   procCpu: Object,
   procMem: Object,
   sysFps: Object,
   sysJank: Object,
   procThread: Object,
 });
-
-const getNetworktimestamp = () => {
-  const result = [];
-  if (props.sysNetwork.length > 0) {
-    for (const i in props.sysNetwork[0]) {
-      if (i) {
-        props.sysNetwork.map((obj) => {
-          result.push(moment(new Date(obj[i].timestamp)).format('HH:mm:ss'));
-        });
-        break;
-      }
-    }
-  }
-  return result;
-};
 
 
 const seriesSysNetworkMap = {}
@@ -247,6 +233,15 @@ watch(() => props.procThread, () => {
   }
 })
 
+let procTemperatureOption = {
+  temperature: [],
+  xTimeList: []
+}
+
+watch(() => props.sysTemperature, () => {
+  procTemperatureOption.xTimeList.push(moment(new Date(props.sysTemperature.timestamp)).format('HH:mm:ss'));
+  procTemperatureOption.temperature.push(props.sysTemperature.temperature)
+})
 
 const printCpu = () => {
   let chart = echarts.getInstanceByDom(
@@ -655,6 +650,72 @@ const printNetwork = () => {
   };
   chart.setOption(option);
 };
+
+const printTemperature = () => {
+  let chart = echarts.getInstanceByDom(
+      document.getElementById(
+          `${props.rid}-${props.cid}-${props.did}-` + `sysTemperatureChart`
+      )
+  );
+  if (chart == null) {
+    chart = echarts.init(
+        document.getElementById(
+            `${props.rid}-${props.cid}-${props.did}-` + `sysTemperatureChart`
+        )
+    );
+  }
+
+  chart.resize();
+  const option = {
+    color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#409EFF'],
+    title: {
+      text: 'System Temperature',
+      textStyle: {
+        color: '#606266',
+      },
+      x: 'center',
+      y: 'top',
+    },
+    tooltip: {
+      trigger: 'axis',
+    },
+    grid: {top: '35%', left: '20%'},
+    toolbox: {
+      feature: {
+        saveAsImage: {show: true, title: 'Save'},
+      },
+    },
+    legend: {
+      top: '8%',
+    },
+    xAxis: {
+      data: procTemperatureOption.xTimeList,
+    },
+    dataZoom: [
+      {
+        show: true,
+        realtime: true,
+        start: 30,
+        end: 100,
+        xAxisIndex: [0, 1],
+      },
+    ],
+    yAxis: {
+      type: 'value',
+      axisLabel: {
+        formatter: '{value} ℃'
+      }
+    },
+    series: [
+      {
+        type: 'line',
+        data: procTemperatureOption.temperature,
+        showSymbol: false,
+      },
+    ],
+  };
+  chart.setOption(option);
+};
 const printPerfCpu = () => {
   let chart = echarts.getInstanceByDom(
       document.getElementById(
@@ -828,6 +889,7 @@ defineExpose({
   printCpu,
   printMem,
   printNetwork,
+  printTemperature,
   printPerfCpu,
   printPerfMem,
   printFps,
@@ -893,7 +955,9 @@ const switchTab = (e) => {
               `${props.rid}-${props.cid}-${props.did}-` + `perfMemChart`
           )
       );
-      procMemChart.resize();
+      if (procMemChart!==undefined){
+        procMemChart.resize();
+      }
     })
   } else {
     nextTick(() => {
@@ -903,14 +967,29 @@ const switchTab = (e) => {
               `${props.rid}-${props.cid}-${props.did}-` + `sysNetworkChart`
           )
       );
-      networkChart.resize();
+      if (networkChart!==undefined){
+        networkChart.resize();
+      }
 
       const threadChart = echarts.getInstanceByDom(
           document.getElementById(
               `${props.rid}-${props.cid}-${props.did}-` + `procThreadChart`
           )
       );
-      threadChart.resize();
+      if (threadChart!==undefined){
+        threadChart.resize();
+      }
+
+
+      const temperatureChart = echarts.getInstanceByDom(
+          document.getElementById(
+              `${props.rid}-${props.cid}-${props.did}-` + `sysTemperatureChart`
+          )
+      );
+      if (temperatureChart!==undefined){
+        temperatureChart.resize();
+      }
+
     });
   }
 };
@@ -1024,12 +1103,25 @@ const switchTab = (e) => {
     <el-tab-pane label="Other">
       <el-row :gutter="10">
 
-
         <el-col :span="12">
           <el-tooltip class="item" :disabled="sysNetwork !== null" content="sys network" placement="top">
             <el-card style="margin-top: 10px">
               <div
                   :id="rid + '-' + cid + '-' + did + '-' + 'sysNetworkChart'"
+                  v-loading="sysNetwork === null"
+                  :element-loading-text="$t('perf.emptyData')"
+                  element-loading-spinner="el-icon-box"
+                  style="width: 100%; height: 350px"
+              ></div>
+            </el-card>
+          </el-tooltip>
+        </el-col>
+
+        <el-col :span="12">
+          <el-tooltip class="item" :disabled="sysTemperature !== null" content="sys temperature" placement="top">
+            <el-card style="margin-top: 10px">
+              <div
+                  :id="rid + '-' + cid + '-' + did + '-' + 'sysTemperatureChart'"
                   v-loading="sysNetwork === null"
                   :element-loading-text="$t('perf.emptyData')"
                   element-loading-spinner="el-icon-box"

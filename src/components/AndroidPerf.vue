@@ -32,10 +32,10 @@ const props = defineProps({
   appList: Array,
 });
 
-watch(()=>props.udid, (udid) => {
-  if (udid!==""){
+watch(() => props.udid, (udid) => {
+  if (udid !== "") {
     isPackageLoading.value = props.appList.length === 0;
-  }else {
+  } else {
     isPackageLoading.value = false
   }
 
@@ -49,11 +49,6 @@ const stopPerfmon = () => {
   emit('stopPerfmon', isStart);
   // isStart.value = false;
 };
-// const refreshAppList = (isVisible) => {
-//   if (isVisible){
-//     emit('refreshAppList');
-//   }
-// }
 const clearPerfmon = () => {
   sysCpu.value = {};
   sysMem.value = {};
@@ -91,13 +86,17 @@ const setData = (data) => {
       sysNetwork.value = data.system.networkInfo;
       androidPerfChart.value.printNetwork();
     }
+    if (data.system.temperature){
+      sysTemperature.value = data.system.temperature;
+      androidPerfChart.value.printTemperature()
+    }
     if (data.system.frame) {
       // console.log(data.system.frame)
       sysFps.value = data.system.frame;
-      if (perfConfig.value.FPS){
+      if (perfConfig.value.FPS) {
         androidPerfChart.value.printFps();
       }
-      if (perfConfig.value.jank){
+      if (perfConfig.value.jank) {
         androidPerfChart.value.printJank();
       }
     }
@@ -111,6 +110,7 @@ const procMem = ref(null);
 const sysFps = ref(null);
 const sysJank = ref(null);
 const procThread = ref(null);
+const sysTemperature = ref(null);
 defineExpose({setData});
 
 const getCurrentAppName = () => {
@@ -130,6 +130,7 @@ const perfConfig = ref({
   procCpu: false,
   procMem: false,
   procThread: false,
+  sysTemperature: false,
   packageName: "",
 })
 
@@ -199,8 +200,10 @@ const perfConfig = ref({
 
             <span>network</span>
             <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.sysNetwork"></el-switch>
+            <span>temperature</span>
+            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.sysTemperature"></el-switch>
           </el-form-item>
-<!--          <el-divider></el-divider>-->
+          <!--          <el-divider></el-divider>-->
 
           <el-form-item>
             <span>proc-cpu</span>
@@ -211,7 +214,7 @@ const perfConfig = ref({
             <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.procThread"></el-switch>
           </el-form-item>
 
-<!--          <el-divider></el-divider>-->
+          <!--          <el-divider></el-divider>-->
           <el-form-item>
             <span>FPS</span>
             <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.FPS"></el-switch>
@@ -241,6 +244,7 @@ const perfConfig = ref({
         :proc-cpu="procCpu"
         :proc-mem="procMem"
         :proc-thread="procThread"
+        :sys-temperature="sysTemperature"
     />
   </div>
 </template>
