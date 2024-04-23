@@ -17,8 +17,8 @@ const props = defineProps({
 
 const emit = defineEmits(['getDetail']);
 
-const getDetailCallback = (uuid,testName) => {
-  emit('getDetail',uuid,testName)
+const getDetailCallback = (uuid, testName) => {
+  emit('getDetail', uuid, testName)
 }
 
 const getImg = (name) => {
@@ -42,12 +42,12 @@ const testName = ref("")
 const isInput = ref(false)
 
 const submitRename = () => {
-  if (testName.value!==""){
+  if (testName.value !== "") {
 
-    axios.post("/report/rename",{
-      uuid:props.device.uuid,
-      testName:testName.value
-    }).then((resp)=>{
+    axios.post("/report/rename", {
+      uuid: props.device.uuid,
+      testName: testName.value
+    }).then((resp) => {
       isInput.value = false
     })
   }
@@ -64,13 +64,22 @@ const submitRename = () => {
   >
     <template #header>
       <div style="position: relative; display: flex; align-items: center">
-        <span v-show="!isInput" style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden;color: #e6a23c; margin-left: 15px;margin-right: 10px">
-          {{device.testName}}
+        <el-tooltip
+            class="box-item"
+            effect="dark"
+            :content="device.testName"
+            placement="top"
+        >
+        <span v-show="!isInput"
+              style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden;color: #e6a23c; margin-left: 15px;margin-right: 10px">
+          {{ device.testName }}
         </span>
+        </el-tooltip>
+        <!--        // todo-->
         <el-input v-show="isInput"
-            size="mini"
-            placeholder="请输入报告名"
-            v-model="testName">
+                  size="mini"
+                  placeholder="请输入报告名"
+                  v-model="testName">
         </el-input>
         <el-button size="mini" v-show="!isInput" icon="el-icon-edit" @click="isInput=true" circle></el-button>
         <el-button size="mini" v-show="isInput" icon="el-icon-check" @click="submitRename" circle></el-button>
@@ -154,10 +163,10 @@ const submitRename = () => {
             <span style="margin-left: 6px">{{ device.version }}</span>
           </el-form-item>
           <el-form-item :label="$t('devices.form.testPackageName')">
-            {{device.packageName}}
+            {{ device.packageName }}
           </el-form-item>
           <el-form-item :label="$t('devices.form.testTime')">
-            {{moment(new Date(device.timestamp)).format('yy.MM.DD HH:mm:ss')}}
+            {{ moment(new Date(device.timestamp)).format('yy.MM.DD HH:mm:ss') }}
           </el-form-item>
         </el-form>
       </el-col>
