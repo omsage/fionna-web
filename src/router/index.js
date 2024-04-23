@@ -3,12 +3,16 @@ import { createRouter, createWebHistory } from 'vue-router';
 const getRoutes = () => [
   {
     path: '/',
-    component: () => import('../views/RemoteEmulator/index.vue'),
+    component: () => import('../views/Home.vue'),
   },
-  {
-    path: '/report',
-    component: () => import('../views/Report.vue'),
-  },
+  // {
+  //   path: '/',
+  //   component: () => import('../views/RemoteEmulator/PerfIndex.vue'),
+  // },
+  // {
+  //   path: '/report',
+  //   component: () => import('../views/Report/ReportDetail.vue'),
+  // },
 ];
 
 export let router = null;

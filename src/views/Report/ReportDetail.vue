@@ -1,18 +1,18 @@
 <template>
-  <div class="remote-header">
-    <el-radio-group v-model="currentTabName">
-      <el-radio-button label="perfTest" @click="router.replace('/')">性能测试</el-radio-button>
-      <el-radio-button label="testReport" @click="router.replace('/report')">测试报告</el-radio-button>
-    </el-radio-group>
-  </div>
+<!--  <div class="remote-header">-->
+<!--    <el-radio-group v-model="currentTabName">-->
+<!--      <el-radio-button label="perfTest" @click="router.replace('/')">性能测试</el-radio-button>-->
+<!--      <el-radio-button label="testReport" @click="router.replace('/report')">测试报告</el-radio-button>-->
+<!--    </el-radio-group>-->
+<!--  </div>-->
   <div style="padding: 20px">
     <el-backtop :right="100" :bottom="100"/>
     <el-card class="box-card">
       <template #header>
         <div style="position: relative; display: flex; align-items: center">
-          <el-button size="small" circle icon="el-icon-arrow-left"></el-button>
+          <el-button size="small" @click="exitDetailCallback" circle icon="el-icon-arrow-left"></el-button>
           <span style="font-size: 16px;margin-left: 20px">
-            xxxx测试报告！
+            {{testReportName}}
           </span>
 
         </div>
@@ -321,7 +321,6 @@
 
 <script setup>
 import {nextTick, onMounted, ref, watch} from "vue";
-import {useRouter} from 'vue-router';
 import * as echarts from 'echarts/core';
 import {
   TitleComponent,
@@ -350,23 +349,30 @@ echarts.use([
   TitleComponent,
   TooltipComponent,
 ]);
-const router = useRouter();
 
 const tabActiveName = ref("Frame");
 
-const currentTabName = 'testReport'
+const emit = defineEmits(['getDetail','exitDetail']);
 
-onMounted(() => {
-  getPerfConfig()
-  getSummary()
-})
-
+const exitDetailCallback = () => {
+  emit('exitDetail')
+}
 
 const CPUActAiveName = ref(['proc-cpu'])
 const MemActAiveName = ref(['proc-mem'])
 const FPSActiveName = ref(['sys-FPS'])
 
-const uuid = ref("5c3747cf-b234-4def-a025-c77ce6554255")
+const props = defineProps({
+  uuid: String,
+  testReportName :String,
+});
+
+
+onMounted(()=>{
+  getPerfConfig()
+  getSummary()
+})
+// const uuid = ref("5c3747cf-b234-4def-a025-c77ce6554255")
 
 
 const handleChange = (val) => {
@@ -480,7 +486,7 @@ const perfConfig = ref({
 })
 
 const getPerfConfig = () => {
-  axios.get("/report/config", {params: {uuid: uuid.value}}).then((resp) => {
+  axios.get("/report/config", {params: {uuid: props.uuid}}).then((resp) => {
     perfConfig.value = resp.data
     if (perfConfig.value.jank || perfConfig.value.FPS) {
       getFrameData()
@@ -557,7 +563,7 @@ const summaryLoading = ref(false)
 
 const getSummary = () => {
   summaryLoading.value = true
-  axios.get("/report/summary", {params: {uuid: uuid.value}}).then((resp) => {
+  axios.get("/report/summary", {params: {uuid: props.uuid}}).then((resp) => {
     console.log(resp)
     summaryInfo.value = resp.data;
     summaryLoading.value = false;
@@ -573,7 +579,7 @@ let procThreadOption = {
 }
 
 const getProcThreadData = () => {
-  axios.get("/report/proc/thread", {params: {uuid: uuid.value}}).then((resp) => {
+  axios.get("/report/proc/thread", {params: {uuid: props.uuid}}).then((resp) => {
     let procThreadDataList = resp.data;
     procThreadOption.loading = true
 
@@ -646,7 +652,7 @@ let sysTemperatureOption = {
 }
 
 const getSysTemperatureData = () => {
-  axios.get("/report/sys/temperature", {params: {uuid: uuid.value}}).then((resp) => {
+  axios.get("/report/sys/temperature", {params: {uuid: props.uuid}}).then((resp) => {
     let sysTemperatureDataList = resp.data;
     sysTemperatureOption.loading = true
 
@@ -726,7 +732,7 @@ let sysFrameOption = {
 }
 
 const getFrameData = () => {
-  axios.get("/report/sys/frame", {params: {uuid: uuid.value}}).then((resp) => {
+  axios.get("/report/sys/frame", {params: {uuid: props.uuid}}).then((resp) => {
     let frameDataList = resp.data;
     sysFrameOption.loading = true
 
@@ -980,7 +986,7 @@ let procCPUOption = {
 }
 
 const getProcCpuData = () => {
-  axios.get("/report/proc/cpu", {params: {uuid: uuid.value}}).then((resp) => {
+  axios.get("/report/proc/cpu", {params: {uuid: props.uuid}}).then((resp) => {
     let procCPUDataList = resp.data;
     procCPUOption.loading = true
 
@@ -1063,7 +1069,7 @@ let procMemOption = {
 }
 
 const getProcMemData = () => {
-  axios.get("/report/proc/mem", {params: {uuid: uuid.value}}).then((resp) => {
+  axios.get("/report/proc/mem", {params: {uuid: props.uuid}}).then((resp) => {
     let procMemDataList = resp.data;
     procMemOption.loading = true
 
@@ -1189,7 +1195,7 @@ let sysCPUOption = {
   xTimeMap: {}
 }
 const getSysCpuData = () => {
-  axios.get("/report/sys/cpu", {params: {uuid: uuid.value}}).then((resp) => {
+  axios.get("/report/sys/cpu", {params: {uuid: props.uuid}}).then((resp) => {
     let sysCPUDataList = resp.data;
     sysCPUOption.loading = true
 
@@ -1271,7 +1277,7 @@ let sysNetworkOption = {
   xTimeMap: {}
 }
 const getSysNetworkData = () => {
-  axios.get("/report/sys/network", {params: {uuid: uuid.value}}).then((resp) => {
+  axios.get("/report/sys/network", {params: {uuid: props.uuid}}).then((resp) => {
     let sysNetworkDataList = resp.data;
     sysNetworkOption.loading = true
 
@@ -1359,7 +1365,7 @@ let sysMemOption = {
 }
 
 const getSysMemData = () => {
-  axios.get("/report/sys/mem", {params: {uuid: uuid.value}}).then((resp) => {
+  axios.get("/report/sys/mem", {params: {uuid: props.uuid}}).then((resp) => {
     let sysMemDataList = resp.data;
     sysMemOption.loading = true
 

@@ -11,7 +11,6 @@ const {t: $t} = useI18n();
 const img = import.meta.globEager('./../assets/img/*');
 const props = defineProps({
   device: Object,
-  agentList: Array,
   detail: {
     type: Boolean,
     default: false,

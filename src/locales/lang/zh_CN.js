@@ -273,6 +273,8 @@ const devices = {
       temperature: '电池温度',
       voltage: '充电电压',
     },
+    testTime:"测试时间",
+    testPackageName:"测试包",
     agent: '所在位置',
   },
   detail: {
