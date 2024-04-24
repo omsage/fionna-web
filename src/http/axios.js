@@ -58,7 +58,7 @@ $http.interceptors.request.use(
 $http.interceptors.response.use(
     (response) => {
         switch (response.data.code) {
-            case 1000:
+            case 10000:
                 break;
             default:
                 if (response.data.message) {

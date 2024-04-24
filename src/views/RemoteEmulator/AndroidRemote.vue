@@ -293,6 +293,14 @@ const commandUUID = ref("")
 const logcatUUID = ref("")
 const terminalWebsocketOnmessage = (message) => {
   // console.log(message)
+  let infoData = JSON.parse(message.data);
+  if (infoData.code!==10000){
+    ElMessage.error({
+      message: infoData.data,
+    });
+    close();
+    return;
+  }
   switch (JSON.parse(message.data).messageType) {
     case 'logcat':
       logcatUUID.value = JSON.parse(message.data).uuid
@@ -333,17 +341,25 @@ const terminalWebsocketOnmessage = (message) => {
       cmdIsDone.value = true;
       commandUUID.value = ""
       break;
-    case 'error':
-      ElMessage.error({
-        message: $t('androidRemoteTS.systemException'),
-      });
-      close();
-      break;
+    // case 'error':
+    //   ElMessage.error({
+    //     message: $t('androidRemoteTS.systemException'),
+    //   });
+    //   close();
+    //   break;
   }
 };
 const screenWebsocketOnmessage = (message) => {
   // console.log('screenWebsocketOnmessage', message.data);
-  switch (JSON.parse(message.data).messageType) {
+  let infoData = JSON.parse(message.data);
+  if (infoData.code!==10000){
+    ElMessage.error({
+      message: infoData.data,
+    });
+    close();
+    return;
+  }
+  switch (infoData.messageType) {
     case 'sizeInfo': {
       loading.value = true;
 
@@ -362,19 +378,27 @@ const screenWebsocketOnmessage = (message) => {
       //   loading.value = false;
       //   break;
       // }
-    case 'error':
-      ElMessage.error({
-        message: $t('androidRemoteTS.systemException'),
-      });
-      close();
-      break;
+    // case 'error':
+    //   ElMessage.error({
+    //     message: $t('androidRemoteTS.systemException'),
+    //   });
+    //   close();
+    //   break;
   }
 };
 const perfWebsocketOnmessage = (message) => {
   // console.log(message.data)
-  switch (JSON.parse(message.data).messageType) {
+  let infoData = JSON.parse(message.data);
+  if (infoData.code!==10000){
+    ElMessage.error({
+      message: infoData.data,
+    });
+    close();
+    return;
+  }
+  switch (infoData.messageType) {
     case 'perfdata':
-      androidPerfRef.value.setData(JSON.parse(message.data).perfData);
+      androidPerfRef.value.setData(infoData.perfData);
       break;
     case 'error': {
       ElMessage.error({
@@ -407,24 +431,6 @@ const deleteInputHandle = () => {
   //       detail: 'CODE_AC_BACK',
   //     })
   // );
-};
-const setPasteboard = (text) => {
-  perfWebsocket.send(
-      JSON.stringify({
-        type: 'setPasteboard',
-        detail: text,
-      })
-  );
-  ElMessage.success({
-    message: $t('IOSRemote.clipboard.SentSuccessfully'),
-  });
-};
-const getPasteboard = () => {
-  perfWebsocket.send(
-      JSON.stringify({
-        type: 'getPasteboard',
-      })
-  );
 };
 const enterInputHandle = () => {
   // websocket.send(
@@ -540,11 +546,13 @@ const mousemove = (event) => {
   }
 };
 const refreshAppList = () => {
-  appList.value = [];
-  ElMessage.success({
-    message: $t('androidRemoteTS.loadIng'),
-  });
-  getAppList();
+  if (selectDeviceUdid.value!==""){
+    appList.value = [];
+    ElMessage.success({
+      message: $t('androidRemoteTS.loadIng'),
+    });
+    getAppList();
+  }
 };
 
 const getAppList = () => {

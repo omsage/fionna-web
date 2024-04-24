@@ -40,7 +40,7 @@ onMounted(() => {
 })
 
 const pageSize = ref(8)
-const total = ref(12)
+const total = ref(0)
 const reportList = ref([])
 
 const detailUUID = ref("")
