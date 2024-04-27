@@ -73,11 +73,11 @@ let selectUUIDs = {}
 
 const deleteReport = () => {
   ElMessageBox.confirm(
-      '删除所选报告？',
+      $t('report.deleteMess'),
       $t('elements.warn'),
       {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+        confirmButtonText: $t('form.confirm'),
+        cancelButtonText: $t('form.cancel'),
         type: 'warning',
       }
   ).then(() => {
@@ -91,14 +91,14 @@ const deleteReport = () => {
     axios.post("/report/delete",params).then((resp)=>{
       ElMessage({
         type: 'success',
-        message: '成功',
+        message: 'success',
       });
       getReportList(1)
     })
   }).catch((err) => {
     ElMessage({
       type: 'info',
-      message: '已取消',
+      message: $t('form.cancel'),
     });
   })
 }

@@ -87,7 +87,7 @@
           <el-collapse v-show="perfConfig.jank || perfConfig.FPS" v-model="FPSActiveName" @change="handleChange">
             <el-collapse-item v-if="perfConfig.FPS" title="FPS" name="sys-FPS">
               <div>
-                {{ $t('report.summary.fpsMess') + ':' + summaryInfo.sysFrameSummary.avgFPS.toFixed(2) }}
+                {{ $t('report.summary.fpsMess')  + summaryInfo.sysFrameSummary.avgFPS.toFixed(2) }}
               </div>
             </el-collapse-item>
             <el-collapse-item v-if="perfConfig.jank && summaryInfo.sysFrameSummary.allJankCount!==null"

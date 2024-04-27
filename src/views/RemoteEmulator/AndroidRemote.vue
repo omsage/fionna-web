@@ -109,7 +109,7 @@ const startPerfmon = (perfConfig, isStart) => {
   if (perfConfig.procCpu || perfConfig.procMem || perfConfig.procThread) {
     if (perfConfig.packageName === "") {
       ElMessage.error({
-        message: '请选择需要采集的应用',
+        message: $t('perf.pleaseSelectApply'),
       });
       isStart.value = false
       return
@@ -118,7 +118,7 @@ const startPerfmon = (perfConfig, isStart) => {
   }
   if (selectDeviceUdid.value === "") {
     ElMessage.error({
-      message: '未选择设备',
+      message:  $t('androidRemoteTS.noSelectDevice'),
     });
     isStart.value = false
   } else {
@@ -222,7 +222,7 @@ let terminalPongId = null;
 const initTerminalWebsocket = () => {
   if (selectDeviceUdid.value === "") {
     ElMessage.error({
-      message: '请选择设备',
+      message:  $t('androidRemoteTS.noSelectDevice'),
     });
     return
   }
@@ -643,7 +643,7 @@ const getAndroidDeviceList = () => {
     if (serialInfoList.value.length === 0) {
       ElMessage({
         type: 'error',
-        message: '未找到设备',
+        message: 'not find device',
       });
     }
     udidListLoading.value = false
@@ -678,11 +678,11 @@ const infoLoading = ref(false)
 const selectGroupDevices = () => {
   // MessageBox ('是否要移除勾选的群控设备？')
   ElMessageBox.confirm(
-      '是否选择该设备？',
+      $t('perf.selectDeviceMess'),
       $t('elements.warn'),
       {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+        confirmButtonText: $t('form.confirm'),
+        cancelButtonText: $t('form.cancel'),
         type: 'warning',
       }
   ).then(() => {
@@ -691,7 +691,7 @@ const selectGroupDevices = () => {
     axios.get("/android/serial/info", {params: {udid: selectDeviceUdid.value}}).then((resp) => {
       ElMessage({
         type: 'success',
-        message: '成功',
+        message: 'success',
       });
       currentUdid.value = selectDeviceUdid.value
       infoLoading.value = false;
@@ -701,7 +701,7 @@ const selectGroupDevices = () => {
   }).catch((err) => {
     ElMessage({
       type: 'info',
-      message: '已取消',
+      message: $t('form.cancel'),
     });
     selectDeviceUdid.value = ""
   })
@@ -720,25 +720,25 @@ const useScreenCall = () => {
 
 const cancelTheCasting = () => {
   ElMessageBox.confirm(
-      '取消投屏？',
+      $t('androidRemoteTS.cancelScreenMess'),
       $t('elements.warn'),
       {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+        confirmButtonText: $t('form.confirm'),
+        cancelButtonText: $t('form.cancel'),
         type: 'warning',
       }
   ).then(() => {
     // todo 增加选择设备的方法
     ElMessage({
       type: 'success',
-      message: '成功',
+      message: 'success',
     });
     __Scrcpy.destroy()
     showCardMode.value = 1
   }).catch((err) => {
     ElMessage({
       type: 'info',
-      message: '已取消',
+      message: $t('form.cancel'),
     });
   })
 
