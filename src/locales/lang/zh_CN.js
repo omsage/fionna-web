@@ -132,6 +132,8 @@ const report = {
   down:"下载",
   selectReportMess :"请输入报告名",
   summary:{
+    avgMemMess:"均值是:",
+    maxMemMess:"最大值:",
     procAvgCPUUsage:"程序CPU平均使用率",
     procMaxPss:"程序PSS峰值",
     AvgFPS:"FPS均值",
@@ -144,6 +146,20 @@ const report = {
     bigJankMessPre:"当前测试阶段big jank数量为",
     bigJankMessMid:",每秒最大峰值为:",
     bigJankMessEnd:",每秒平均big jank率:",
+    procCPUMessPre:"当前所测试程序的CPU均值是:",
+    procCPUMessEnd:"%,最大峰值是:",
+    collectivitySysCpuPre:"当前系统整体CPU使用率均值为:",
+    collectivitySysCpuEnd:"%,峰值为:",
+    sysCpuPre:"使用率均值为:",
+    sysCpuEnd:"%,峰值为:",
+    procMemPre:"当前测试阶段程序的总PSS均值是:",
+    procMemEnd:"MB,最大峰值是:",
+    sysMemPre:"当前系统程序的内存使用均值是:",
+    sysMemEnd:"MB,最大峰值是:",
+    sysNetworkPre:"上行流量为:",
+    sysNetworkEnd:"MB,下行流量:",
+    sysTemperaturePre:"当前测试阶段系统温度的峰值是:",
+    sysTemperatureEnd:" ℃,与初始温度的差值是:",
   }
 };
 const dialog = {

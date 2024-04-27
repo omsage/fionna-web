@@ -6,7 +6,7 @@
         <div style="position: relative; display: flex; align-items: center">
           <el-button size="small" @click="exitDetailCallback" circle icon="el-icon-arrow-left"></el-button>
           <span style="font-size: 16px;margin-left: 20px">
-            {{testReportName}}
+            {{ testReportName }}
           </span>
 
         </div>
@@ -17,7 +17,7 @@
 
             height: '75px'
           }">
-            {{$t('report.summary.procAvgCPUUsage') +":" + summaryInfo.procCpuSummary.avgProcCPU.toFixed(2) }}%
+            {{ $t('report.summary.procAvgCPUUsage') + ":" + summaryInfo.procCpuSummary.avgProcCPU.toFixed(2) }}%
           </el-card>
         </el-col>
         <el-col :span="4" v-if="perfConfig.procMem">
@@ -25,7 +25,7 @@
 
             height: '75px'
           }">
-            {{$t('report.summary.procMaxPss') +":" + summaryInfo.procMemSummary.maxTotalPSS.toFixed(2) }}MB
+            {{ $t('report.summary.procMaxPss') + ":" + summaryInfo.procMemSummary.maxTotalPSS.toFixed(2) }}MB
           </el-card>
         </el-col>
         <el-col :span="4" v-if="perfConfig.FPS">
@@ -33,7 +33,7 @@
 
             height: '75px'
           }">
-            {{$t('report.summary.AvgFPS') +":" +  summaryInfo.sysFrameSummary.avgFPS.toFixed(2) }}
+            {{ $t('report.summary.AvgFPS') + ":" + summaryInfo.sysFrameSummary.avgFPS.toFixed(2) }}
           </el-card>
 
         </el-col>
@@ -60,7 +60,7 @@
               <div v-for="item in summaryInfo.sysCpuSummary">
                 <div v-if="item.cpuName!==undefined">
                   <div v-if="item.cpuName==='cpu'">
-                    {{$t('report.summary.sysCpuAvg') +":" +   item.avgSysCPU.toFixed(2) }}%
+                    {{ $t('report.summary.sysCpuAvg') + ":" + item.avgSysCPU.toFixed(2) }}%
                   </div>
                 </div>
 
@@ -74,7 +74,7 @@
           <el-card :style="{
             height: '75px'
           }">
-            {{$t('report.summary.sysMaxAvg') +":" +    summaryInfo.sysMemSummary.maxMemTotal }}MB
+            {{ $t('report.summary.sysMaxAvg') + ":" + summaryInfo.sysMemSummary.maxMemTotal }}MB
           </el-card>
         </el-col>
 
@@ -87,26 +87,30 @@
           <el-collapse v-show="perfConfig.jank || perfConfig.FPS" v-model="FPSActiveName" @change="handleChange">
             <el-collapse-item v-if="perfConfig.FPS" title="FPS" name="sys-FPS">
               <div>
-                {{$t('report.summary.fpsMess')+':'+ summaryInfo.sysFrameSummary.avgFPS.toFixed(2) }}
+                {{ $t('report.summary.fpsMess') + ':' + summaryInfo.sysFrameSummary.avgFPS.toFixed(2) }}
               </div>
             </el-collapse-item>
             <el-collapse-item v-if="perfConfig.jank && summaryInfo.sysFrameSummary.allJankCount!==null"
                               title="Jank info" name="sys-jank">
               <div>
-                {{$t('report.summary.jankMessPre')+
+                {{
+                  $t('report.summary.jankMessPre') +
                   summaryInfo.sysFrameSummary.allJankCount +
                   $t('report.summary.jankMessMid') +
                   summaryInfo.sysFrameSummary.maxJankCount +
                   $t('report.summary.jankMessEnd') +
-                 summaryInfo.sysFrameSummary.jankCountRate.toFixed(3) }}%
+                  summaryInfo.sysFrameSummary.jankCountRate.toFixed(3)
+                }}%
               </div>
               <div>
-                {{$t('report.summary.bigJankMessPre')+
-              summaryInfo.sysFrameSummary.allBigJankCount +
-              $t('report.summary.bigJankMessMid') +
-              summaryInfo.sysFrameSummary.maxBigJankCount +
-              $t('report.summary.bigJankMessEnd') +
-              summaryInfo.sysFrameSummary.bigJankCountRate.toFixed(3) }}%
+                {{
+                  $t('report.summary.bigJankMessPre') +
+                  summaryInfo.sysFrameSummary.allBigJankCount +
+                  $t('report.summary.bigJankMessMid') +
+                  summaryInfo.sysFrameSummary.maxBigJankCount +
+                  $t('report.summary.bigJankMessEnd') +
+                  summaryInfo.sysFrameSummary.bigJankCountRate.toFixed(3)
+                }}%
               </div>
             </el-collapse-item>
           </el-collapse>
@@ -148,24 +152,32 @@
         </el-tab-pane>
 
         <el-tab-pane label="CPU" name="CPU">
-          <el-collapse v-loading="summaryLoading" v-if="perfConfig.sysCpu||perfConfig.procCpu" v-model="CPUActAiveName" @change="handleChange">
+          <el-collapse v-loading="summaryLoading" v-if="perfConfig.sysCpu||perfConfig.procCpu" v-model="CPUActAiveName"
+                       @change="handleChange">
             <el-collapse-item v-if="perfConfig.procCpu" title="Process CPU" name="proc-cpu">
               <div>
-                当前所测试程序的CPU均值是:{{
-                  summaryInfo.procCpuSummary.avgProcCPU.toFixed(2)
-                }}%,最大峰值是:{{ summaryInfo.procCpuSummary.maxProcCPU.toFixed(2) }}%
+                {{
+                  $t('report.summary.procCPUMessPre') +
+                  summaryInfo.procCpuSummary.avgProcCPU.toFixed(2) +
+                  $t('report.summary.procCPUMessEnd') +
+                  summaryInfo.procCpuSummary.maxProcCPU.toFixed(2)
+                }}%
               </div>
             </el-collapse-item>
             <el-collapse-item v-if="perfConfig.sysCpu" title="System CPU" name="sys-cpu">
               <div v-for="item in summaryInfo.sysCpuSummary">
                 <div v-if="item.cpuName!==undefined">
                   <div v-if="item.cpuName==='cpu'">
-                    当前系统整体CPU使用率均值为:{{ item.avgSysCPU.toFixed(2) }}%,峰值为:{{ item.maxSysCPU.toFixed(2) }}%
+                    {{
+                      $t('report.summary.collectivitySysCpuPre') + item.avgSysCPU.toFixed(2) + $t('report.summary.collectivitySysCpuEnd') + item.maxSysCPU.toFixed(2)
+                    }}%
                   </div>
                   <div v-else>
-                    当前{{ item.cpuName }}使用率均值为:{{
-                      item.avgSysCPU.toFixed(2)
-                    }}%,峰值为:{{ item.maxSysCPU.toFixed(2) }}%
+                    {{
+                      item.cpuName + $t('report.summary.sysCpuPre') +
+                      item.avgSysCPU.toFixed(2) +
+                      $t('report.summary.sysCpuEnd') + item.maxSysCPU.toFixed(2)
+                    }}%
                   </div>
                 </div>
 
@@ -192,47 +204,57 @@
 
 
         <el-tab-pane label="Memory" name="Memory">
-          <el-collapse v-loading="summaryLoading" v-if="perfConfig.sysMem||perfConfig.procMem" v-model="MemActAiveName" @change="handleChange">
+          <el-collapse v-loading="summaryLoading" v-if="perfConfig.sysMem||perfConfig.procMem" v-model="MemActAiveName"
+                       @change="handleChange">
             <el-collapse-item v-if="perfConfig.procMem" title="Process Memory" name="proc-mem">
               <div>
-                当前测试阶段程序的总PSS均值是:{{
-                  summaryInfo.procMemSummary.avgTotalPSS.toFixed(2)
-                }}MB,最大峰值是:{{ summaryInfo.procMemSummary.maxTotalPSS.toFixed(2) }}MB
+                {{
+                  $t('report.summary.procMemPre') +
+                  summaryInfo.procMemSummary.avgTotalPSS.toFixed(2) +
+                  $t('report.summary.procMemEnd') + summaryInfo.procMemSummary.maxTotalPSS.toFixed(2)
+                }}MB
               </div>
               <div>
-                JavaHeap PSS均值是:{{
+                JavaHeap PSS{{
+                  $t('report.summary.avgMemMess') +
                   summaryInfo.procMemSummary.avgJavaHeap.toFixed(2)
-                }}MB,最大峰值是:{{ summaryInfo.procMemSummary.maxJavaHeap.toFixed(2) }}MB
+                }}MB,{{ $t('report.summary.maxMemMess') + summaryInfo.procMemSummary.maxJavaHeap.toFixed(2) }}MB
               </div>
               <div>
-                NativeHeap PSS均值是:{{
+                NativeHeap PSS{{
+                  $t('report.summary.avgMemMess') +
                   summaryInfo.procMemSummary.avgNativeHeap.toFixed(2)
-                }}MB,最大峰值是:{{ summaryInfo.procMemSummary.maxNativeHeap.toFixed(2) }}MB
+                }}MB,{{ $t('report.summary.maxMemMess') + summaryInfo.procMemSummary.maxNativeHeap.toFixed(2) }}MB
               </div>
               <div>
-                Graphics PSS均值是:{{
+                Graphics PSS{{
+                  $t('report.summary.avgMemMess') +
                   summaryInfo.procMemSummary.avgGraphics.toFixed(2)
-                }}MB,最大峰值是:{{ summaryInfo.procMemSummary.maxGraphics.toFixed(2) }}MB
+                }}MB,{{ $t('report.summary.maxMemMess') + summaryInfo.procMemSummary.maxGraphics.toFixed(2) }}MB
               </div>
               <div>
-                Stack PSS均值是:{{
+                Stack PSS{{
+                  $t('report.summary.avgMemMess') +
                   summaryInfo.procMemSummary.avgStack.toFixed(2)
-                }}MB,最大峰值是:{{ summaryInfo.procMemSummary.maxStack.toFixed(2) }}MB
+                }}MB,{{ $t('report.summary.maxMemMess') + summaryInfo.procMemSummary.maxStack.toFixed(2) }}MB
               </div>
               <div>
-                System PSS均值是:{{
+                System PSS{{
+                  $t('report.summary.avgMemMess') +
                   summaryInfo.procMemSummary.avgSystem.toFixed(2)
-                }}MB,最大峰值是:{{ summaryInfo.procMemSummary.maxSystem.toFixed(2) }}MB
+                }}MB,{{ $t('report.summary.maxMemMess') + summaryInfo.procMemSummary.maxSystem.toFixed(2) }}MB
               </div>
               <div>
-                Code PSS均值是:{{
+                Code PSS{{
+                  $t('report.summary.avgMemMess') +
                   summaryInfo.procMemSummary.avgCode.toFixed(2)
-                }}MB,最大峰值是:{{ summaryInfo.procMemSummary.maxCode.toFixed(2) }}MB
+                }}MB,{{ $t('report.summary.maxMemMess') + summaryInfo.procMemSummary.maxCode.toFixed(2) }}MB
               </div>
               <div>
-                PrivateOther均值是:{{
+                PrivateOther{{
+                  $t('report.summary.avgMemMess') +
                   summaryInfo.procMemSummary.avgPrivateOther.toFixed(2)
-                }}MB,最大峰值是:{{ summaryInfo.procMemSummary.maxPrivateOther.toFixed(2) }}MB
+                }}MB,{{ $t('report.summary.maxMemMess') + summaryInfo.procMemSummary.maxPrivateOther.toFixed(2) }}MB
               </div>
 
               <!--              <div>-->
@@ -243,9 +265,11 @@
             </el-collapse-item>
             <el-collapse-item v-if="perfConfig.sysMem" title="System memory" name="sys-mem">
               <div>
-                当前系统程序的内存使用均值是:{{
-                  summaryInfo.sysMemSummary.avgMemTotal.toFixed(2)
-                }}MB,最大峰值是:{{ summaryInfo.sysMemSummary.maxMemTotal.toFixed(2) }}MB
+                {{
+                  $t('report.summary.sysMemPre') +
+                  summaryInfo.sysMemSummary.avgMemTotal.toFixed(2) +
+                  $t('report.summary.sysMemEnd') + summaryInfo.sysMemSummary.maxMemTotal.toFixed(2)
+                }}MB
               </div>
             </el-collapse-item>
           </el-collapse>
@@ -268,21 +292,28 @@
         </el-tab-pane>
 
         <el-tab-pane label="Other" name="Other">
-          <el-collapse v-loading="summaryLoading" v-if="perfConfig.sysNetwork||perfConfig.procThread||perfConfig.sysTemperature" v-model="MemActAiveName" @change="handleChange">
+          <el-collapse v-loading="summaryLoading"
+                       v-if="perfConfig.sysNetwork||perfConfig.procThread||perfConfig.sysTemperature"
+                       v-model="MemActAiveName" @change="handleChange">
             <el-collapse-item v-if="perfConfig.sysNetwork" title="System network" name="system-network">
               <div v-for="item in summaryInfo.networkSummary">
                 <div v-if="item.name!==undefined">
-                  当前测试阶段系统{{ item.name }}上行流量为:{{
-                      item.allSysTxData.toFixed(2)
-                    }}MB,下行流量:{{ item.allSysRxData.toFixed(2) }}MB
+                  {{
+                    item.name + $t('report.summary.sysNetworkPre') +
+                    item.allSysTxData.toFixed(2) +
+                    $t('report.summary.sysNetworkEnd') + item.allSysRxData.toFixed(2)
+                  }}MB
                 </div>
               </div>
             </el-collapse-item>
-            <el-collapse-item v-loading="summaryLoading" v-if="perfConfig.sysTemperature" title="System temperature" name="system-temperature">
+            <el-collapse-item v-loading="summaryLoading" v-if="perfConfig.sysTemperature" title="System temperature"
+                              name="system-temperature">
               <div>
-                当前测试阶段系统温度的峰值是:{{
-                  summaryInfo.sysTemperatureSummary.mxTemperature.toFixed(2)
-                }} ℃,与初始温度的差值是:{{ summaryInfo.sysTemperatureSummary.diffTemperature.toFixed(2) }} ℃
+                {{
+                  $t('report.summary.sysTemperaturePre') +
+                  summaryInfo.sysTemperatureSummary.mxTemperature.toFixed(2) +
+                  $t('report.summary.sysTemperatureEnd') + summaryInfo.sysTemperatureSummary.diffTemperature.toFixed(2)
+                }} ℃
               </div>
             </el-collapse-item>
           </el-collapse>
@@ -304,7 +335,8 @@
               </el-card>
             </el-col>
           </el-row>
-          <div class="card-echart-parent" v-if="!perfConfig.sysNetwork && !perfConfig.sysTemperature && !perfConfig.procThread">
+          <div class="card-echart-parent"
+               v-if="!perfConfig.sysNetwork && !perfConfig.sysTemperature && !perfConfig.procThread">
             <el-empty description="perf data is empty!"/>
           </div>
         </el-tab-pane>
@@ -333,6 +365,7 @@ import {CanvasRenderer} from 'echarts/renderers';
 import axios from "@/http/axios";
 import moment from "moment";
 import {useI18n} from "vue-i18n";
+
 const {t: $t} = useI18n();
 
 echarts.use([
@@ -350,7 +383,7 @@ echarts.use([
 
 const tabActiveName = ref("Frame");
 
-const emit = defineEmits(['getDetail','exitDetail']);
+const emit = defineEmits(['getDetail', 'exitDetail']);
 
 const exitDetailCallback = () => {
   emit('exitDetail')
@@ -362,11 +395,11 @@ const FPSActiveName = ref(['sys-FPS'])
 
 const props = defineProps({
   uuid: String,
-  testReportName :String,
+  testReportName: String,
 });
 
 
-onMounted(()=>{
+onMounted(() => {
   getPerfConfig()
   getSummary()
 })
@@ -442,7 +475,7 @@ watch(tabActiveName, (activeName) => {
       }
     })
   }
-  if (activeName ==="Other"){
+  if (activeName === "Other") {
     nextTick(() => {
       if (perfConfig.value.sysNetwork) {
         let chart = echarts.getInstanceByDom(
@@ -480,7 +513,7 @@ const perfConfig = ref({
   procCpu: false,
   procMem: false,
   procThread: false,
-  sysTemperature:false,
+  sysTemperature: false,
 })
 
 const getPerfConfig = () => {
@@ -501,13 +534,13 @@ const getPerfConfig = () => {
     if (perfConfig.value.sysMem) {
       getSysMemData()
     }
-    if (perfConfig.value.sysNetwork){
+    if (perfConfig.value.sysNetwork) {
       getSysNetworkData()
     }
-    if (perfConfig.value.sysTemperature){
+    if (perfConfig.value.sysTemperature) {
       getSysTemperatureData()
     }
-    if (perfConfig.value.procThread){
+    if (perfConfig.value.procThread) {
       getProcThreadData()
     }
   })
@@ -520,9 +553,9 @@ const summaryInfo = ref({
     maxMemTotal: 0,
     avgMemTotal: 0
   },
-  sysTemperatureSummary:{
-    diffTemperature:0,
-    mxTemperature:0,
+  sysTemperatureSummary: {
+    diffTemperature: 0,
+    mxTemperature: 0,
   },
   sysFrameSummary: {
     avgFPS: 0,
@@ -567,7 +600,6 @@ const getSummary = () => {
     summaryLoading.value = false;
   })
 }
-
 
 
 let procThreadOption = {
@@ -1288,26 +1320,26 @@ const getSysNetworkData = () => {
         sysNetworkOption.xTimeList.push(xTimestr);
         sysNetworkOption.xTimeMap[xTimestr] = 1
       }
-      if (sysNetworkOption.networkSeriesMap[sysNetData.interfaceName+"_tx"] === undefined) {
-        sysNetworkOption.networkSeriesMap[sysNetData.interfaceName+"_tx"] = {
-          name: sysNetData.interfaceName+"_tx",
+      if (sysNetworkOption.networkSeriesMap[sysNetData.interfaceName + "_tx"] === undefined) {
+        sysNetworkOption.networkSeriesMap[sysNetData.interfaceName + "_tx"] = {
+          name: sysNetData.interfaceName + "_tx",
           type: 'line',
           data: [],
           showSymbol: false,
           areaStyle: {},
         }
-        sysNetworkOption.networkSeriesMap[sysNetData.interfaceName+"_rx"] = {
-          name: sysNetData.name+"_rx",
+        sysNetworkOption.networkSeriesMap[sysNetData.interfaceName + "_rx"] = {
+          name: sysNetData.name + "_rx",
           type: 'line',
           data: [],
           showSymbol: false,
           areaStyle: {},
         }
-        sysNetworkOption.networkSeriesList.push(sysNetworkOption.networkSeriesMap[sysNetData.interfaceName+"_tx"])
-        sysNetworkOption.networkSeriesList.push(sysNetworkOption.networkSeriesMap[sysNetData.interfaceName+"_rx"])
+        sysNetworkOption.networkSeriesList.push(sysNetworkOption.networkSeriesMap[sysNetData.interfaceName + "_tx"])
+        sysNetworkOption.networkSeriesList.push(sysNetworkOption.networkSeriesMap[sysNetData.interfaceName + "_rx"])
       }
-      sysNetworkOption.networkSeriesMap[sysNetData.interfaceName+"_tx"].data.push(sysNetData.tx)
-      sysNetworkOption.networkSeriesMap[sysNetData.interfaceName+"_rx"].data.push(sysNetData.rx)
+      sysNetworkOption.networkSeriesMap[sysNetData.interfaceName + "_tx"].data.push(sysNetData.tx)
+      sysNetworkOption.networkSeriesMap[sysNetData.interfaceName + "_rx"].data.push(sysNetData.rx)
     }
     sysNetworkOption.loading = false
     printSysNetwork()
