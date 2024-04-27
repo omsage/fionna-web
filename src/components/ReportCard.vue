@@ -1,8 +1,8 @@
 <script setup>
 import {useI18n} from 'vue-i18n';
 import moment from 'moment/moment';
-import {ref} from "vue";
-import axios from "@/http/axios";
+import {ref, watch} from "vue";
+import axios, {baseURL} from "@/http/axios";
 
 const {t: $t} = useI18n();
 const img = import.meta.globEager('./../assets/img/*');
@@ -15,11 +15,19 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['getDetail']);
+const emit = defineEmits(['getDetail','selectReportList']);
 
 const getDetailCallback = (uuid, testName) => {
   emit('getDetail', uuid, testName)
 }
+const isCheckbox = ref(false)
+const selectReportListCallback = ()=>{
+  emit('selectReportList',props.device.uuid,isCheckbox.value)
+}
+
+watch(isCheckbox,()=>{
+  selectReportListCallback()
+})
 
 const getImg = (name) => {
   let result;
@@ -54,6 +62,10 @@ const submitRename = () => {
 
 }
 
+const getReportDownLink = () => {
+  return baseURL+"/report/down?uuid="+props.device.uuid
+}
+
 </script>
 
 <template>
@@ -64,6 +76,8 @@ const submitRename = () => {
   >
     <template #header>
       <div style="position: relative; display: flex; align-items: center">
+<!--        todo add checkbox callback-->
+        <el-checkbox size="large" v-model="isCheckbox"/>
         <el-tooltip
             class="box-item"
             effect="dark"
@@ -171,5 +185,15 @@ const submitRename = () => {
         </el-form>
       </el-col>
     </el-row>
+    <div style="text-align: center">
+      <a :href="getReportDownLink()">
+        <el-button
+            type="primary"
+            size="mini"
+        >{{$t('report.down')}}
+        </el-button>
+      </a>
+
+    </div>
   </el-card>
 </template>

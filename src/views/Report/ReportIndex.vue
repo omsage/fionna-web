@@ -1,6 +1,21 @@
 <template>
   <div style="padding: 20px">
     <el-card v-if="!isShowDetail">
+      <template #header>
+        <div>
+          <el-input
+              v-model="selectTestName"
+              style="max-width: 600px"
+              :placeholder="$t('report.selectReportMess')"
+              clearable
+          >
+            <template #append><el-button @click="getReportList" icon="el-icon-search"></el-button></template>
+          </el-input>
+
+          <el-button style=" float: right;" @click="deleteReport">{{$t("report.delete")}}</el-button>
+        </div>
+      </template>
+
       <el-row :gutter="10">
         <el-col :span="5" v-for="item in reportList" :key="item"
                 :xs="12"
@@ -11,12 +26,14 @@
                 style="margin-top: 20px"
         >
           <ReportCard
+              @selectReportList="selectReportList"
               @getDetail="getDetail"
               :device="item"
           />
         </el-col>
       </el-row>
-      <el-pagination style="margin-top: 20px" background :page-size="pageSize" @current-change="getReportList" layout="prev, pager, next"
+      <el-pagination v-show="total/pageSize>1" style="margin-top: 20px" background :page-size="pageSize"
+                     @current-change="getReportList" layout="prev, pager, next"
                      :total="total"/>
     </el-card>
     <ReportDetail
@@ -34,7 +51,9 @@ import axios from "@/http/axios";
 import {onMounted, ref} from "vue";
 import ReportCard from "@/components/ReportCard.vue";
 import ReportDetail from "@/views/Report/ReportDetail.vue";
-
+import {ElMessage, ElMessageBox} from "element-plus";
+import {useI18n} from "vue-i18n";
+const { t: $t } = useI18n();
 onMounted(() => {
   getReportList(1)
 })
@@ -46,7 +65,45 @@ const reportList = ref([])
 const detailUUID = ref("")
 const detailTestName = ref("")
 const isShowDetail = ref(false)
-const getDetail = (uuid,testName) => {
+
+const selectTestName = ref("")
+
+let selectUUIDs = {}
+
+
+const deleteReport = () => {
+  ElMessageBox.confirm(
+      '删除所选报告？',
+      $t('elements.warn'),
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+  ).then(() => {
+    // todo 增加选择设备的方法
+
+    let params = []
+    for (let key in selectUUIDs){
+      // console.log(key)
+      params.push(selectUUIDs[key])
+    }
+    axios.post("/report/delete",params).then((resp)=>{
+      ElMessage({
+        type: 'success',
+        message: '成功',
+      });
+      getReportList(1)
+    })
+  }).catch((err) => {
+    ElMessage({
+      type: 'info',
+      message: '已取消',
+    });
+  })
+}
+
+const getDetail = (uuid, testName) => {
   detailUUID.value = uuid
   isShowDetail.value = true
   detailTestName.value = testName
@@ -55,17 +112,31 @@ const getDetail = (uuid,testName) => {
 const exitDetail = () => {
   detailUUID.value = ""
   isShowDetail.value = false
-  console.log("?????")
 }
 
 const getReportList = (page) => {
-  axios.get("/report/list", {params: {page: page, size: pageSize.value}}).then((resp) => {
+  let param = {page: page, size: pageSize.value};
+  if (selectTestName.value!==""){
+    param.name = selectTestName.value
+  }
+  axios.get("/report/list", {params: param}).then((resp) => {
     console.log(resp)
     reportList.value = resp.data.reports;
     total.value = resp.data.total;
   })
 }
 
+const selectReportList = (uuid,isCheckbox) => {
+  console.log(uuid,isCheckbox)
+  if (isCheckbox){
+    selectUUIDs[uuid]={
+      uuid:uuid
+    }
+  }else {
+    delete selectUUIDs[uuid]
+  }
+
+}
 
 </script>
 

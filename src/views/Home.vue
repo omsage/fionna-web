@@ -1,8 +1,8 @@
 <template>
   <div class="remote-header">
     <el-radio-group v-model="currentTabName">
-      <el-radio-button label="perfTest" @click="isReportPage=false">性能测试</el-radio-button>
-      <el-radio-button label="testReport" @click="isReportPage=true">测试报告</el-radio-button>
+      <el-radio-button label="perfTest" @click="isReportPage=false">{{ $t('perf.perfTab')}}</el-radio-button>
+      <el-radio-button label="testReport" @click="isReportPage=true">{{ $t('perf.reportTab')}}</el-radio-button>
       <el-dropdown style=" float: right;margin-right: 20px">
     <span class="el-dropdown-link">
       {{ $t('layout.languages')}}

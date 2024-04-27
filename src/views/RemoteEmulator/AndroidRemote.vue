@@ -192,18 +192,6 @@ const getImg = (name) => {
   }
   return result;
 };
-const copy = (value) => {
-  try {
-    toClipboard(value);
-    ElMessage.success({
-      message: $t('androidRemoteTS.copySuccess'),
-    });
-  } catch (e) {
-    ElMessage.error({
-      message: $t('androidRemoteTS.copyFail'),
-    });
-  }
-};
 const sendLogcat = () => {
   if (terminalWebsocket === null) {
     initTerminalWebsocket()
@@ -292,15 +280,6 @@ const stopCmd = () => {
 const commandUUID = ref("")
 const logcatUUID = ref("")
 const terminalWebsocketOnmessage = (message) => {
-  // console.log(message)
-  let infoData = JSON.parse(message.data);
-  if (infoData.code!==10000){
-    ElMessage.error({
-      message: infoData.data,
-    });
-    close();
-    return;
-  }
   switch (JSON.parse(message.data).messageType) {
     case 'logcat':
       logcatUUID.value = JSON.parse(message.data).uuid
@@ -341,24 +320,17 @@ const terminalWebsocketOnmessage = (message) => {
       cmdIsDone.value = true;
       commandUUID.value = ""
       break;
-    // case 'error':
-    //   ElMessage.error({
-    //     message: $t('androidRemoteTS.systemException'),
-    //   });
-    //   close();
-    //   break;
+    case 'error':
+      ElMessage.error({
+        message: $t('androidRemoteTS.systemException'),
+      });
+      closeTerminal();
+      break;
   }
 };
 const screenWebsocketOnmessage = (message) => {
   // console.log('screenWebsocketOnmessage', message.data);
   let infoData = JSON.parse(message.data);
-  if (infoData.code!==10000){
-    ElMessage.error({
-      message: infoData.data,
-    });
-    close();
-    return;
-  }
   switch (infoData.messageType) {
     case 'sizeInfo': {
       loading.value = true;
@@ -378,24 +350,17 @@ const screenWebsocketOnmessage = (message) => {
       //   loading.value = false;
       //   break;
       // }
-    // case 'error':
-    //   ElMessage.error({
-    //     message: $t('androidRemoteTS.systemException'),
-    //   });
-    //   close();
-    //   break;
+    case 'error':
+      ElMessage.error({
+        message: $t('androidRemoteTS.systemException'),
+      });
+      closeScreenWebsocket();
+      break;
   }
 };
 const perfWebsocketOnmessage = (message) => {
   // console.log(message.data)
   let infoData = JSON.parse(message.data);
-  if (infoData.code!==10000){
-    ElMessage.error({
-      message: infoData.data,
-    });
-    close();
-    return;
-  }
   switch (infoData.messageType) {
     case 'perfdata':
       androidPerfRef.value.setData(infoData.perfData);
@@ -404,8 +369,7 @@ const perfWebsocketOnmessage = (message) => {
       ElMessage.error({
         message: $t('androidRemoteTS.systemException'),
       });
-      close();
-      router.go(-1);
+      closePerf();
       break;
     }
   }
@@ -546,7 +510,7 @@ const mousemove = (event) => {
   }
 };
 const refreshAppList = () => {
-  if (selectDeviceUdid.value!==""){
+  if (selectDeviceUdid.value !== "") {
     appList.value = [];
     ElMessage.success({
       message: $t('androidRemoteTS.loadIng'),
@@ -627,29 +591,43 @@ const stopKeyboard = () => {
       })
   );
 };
-const close = () => {
+
+const closePerf = () => {
   if (perfWebsocket !== null) {
     perfWebsocket.close();
     perfWebsocket = null;
+
   }
+  if (perfPongId !== null) {
+    clearTimeout(perfPongId);
+    perfPongId = null;
+  }
+}
+
+const closeScreenWebsocket = () => {
   if (screenWebsocket !== null) {
     screenWebsocket.close();
     screenWebsocket = null;
     __Scrcpy && __Scrcpy.destroy();
     __Scrcpy = null;
   }
+}
+
+const closeTerminal = () => {
   if (terminalWebsocket !== null) {
     terminalWebsocket.close();
     terminalWebsocket = null;
   }
-  if (perfPongId !== null) {
-    clearTimeout(perfPongId);
-    perfPongId = null;
-  }
+
   if (terminalPongId !== null) {
     clearTimeout(terminalPongId);
     terminalPongId = null;
   }
+}
+const close = () => {
+  closePerf()
+  closeScreenWebsocket()
+  closeTerminal()
   // window.close();
 };
 onBeforeUnmount(() => {
@@ -662,7 +640,7 @@ const getAndroidDeviceList = () => {
     for (let i in resp.data) {
       serialInfoList.value.push(resp.data[i])
     }
-    if (serialInfoList.value.length===0){
+    if (serialInfoList.value.length === 0) {
       ElMessage({
         type: 'error',
         message: '未找到设备',
@@ -798,16 +776,17 @@ const reSelectionDevice = () => {
                   :key="item.udid"
                   :value="item.udid"
           >
-            <el-tooltip class="item" effect="dark" :content=" '产品:'+item.productDevice +' 型号:'+item.model"
+            <el-tooltip class="item" effect="dark"
+                        :content=" $t('androidRemoteTS.product')+':'+item.productDevice +' '+$t('androidRemoteTS.model')+':'+item.model"
                         placement="top">
               <el-radio v-model="selectDeviceUdid" @input="selectGroupDevices" :label="item.udid" border>
-                设备{{ item.udid }}
+                {{ $t('androidRemoteTS.device') }}{{ item.udid }}
               </el-radio>
             </el-tooltip>
 
           </el-col>
-          <el-empty v-show="serialInfoList.length===0" description="not device!" >
-            <el-button type="primary" @click="getAndroidDeviceList">刷新</el-button>
+          <el-empty v-show="serialInfoList.length===0" description="not device!">
+            <el-button type="primary" @click="getAndroidDeviceList">{{ $t('androidRemoteTS.flushed') }}</el-button>
           </el-empty>
         </el-card>
         <!--        这里选择设备后再显示-->
@@ -1087,7 +1066,7 @@ const reSelectionDevice = () => {
             @tab-click="switchTabs"
         >
 
-          <el-tab-pane :label="$t('IOSRemote.perfmon')" name="perfmon">
+          <el-tab-pane :label="$t('androidRemoteTS.perfmon')" name="perfmon">
             <android-perf
                 ref="androidPerfRef"
                 :app-list="appList"

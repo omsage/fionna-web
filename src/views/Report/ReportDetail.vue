@@ -1,10 +1,4 @@
 <template>
-<!--  <div class="remote-header">-->
-<!--    <el-radio-group v-model="currentTabName">-->
-<!--      <el-radio-button label="perfTest" @click="router.replace('/')">性能测试</el-radio-button>-->
-<!--      <el-radio-button label="testReport" @click="router.replace('/report')">测试报告</el-radio-button>-->
-<!--    </el-radio-group>-->
-<!--  </div>-->
   <div style="padding: 20px">
     <el-backtop :right="100" :bottom="100"/>
     <el-card class="box-card">
@@ -23,7 +17,7 @@
 
             height: '75px'
           }">
-            程序CPU平均使用率:{{ summaryInfo.procCpuSummary.avgProcCPU.toFixed(2) }}%
+            {{$t('report.summary.procAvgCPUUsage') +":" + summaryInfo.procCpuSummary.avgProcCPU.toFixed(2) }}%
           </el-card>
         </el-col>
         <el-col :span="4" v-if="perfConfig.procMem">
@@ -31,7 +25,7 @@
 
             height: '75px'
           }">
-            程序PSS峰值:{{ summaryInfo.procMemSummary.maxTotalPSS.toFixed(2) }}MB
+            {{$t('report.summary.procMaxPss') +":" + summaryInfo.procMemSummary.maxTotalPSS.toFixed(2) }}MB
           </el-card>
         </el-col>
         <el-col :span="4" v-if="perfConfig.FPS">
@@ -39,7 +33,7 @@
 
             height: '75px'
           }">
-            FPS均值:{{ summaryInfo.sysFrameSummary.avgFPS.toFixed(2) }}
+            {{$t('report.summary.AvgFPS') +":" +  summaryInfo.sysFrameSummary.avgFPS.toFixed(2) }}
           </el-card>
 
         </el-col>
@@ -49,10 +43,10 @@
             height: '75px'
           }">
             <div>
-              Jank:{{ summaryInfo.sysFrameSummary.allJankCount }}次
+              Jank count:{{ summaryInfo.sysFrameSummary.allJankCount }}
             </div>
             <div>
-              BigJank:{{ summaryInfo.sysFrameSummary.allBigJankCount }}次
+              BigJank count:{{ summaryInfo.sysFrameSummary.allBigJankCount }}
             </div>
           </el-card>
 
@@ -66,7 +60,7 @@
               <div v-for="item in summaryInfo.sysCpuSummary">
                 <div v-if="item.cpuName!==undefined">
                   <div v-if="item.cpuName==='cpu'">
-                    系统CPU均值:{{ item.avgSysCPU.toFixed(2) }}%
+                    {{$t('report.summary.sysCpuAvg') +":" +   item.avgSysCPU.toFixed(2) }}%
                   </div>
                 </div>
 
@@ -80,7 +74,7 @@
           <el-card :style="{
             height: '75px'
           }">
-            系统使用内存峰值:{{ summaryInfo.sysMemSummary.maxMemTotal }}MB
+            {{$t('report.summary.sysMaxAvg') +":" +    summaryInfo.sysMemSummary.maxMemTotal }}MB
           </el-card>
         </el-col>
 
@@ -93,24 +87,26 @@
           <el-collapse v-show="perfConfig.jank || perfConfig.FPS" v-model="FPSActiveName" @change="handleChange">
             <el-collapse-item v-if="perfConfig.FPS" title="FPS" name="sys-FPS">
               <div>
-                当前所测试阶段的FPS均值是:{{ summaryInfo.sysFrameSummary.avgFPS.toFixed(2) }}
+                {{$t('report.summary.fpsMess')+':'+ summaryInfo.sysFrameSummary.avgFPS.toFixed(2) }}
               </div>
             </el-collapse-item>
             <el-collapse-item v-if="perfConfig.jank && summaryInfo.sysFrameSummary.allJankCount!==null"
                               title="Jank info" name="sys-jank">
               <div>
-                当前测试阶段jank数量为:{{
-                  summaryInfo.sysFrameSummary.allJankCount
-                }},每秒最大峰值为:{{
-                  summaryInfo.sysFrameSummary.maxJankCount
-                }},每秒平均jank率:{{ summaryInfo.sysFrameSummary.jankCountRate.toFixed(3) }}%
+                {{$t('report.summary.jankMessPre')+
+                  summaryInfo.sysFrameSummary.allJankCount +
+                  $t('report.summary.jankMessMid') +
+                  summaryInfo.sysFrameSummary.maxJankCount +
+                  $t('report.summary.jankMessEnd') +
+                 summaryInfo.sysFrameSummary.jankCountRate.toFixed(3) }}%
               </div>
               <div>
-                当前测试阶段big
-                jank数量为:{{
-                  summaryInfo.sysFrameSummary.allBigJankCount
-                }},每秒最大峰值为:{{ summaryInfo.sysFrameSummary.maxBigJankCount }},每秒平均big
-                jank率:{{ summaryInfo.sysFrameSummary.bigJankCountRate.toFixed(3) }}%
+                {{$t('report.summary.bigJankMessPre')+
+              summaryInfo.sysFrameSummary.allBigJankCount +
+              $t('report.summary.bigJankMessMid') +
+              summaryInfo.sysFrameSummary.maxBigJankCount +
+              $t('report.summary.bigJankMessEnd') +
+              summaryInfo.sysFrameSummary.bigJankCountRate.toFixed(3) }}%
               </div>
             </el-collapse-item>
           </el-collapse>
@@ -336,6 +332,8 @@ import {LineChart} from 'echarts/charts';
 import {CanvasRenderer} from 'echarts/renderers';
 import axios from "@/http/axios";
 import moment from "moment";
+import {useI18n} from "vue-i18n";
+const {t: $t} = useI18n();
 
 echarts.use([
   MarkPointComponent,

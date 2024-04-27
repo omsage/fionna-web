@@ -21,7 +21,7 @@ import { ElMessage } from 'element-plus';
 import { i18n, $tc } from '@/locales/setupI18n';
 import { router } from '../router/index.js';
 
-let baseURL = '';
+export let baseURL = '';
 if (process.env.NODE_ENV === 'development') {
     baseURL = '/serverproxy';
 }
