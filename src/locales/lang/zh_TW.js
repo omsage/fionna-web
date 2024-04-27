@@ -46,6 +46,7 @@ const elements = {
     warn: '警告',
 };
 const devices = {
+    currentApp:"当前应用",
     list: '設備列表',
     form: {
         model: '設備型號',

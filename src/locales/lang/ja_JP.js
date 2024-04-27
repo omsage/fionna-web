@@ -43,18 +43,19 @@ const elements = {
     warn: '警告',
 };
 const devices = {
+    currentApp:"現在のアプリ",
     list: 'デバイスリスト',
     form: {
-        model: 'デバイスモデル',
+        model: 'モデル',
         manufacturer: 'メーカー',
-        system: 'デバイスシステム',
+        system: 'システム',
         battery: {
             level: 'バッテリーレベル',
             temperature: 'バッテリー温度',
             voltage: '充電電圧',
         },
         testTime: "テスト時間",
-        testPackageName: "テストパッケージ",
+        testPackageName: "test app",
         agent: 'エージェントの位置',
     },
     detail: {
@@ -63,7 +64,7 @@ const devices = {
         nickName: 'デバイスニックネーム',
         nickPlaceholder: 'デバイスの備考情報を入力してください',
         name: 'デバイス名',
-        model: 'デバイスモデル',
+        model: 'モデル',
         udId: 'デバイスシリアル番号',
         size: '画面解像度',
         cpu: 'CPUタイプ',

@@ -160,7 +160,7 @@ const perfConfig = ref({
         type="primary"
         size="mini"
     >
-      当前应用
+      {{$t('devices.currentApp')}}
     </el-button>
     <el-button
         type="primary"
