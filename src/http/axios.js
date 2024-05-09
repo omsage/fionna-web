@@ -26,7 +26,7 @@ if (process.env.NODE_ENV === 'development') {
     baseURL = '/serverproxy';
 }
 if (process.env.NODE_ENV === 'production') {
-    baseURL = 'http://SONIC_SERVER_HOST:SONIC_SERVER_PORT/';
+    baseURL = '/';
 }
 const $http = axios.create(
 
@@ -69,18 +69,18 @@ $http.interceptors.response.use(
         }
         return response.data;
     },
-    (err) => {
-        if (err.response.status === 503) {
-            ElMessage.info({
-                message: $tc('dialog.ready'),
-            });
-        } else {
-            ElMessage.error({
-                message: $tc('dialog.error'),
-            });
-        }
-        return Promise.reject(err);
-    }
+    // (err) => {
+    //     if (err.response.status === 503) {
+    //         ElMessage.info({
+    //             message: $tc('dialog.ready'),
+    //         });
+    //     } else {
+    //         ElMessage.error({
+    //             message: $tc('dialog.error'),
+    //         });
+    //     }
+    //     return Promise.reject(err);
+    // }
 );
 
 export default $http;
