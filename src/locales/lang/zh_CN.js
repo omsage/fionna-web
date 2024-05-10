@@ -134,6 +134,10 @@ const report = {
     deleteMess: "是否删除所选报告?",
     delete: "删除",
     down: "下载",
+    comparison:"对比",
+    comparisonMode:"对比模式",
+    displaysTable:"显示表格",
+    displaysChart:"显示图表",
     selectReportMess: "请输入报告名",
     summary: {
         avgMemMess: "均值是:",
@@ -182,6 +186,9 @@ const dialog = {
     error: '系统出错了！',
 };
 const androidRemoteTS = {
+    useScreenCasting:"使用投屏",
+    reselectTheDevice:"是否重新选择设备？",
+    isUseScreen:"是否使用投屏？",
     cancelScreenMess: "取消投屏？",
     noSelectDevice: "未选择设备",
     perfmon: "性能监控",

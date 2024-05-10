@@ -4,7 +4,6 @@ import {ElMessage, ElMessageBox} from 'element-plus';
 import ColorImg from '@/components/ColorImg.vue';
 import {useRouter} from 'vue-router';
 import RenderDeviceName from './RenderDeviceName.vue';
-import axios from '../http/axios';
 
 const router = useRouter();
 const {t: $t} = useI18n();
@@ -19,48 +18,49 @@ const props = defineProps({
 const emit = defineEmits(['useScreenCall',"reSelectionDevice"]);
 const useScreenCall = () => {
   ElMessageBox.confirm(
-      '是否使用投屏？',
+      $t('androidRemoteTS.isUseScreen'),
+
       $t('elements.warn'),
       {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+        confirmButtonText: $t('form.confirm'),
+        cancelButtonText: $t('form.cancel'),
         type: 'warning',
       }
   ).then(() => {
     // todo 增加选择设备的方法
     ElMessage({
       type: 'success',
-      message: '成功',
+      message: 'success',
     });
     emit('useScreenCall');
   }).catch((err) => {
     ElMessage({
       type: 'info',
-      message: '已取消',
+      message: $t('form.cancel'),
     });
   })
 }
 
 const reSelectionDevice = () => {
   ElMessageBox.confirm(
-      '是否重新选择设备？',
+      $t('androidRemoteTS.reselectTheDevice'),
       $t('elements.warn'),
       {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+        confirmButtonText: $t('form.confirm'),
+        cancelButtonText: $t('form.cancel'),
         type: 'warning',
       }
   ).then(() => {
     // todo 增加选择设备的方法
     ElMessage({
       type: 'success',
-      message: '成功',
+      message: 'success',
     });
     emit('reSelectionDevice');
   }).catch((err) => {
     ElMessage({
       type: 'info',
-      message: '已取消',
+      message: $t('form.cancel'),
     });
   })
 }
@@ -291,7 +291,7 @@ const getImg = (name) => {
           type="primary"
           size="mini"
           @click="useScreenCall"
-      >使用投屏
+      >{{$t('androidRemoteTS.useScreenCasting')}}
       </el-button>
     </div>
   </el-card>

@@ -971,48 +971,48 @@ const reSelectionDevice = () => {
           </div>
           <!--一些细节按钮-->
           <div style="position: absolute; right: 5px; top: 10px">
-            <el-tooltip
-                :enterable="false"
-                effect="dark"
-                :content="$t('androidRemoteTS.code.frameNumber')"
-                :placement="tabPosition == 'left' ? 'right' : 'left'"
-                :offset="15"
-            >
-              <div>
-                <el-dropdown
-                    :hide-on-click="false"
-                    trigger="click"
-                    placement="right"
-                    style="margin-top: 4px"
-                >
-                  <el-button size="small" type="info" circle>
-                    <el-icon :size="12" style="vertical-align: middle">
-                      <View/>
-                    </el-icon>
-                  </el-button>
-                  <template #dropdown>
-                    <el-dropdown-menu class="divider">
-                      <el-radio-group
-                          v-model="pic"
-                          v-loading="loading"
-                          size="mini"
-                          @change="changePic"
-                      >
-                        <el-radio-button
-                            :label="$t('androidRemoteTS.low')"
-                        ></el-radio-button>
-                        <el-radio-button
-                            :label="$t('androidRemoteTS.middle')"
-                        ></el-radio-button>
-                        <el-radio-button
-                            :label="$t('androidRemoteTS.high')"
-                        ></el-radio-button>
-                      </el-radio-group>
-                    </el-dropdown-menu>
-                  </template>
-                </el-dropdown>
-              </div>
-            </el-tooltip>
+<!--            <el-tooltip-->
+<!--                :enterable="false"-->
+<!--                effect="dark"-->
+<!--                :content="$t('androidRemoteTS.code.frameNumber')"-->
+<!--                :placement="tabPosition == 'left' ? 'right' : 'left'"-->
+<!--                :offset="15"-->
+<!--            >-->
+<!--              <div>-->
+<!--                <el-dropdown-->
+<!--                    :hide-on-click="false"-->
+<!--                    trigger="click"-->
+<!--                    placement="right"-->
+<!--                    style="margin-top: 4px"-->
+<!--                >-->
+<!--                  <el-button size="small" type="info" circle>-->
+<!--                    <el-icon :size="12" style="vertical-align: middle">-->
+<!--                      <View/>-->
+<!--                    </el-icon>-->
+<!--                  </el-button>-->
+<!--                  <template #dropdown>-->
+<!--                    <el-dropdown-menu class="divider">-->
+<!--                      <el-radio-group-->
+<!--                          v-model="pic"-->
+<!--                          v-loading="loading"-->
+<!--                          size="mini"-->
+<!--                          @change="changePic"-->
+<!--                      >-->
+<!--                        <el-radio-button-->
+<!--                            :label="$t('androidRemoteTS.low')"-->
+<!--                        ></el-radio-button>-->
+<!--                        <el-radio-button-->
+<!--                            :label="$t('androidRemoteTS.middle')"-->
+<!--                        ></el-radio-button>-->
+<!--                        <el-radio-button-->
+<!--                            :label="$t('androidRemoteTS.high')"-->
+<!--                        ></el-radio-button>-->
+<!--                      </el-radio-group>-->
+<!--                    </el-dropdown-menu>-->
+<!--                  </template>-->
+<!--                </el-dropdown>-->
+<!--              </div>-->
+<!--            </el-tooltip>-->
             <el-tooltip
                 effect="dark"
                 :content="$t('androidRemoteTS.code.LUS')"

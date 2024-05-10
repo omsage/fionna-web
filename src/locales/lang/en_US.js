@@ -137,6 +137,10 @@ const report = {
     deleteMess: "Delete selected report?",
     delete: "Delete",
     down: "Download",
+    comparison: "comparison",
+    comparisonMode: "comparison mode",
+    displaysTable: "displays table",
+    displaysChart: "displays chart",
     selectReportMess: "Please enter report name",
     summary: {
         avgMemMess: "Average is:",
@@ -185,6 +189,9 @@ const dialog = {
     error: 'System error!',
 };
 const androidRemoteTS = {
+    useScreenCasting: "Use Screen Casting",
+    reselectTheDevice: "Reselect the Device?",
+    isUseScreen: "Is Use Screen?",
     cancelScreenMess: "Cancel screen casting?",
     noSelectDevice: "No device selected",
     perfmon: "Performance Monitoring",

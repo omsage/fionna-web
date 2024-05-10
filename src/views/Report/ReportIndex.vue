@@ -1,6 +1,6 @@
 <template>
   <div style="padding: 20px">
-    <el-card v-if="!isShowDetail">
+    <el-card v-if="isReportMode===0">
       <template #header>
         <div>
           <el-input
@@ -12,7 +12,8 @@
             <template #append><el-button @click="getReportList" icon="el-icon-search"></el-button></template>
           </el-input>
 
-          <el-button style=" float: right;" @click="deleteReport">{{$t("report.delete")}}</el-button>
+          <el-button style=" float: right;margin-right: 10px" @click="deleteReport">{{$t("report.delete")}}</el-button>
+          <el-button style=" float: right;margin-right: 10px" @click="getComparison">{{$t("report.comparison")}}</el-button>
         </div>
       </template>
 
@@ -37,11 +38,18 @@
                      :total="total"/>
     </el-card>
     <ReportDetail
-        v-if="isShowDetail"
+        v-if="isReportMode===1"
         @exitDetail="exitDetail"
         :uuid="detailUUID"
         :test-report-name="detailTestName"
     ></ReportDetail>
+    <ReportComparison
+        :uuids="selectUUIDList"
+        :report-info-objects="selectUUIDObject"
+        v-if="isReportMode===2"
+        @exitComparison="exitComparison"
+    >
+    </ReportComparison>
   </div>
 </template>
 
@@ -53,7 +61,10 @@ import ReportCard from "@/components/ReportCard.vue";
 import ReportDetail from "@/views/Report/ReportDetail.vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {useI18n} from "vue-i18n";
+import ReportComparison from "@/views/Report/ReportComparison.vue";
 const { t: $t } = useI18n();
+import oriAxios from 'axios';
+
 onMounted(() => {
   getReportList(1)
 })
@@ -64,11 +75,12 @@ const reportList = ref([])
 
 const detailUUID = ref("")
 const detailTestName = ref("")
-const isShowDetail = ref(false)
+const isReportMode = ref(0)
 
 const selectTestName = ref("")
 
-let selectUUIDs = {}
+let selectUUIDList = ref([])
+let selectUUIDObject = ref({})
 
 
 const deleteReport = () => {
@@ -84,9 +96,9 @@ const deleteReport = () => {
     // todo 增加选择设备的方法
 
     let params = []
-    for (let key in selectUUIDs){
+    for (let index in selectUUIDList.value){
       // console.log(key)
-      params.push(selectUUIDs[key])
+      params.push(selectUUIDList.value[index])
     }
     axios.post("/report/delete",params).then((resp)=>{
       ElMessage({
@@ -105,35 +117,54 @@ const deleteReport = () => {
 
 const getDetail = (uuid, testName) => {
   detailUUID.value = uuid
-  isShowDetail.value = true
+  isReportMode.value = 1
   detailTestName.value = testName
+}
+
+const getComparison = ()=>{
+
+  isReportMode.value = 2
+}
+
+const exitComparison = () => {
+  isReportMode.value = 0
+  selectUUIDList.value = []
 }
 
 const exitDetail = () => {
   detailUUID.value = ""
-  isShowDetail.value = false
+  isReportMode.value = 0
+  selectUUIDList.value = []
 }
+
+const perfConfigList = ref([])
 
 const getReportList = (page) => {
   let param = {page: page, size: pageSize.value};
   if (selectTestName.value!==""){
     param.name = selectTestName.value
   }
+  perfConfigList.value = []
   axios.get("/report/list", {params: param}).then((resp) => {
     console.log(resp)
     reportList.value = resp.data.reports;
     total.value = resp.data.total;
+
   })
 }
 
-const selectReportList = (uuid,isCheckbox) => {
-  console.log(uuid,isCheckbox)
+const selectReportList = (device,isCheckbox) => {
   if (isCheckbox){
-    selectUUIDs[uuid]={
-      uuid:uuid
-    }
+    selectUUIDList.value.push(device.uuid)
+    selectUUIDObject.value[device.uuid] = device
   }else {
-    delete selectUUIDs[uuid]
+
+    selectUUIDList.value = selectUUIDList.value.filter(item => item !== device.uuid)
+    delete selectUUIDObject.value[device.uuid]
+    // const index = selectUUIDList.value.indexOf(uuid); // 查找元素值在数组中的索引
+    // if (index !== -1) {
+    //   selectUUIDList.value.splice(index, 1); // 如果找到了元素值，就使用 splice() 方法删除
+    // }
   }
 
 }

@@ -132,6 +132,10 @@ const report = {
     deleteMess: "選択したレポートを削除しますか？",
     delete: "削除",
     down: "ダウンロード",
+    comparison: "比較",
+    comparisonMode: "比較モード",
+    displaysTable: "テーブルを表示",
+    displaysChart: "グラフを表示",
     selectReportMess: "レポート名を入力してください",
     summary: {
         avgMemMess: "平均値:",
@@ -180,6 +184,9 @@ const dialog = {
     error: 'システムエラーが発生しました！',
 };
 const androidRemoteTS = {
+    useScreenCasting: "Use Screen Casting",
+    reselectTheDevice: "デバイスを再選択しますか？",
+    isUseScreen: "スクリーンを使用しますか？",
     cancelScreenMess: "スクリーンプロジェクションをキャンセルしますか？",
     noSelectDevice: "デバイスが選択されていません",
     perfmon: "パフォーマンスモニタリング",
