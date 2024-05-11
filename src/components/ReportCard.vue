@@ -29,7 +29,7 @@ watch(isCheckbox, () => {
   selectReportListCallback()
 })
 
-onMounted(()=>{
+onMounted(() => {
   getPerfConfig()
 })
 
@@ -67,9 +67,9 @@ const submitRename = () => {
 }
 
 const getReportDownLink = () => {
-  if (baseURL!=="/"){
+  if (baseURL !== "/") {
     return baseURL + "/report/down?uuid=" + props.device.uuid
-  }else {
+  } else {
     return "http://localhost:3417/report/down?uuid=" + props.device.uuid
   }
 }
@@ -80,10 +80,15 @@ const getPerfConfig = () => {
   axios.get("/report/config", {params: {uuid: props.device.uuid}}).then((resp) => {
     delete resp.data.uuid
     delete resp.data.intervalTime
-    let str = JSON.stringify(resp.data, null, 2)
-    str = str.replaceAll("{","")
-    str = str.replaceAll("}","")
-    perfConfig.value = str
+    // for (let key in resp.data){
+    //   perfConfig.value += key
+    //   perfConfig.value += '\n'
+    // }
+    perfConfig.value = resp.data
+    // let str = JSON.stringify(resp.data, null, 2)
+    // str = str.replaceAll("{","")
+    // str = str.replaceAll("}","")
+    // perfConfig.value = str
   })
 }
 
@@ -123,8 +128,12 @@ const getPerfConfig = () => {
     </template>
     <el-tooltip class="box-item"
                 effect="dark"
-                :content="perfConfig"
                 placement="top">
+      <template #content>
+        <div v-for="(value, key)  in perfConfig" :key="key">
+          {{ key + ": " + value }}<br>
+        </div>
+      </template>
       <el-row @click="getDetailCallback(device.uuid,device.testName)">
         <el-col :span="14">
           <el-form
@@ -212,14 +221,14 @@ const getPerfConfig = () => {
       </el-row>
     </el-tooltip>
     <div style="text-align: center">
-    <a :href="getReportDownLink()">
-      <el-button
-          type="primary"
-          size="mini"
-      >{{ $t('report.down') }}
-      </el-button>
-    </a>
+      <a :href="getReportDownLink()">
+        <el-button
+            type="primary"
+            size="mini"
+        >{{ $t('report.down') }}
+        </el-button>
+      </a>
 
-  </div>
+    </div>
   </el-card>
 </template>
