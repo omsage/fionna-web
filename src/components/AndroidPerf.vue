@@ -179,12 +179,12 @@ const perfConfig = ref({
       </el-icon>
       {{ $t('perf.stop') }}
     </el-button>
-    <el-button type="danger" size="mini" @click="clearPerfmon">
-      <el-icon :size="12" style="vertical-align: middle">
-        <Delete/>
-      </el-icon>
-      {{ $t('perf.clear') }}
-    </el-button>
+<!--    <el-button type="danger" size="mini" @click="clearPerfmon">-->
+<!--      <el-icon :size="12" style="vertical-align: middle">-->
+<!--        <Delete/>-->
+<!--      </el-icon>-->
+<!--      {{ $t('perf.clear') }}-->
+<!--    </el-button>-->
     <!--    性能配置   -->
     <div v-show="!isStart" style="margin-top: 10px">
       <el-card style="height: 100%">

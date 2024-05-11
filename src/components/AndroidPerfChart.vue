@@ -55,7 +55,7 @@ const props = defineProps({
   sysCpu: Object,
   sysMem: Object,
   sysNetwork: Object,
-  sysTemperature:Object,
+  sysTemperature: Object,
   procCpu: Object,
   procMem: Object,
   sysFps: Object,
@@ -256,54 +256,70 @@ const printCpu = () => {
         )
     );
   }
-  chart.resize();
-  const option = {
-    title: {
-      text: 'System Total CPU',
-      textStyle: {
-        color: '#606266',
+  if (chart!==null){
+    chart.resize();
+    const option = {
+      title: {
+        text: 'System Total CPU',
+        textStyle: {
+          color: '#606266',
+        },
+        x: 'center',
+        y: 'top',
       },
-      x: 'center',
-      y: 'top',
-    },
-    tooltip: {
-      trigger: 'axis',
-      position(pos, params, dom, rect, size) {
-        const obj = {top: 60};
-        obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 5;
-        return obj;
+      tooltip: {
+        trigger: 'axis',
+        position(pos, params, dom, rect, size) {
+          const obj = {top: 60};
+          obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 5;
+          return obj;
+        },
+        valueFormatter: (value) => `${value.toFixed(3)} %`,
       },
-      valueFormatter: (value) => `${value.toFixed(3)} %`,
-    },
-    legend: {
-      top: '8%',
-      data: cpuDataLegend.legend,
-    },
-    grid: {top: '28%', left: '20%'},
-    toolbox: {
-      feature: {
-        saveAsImage: {show: true, title: 'Save'},
+      legend: {
+        top: '8%',
+        data: cpuDataLegend.legend,
       },
-    },
-    xAxis: {
-      boundaryGap: false,
-      type: 'category',
-      data: categorySysCpuList,
-    },
-    dataZoom: [
-      {
-        show: true,
-        realtime: true,
-        start: 30,
-        end: 100,
-        xAxisIndex: [0, 1],
+      grid: {top: '28%', left: '20%'},
+      toolbox: {
+        feature: {
+          saveAsImage: {show: true, title: 'Save'},
+        },
       },
-    ],
-    yAxis: [{name: `${$t('perf.totalCpu')}(%)`, min: 0}],
-    series: seriesSysCpuList,
-  };
-  chart.setOption(option);
+      xAxis: {
+        boundaryGap: false,
+        type: 'category',
+        data: categorySysCpuList,
+      },
+      dataZoom: [
+        {
+          show: true,
+          realtime: true,
+          start: sysCPUZoomStart,
+          end: sysCPUZoomEnd,
+          xAxisIndex: [0, 1],
+        },
+      ],
+      yAxis: [{name: `${$t('perf.totalCpu')}(%)`, min: 0}],
+      series: seriesSysCpuList,
+    };
+    chart.on('dataZoom', function (event) {
+      if (event.batch) {
+        sysCPUZoomStart = event.batch[0].start;
+        sysCPUZoomEnd = event.batch[0].end;
+      } else {
+        sysCPUZoomStart = event.start;
+        sysCPUZoomEnd = event.end;
+      }
+    });
+    chart.setOption(option);
+  }
+
 };
+
+let sysCPUZoomStart = 30;
+let sysCPUZoomEnd = 100;
+
 const printMem = () => {
   let chart = echarts.getInstanceByDom(
       document.getElementById(
@@ -317,99 +333,113 @@ const printMem = () => {
         )
     );
   }
-  chart.resize();
-  const option = {
-    color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#409EFF'],
-    title: {
-      text: 'System Memory',
-      textStyle: {
-        color: '#606266',
+  if (chart!==null){
+    chart.resize();
+    const option = {
+      color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#409EFF'],
+      title: {
+        text: 'System Memory',
+        textStyle: {
+          color: '#606266',
+        },
+        x: 'center',
+        y: 'top',
       },
-      x: 'center',
-      y: 'top',
-    },
-    tooltip: {
-      trigger: 'axis',
-    },
-    grid: {top: '30%', left: '20%'},
-    toolbox: {
-      feature: {
-        saveAsImage: {show: true, title: 'Save'},
+      tooltip: {
+        trigger: 'axis',
       },
-    },
-    legend: {
-      top: '8%',
-      data: [
-        'Mem Buffers',
-        'Mem Cached',
-        'Mem Free',
-        'Mem Total',
-        'Swap Free',
-        'Swap Total',
+      grid: {top: '30%', left: '20%'},
+      toolbox: {
+        feature: {
+          saveAsImage: {show: true, title: 'Save'},
+        },
+      },
+      legend: {
+        top: '8%',
+        data: [
+          'Mem Buffers',
+          'Mem Cached',
+          'Mem Free',
+          'Mem Total',
+          'Swap Free',
+          'Swap Total',
+        ],
+      },
+      xAxis: {
+        boundaryGap: false,
+        type: 'category',
+        data: sysMemOption.categorySysMemList,
+      },
+      dataZoom: [
+        {
+          show: true,
+          realtime: true,
+          start: sysMemZoomStart,
+          end: sysMemZoomEnd,
+          xAxisIndex: [0, 1],
+        },
       ],
-    },
-    xAxis: {
-      boundaryGap: false,
-      type: 'category',
-      data: sysMemOption.categorySysMemList,
-    },
-    dataZoom: [
-      {
-        show: true,
-        realtime: true,
-        start: 30,
-        end: 100,
-        xAxisIndex: [0, 1],
-      },
-    ],
-    yAxis: [{name: `${$t('perf.memUsage')}(MB)`, min: 0}],
-    series: [
-      {
-        name: 'Mem Buffers',
-        type: 'line',
-        data: sysMemOption.memBuffers,
-        showSymbol: false,
-        boundaryGap: false,
-      },
-      {
-        name: 'Mem Cached',
-        type: 'line',
-        data: sysMemOption.memCached,
-        showSymbol: false,
-        boundaryGap: false,
-      },
-      {
-        name: 'Mem Free',
-        type: 'line',
-        data: sysMemOption.memFree,
-        showSymbol: false,
-        boundaryGap: false,
-      },
-      {
-        name: 'Mem Total',
-        type: 'line',
-        data: sysMemOption.memTotal,
-        showSymbol: false,
-        boundaryGap: false,
-      },
-      {
-        name: 'Swap Free',
-        type: 'line',
-        data: sysMemOption.swapFree,
-        showSymbol: false,
-        boundaryGap: false,
-      },
-      {
-        name: 'Swap Total',
-        type: 'line',
-        data: sysMemOption.swapTotal,
-        showSymbol: false,
-        boundaryGap: false,
-      },
-    ],
-  };
-  chart.setOption(option);
+      yAxis: [{name: `${$t('perf.memUsage')}(MB)`, min: 0}],
+      series: [
+        {
+          name: 'Mem Buffers',
+          type: 'line',
+          data: sysMemOption.memBuffers,
+          showSymbol: false,
+          boundaryGap: false,
+        },
+        {
+          name: 'Mem Cached',
+          type: 'line',
+          data: sysMemOption.memCached,
+          showSymbol: false,
+          boundaryGap: false,
+        },
+        {
+          name: 'Mem Free',
+          type: 'line',
+          data: sysMemOption.memFree,
+          showSymbol: false,
+          boundaryGap: false,
+        },
+        {
+          name: 'Mem Total',
+          type: 'line',
+          data: sysMemOption.memTotal,
+          showSymbol: false,
+          boundaryGap: false,
+        },
+        {
+          name: 'Swap Free',
+          type: 'line',
+          data: sysMemOption.swapFree,
+          showSymbol: false,
+          boundaryGap: false,
+        },
+        {
+          name: 'Swap Total',
+          type: 'line',
+          data: sysMemOption.swapTotal,
+          showSymbol: false,
+          boundaryGap: false,
+        },
+      ],
+    };
+    chart.on('dataZoom', function (event) {
+      if (event.batch) {
+        sysMemZoomStart = event.batch[0].start;
+        sysMemZoomEnd = event.batch[0].end;
+      } else {
+        sysMemZoomStart = event.start;
+        sysMemZoomEnd = event.end;
+      }
+    });
+    chart.setOption(option);
+  }
+
 };
+let sysMemZoomStart = 30;
+let sysMemZoomEnd = 100;
 const printFps = () => {
   let chart = echarts.getInstanceByDom(
       document.getElementById(
@@ -423,49 +453,63 @@ const printFps = () => {
         )
     );
   }
-  chart.resize();
-  const option = {
-    color: ['#67C23A'],
-    title: {
-      text: 'System FPS',
-      textStyle: {
-        color: '#606266',
+  if (chart !== null) {
+    chart.resize();
+    const option = {
+      color: ['#67C23A'],
+      title: {
+        text: 'System FPS',
+        textStyle: {
+          color: '#606266',
+        },
+        x: 'center',
+        y: 'top',
       },
-      x: 'center',
-      y: 'top',
-    },
-    tooltip: {
-      trigger: 'axis',
-    },
-    grid: {top: '15%'},
-    toolbox: {
-      feature: {
-        saveAsImage: {show: true, title: 'Save'},
+      tooltip: {
+        trigger: 'axis',
       },
-    },
-    xAxis: {
-      data: sysFrameOption.categorySysFrameList,
-    },
-    dataZoom: [
-      {
-        show: true,
-        realtime: true,
-        start: 30,
-        end: 100,
-        xAxisIndex: [0, 1],
+      grid: {top: '15%'},
+      toolbox: {
+        feature: {
+          saveAsImage: {show: true, title: 'Save'},
+        },
       },
-    ],
-    yAxis: [{name: 'FPS', min: 0}],
-    series: [
-      {
-        type: 'line',
-        data: sysFrameOption.FPS,
-        showSymbol: false,
+      xAxis: {
+        data: sysFrameOption.categorySysFrameList,
       },
-    ],
-  };
-  chart.setOption(option);
+      dataZoom: [
+        {
+          show: true,
+          realtime: true,
+          start: sysFPSZoomStart,
+          end: sysFPSZoomEnd,
+          xAxisIndex: [0, 1],
+        },
+      ],
+      yAxis: [{name: 'FPS', min: 0}],
+      series: [
+        {
+          type: 'line',
+          data: sysFrameOption.FPS,
+          showSymbol: false,
+        },
+      ],
+    };
+    chart.on('dataZoom', function (event) {
+      if (event.batch) {
+        sysFPSZoomStart = event.batch[0].start;
+        sysFPSZoomEnd = event.batch[0].end;
+      } else {
+        sysFPSZoomStart = event.start;
+        sysFPSZoomEnd = event.end;
+      }
+    });
+    chart.setOption(option);
+  }
 };
+
+let sysFPSZoomStart = 30;
+let sysFPSZoomEnd = 100;
 
 const printJank = () => {
   let chart = echarts.getInstanceByDom(
@@ -480,65 +524,79 @@ const printJank = () => {
         )
     );
   }
-  chart.resize();
-  const option = {
-    color: ['#f1df80', '#e03b16'],
-    title: {
-      text: 'Jank Info',
-      textStyle: {
-        color: '#606266',
+  if (chart !== null) {
+    chart.resize();
+    const option = {
+      color: ['#f1df80', '#e03b16'],
+      title: {
+        text: 'Jank Info',
+        textStyle: {
+          color: '#606266',
+        },
+        x: 'center',
+        y: 'top',
       },
-      x: 'center',
-      y: 'top',
-    },
-    tooltip: {
-      trigger: 'axis',
-    },
-    grid: {top: '15%'},
-    toolbox: {
-      feature: {
-        saveAsImage: {show: true, title: 'Save'},
+      tooltip: {
+        trigger: 'axis',
       },
-    },
-    xAxis: {
-      data: sysFrameOption.categorySysFrameList,
-    },
-    dataZoom: [
-      {
-        show: true,
-        realtime: true,
-        start: 30,
-        end: 100,
-        xAxisIndex: [0, 1],
+      grid: {top: '15%'},
+      toolbox: {
+        feature: {
+          saveAsImage: {show: true, title: 'Save'},
+        },
       },
-    ],
-    yAxis: [{name: 'Jank', min: 0}],
-    legend: {
-      top: '8%',
-      data: [
-        'jank',
-        'big jank',
+      xAxis: {
+        data: sysFrameOption.categorySysFrameList,
+      },
+      dataZoom: [
+        {
+          show: true,
+          realtime: true,
+          start: sysJankZoomStart,
+          end: sysJankZoomEnd,
+          xAxisIndex: [0, 1],
+        },
       ],
-    },
-    series: [
-      {
-        name: 'jank',
-        type: 'line',
-        data: sysFrameOption.jankCount,
-        showSymbol: false,
-        boundaryGap: false,
+      yAxis: [{name: 'Jank', min: 0}],
+      legend: {
+        top: '8%',
+        data: [
+          'jank',
+          'big jank',
+        ],
       },
-      {
-        name: 'big jank',
-        type: 'line',
-        data: sysFrameOption.bigJankCount,
-        showSymbol: false,
-        boundaryGap: false,
-      },
-    ],
-  };
-  chart.setOption(option);
+      series: [
+        {
+          name: 'jank',
+          type: 'line',
+          data: sysFrameOption.jankCount,
+          showSymbol: false,
+          boundaryGap: false,
+        },
+        {
+          name: 'big jank',
+          type: 'line',
+          data: sysFrameOption.bigJankCount,
+          showSymbol: false,
+          boundaryGap: false,
+        },
+      ],
+    };
+    chart.on('dataZoom', function (event) {
+      if (event.batch) {
+        sysJankZoomStart = event.batch[0].start;
+        sysJankZoomEnd = event.batch[0].end;
+      } else {
+        sysJankZoomStart = event.start;
+        sysJankZoomEnd = event.end;
+      }
+    });
+    chart.setOption(option);
+  }
 };
+
+let sysJankZoomStart = 30;
+let sysJankZoomEnd = 100;
 
 const printProcThread = () => {
   let chart = echarts.getInstanceByDom(
@@ -553,49 +611,63 @@ const printProcThread = () => {
         )
     );
   }
-  chart.resize();
-  const option = {
-    color: ['#ee6666'],
-    title: {
-      text: 'Process Thread Count',
-      textStyle: {
-        color: '#606266',
+  if (chart !== null) {
+    chart.resize();
+    const option = {
+      color: ['#ee6666'],
+      title: {
+        text: 'Process Thread Count',
+        textStyle: {
+          color: '#606266',
+        },
+        x: 'center',
+        y: 'top',
       },
-      x: 'center',
-      y: 'top',
-    },
-    tooltip: {
-      trigger: 'axis',
-    },
-    grid: {top: '15%'},
-    toolbox: {
-      feature: {
-        saveAsImage: {show: true, title: 'Save'},
+      tooltip: {
+        trigger: 'axis',
       },
-    },
-    xAxis: {
-      data: procThreadOption.xTimeList,
-    },
-    dataZoom: [
-      {
-        show: true,
-        realtime: true,
-        start: 30,
-        end: 100,
-        xAxisIndex: [0, 1],
+      grid: {top: '15%'},
+      toolbox: {
+        feature: {
+          saveAsImage: {show: true, title: 'Save'},
+        },
       },
-    ],
-    yAxis: [{name: 'Count', min: 0}],
-    series: [
-      {
-        type: 'line',
-        data: procThreadOption.threadCount,
-        showSymbol: false,
+      xAxis: {
+        data: procThreadOption.xTimeList,
       },
-    ],
-  };
-  chart.setOption(option);
+      dataZoom: [
+        {
+          show: true,
+          realtime: true,
+          start: threadCountZoomStart,
+          end: threadCountZoomEnd,
+          xAxisIndex: [0, 1],
+        },
+      ],
+      yAxis: [{name: 'Count', min: 0}],
+      series: [
+        {
+          type: 'line',
+          data: procThreadOption.threadCount,
+          showSymbol: false,
+        },
+      ],
+    };
+    chart.on('dataZoom', function (event) {
+      if (event.batch) {
+        threadCountZoomStart = event.batch[0].start;
+        threadCountZoomEnd = event.batch[0].end;
+      } else {
+        threadCountZoomStart = event.start;
+        threadCountZoomEnd = event.end;
+      }
+    });
+    chart.setOption(option);
+  }
 };
+
+let threadCountZoomStart = 30
+let threadCountZoomEnd = 100
 const printNetwork = () => {
   let chart = echarts.getInstanceByDom(
       document.getElementById(
@@ -609,47 +681,61 @@ const printNetwork = () => {
         )
     );
   }
-  chart.resize();
-  const option = {
-    color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#409EFF'],
-    title: {
-      text: 'System Network',
-      textStyle: {
-        color: '#606266',
+  if (chart !== null) {
+    chart.resize();
+    const option = {
+      color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#409EFF'],
+      title: {
+        text: 'System Network',
+        textStyle: {
+          color: '#606266',
+        },
+        x: 'center',
+        y: 'top',
       },
-      x: 'center',
-      y: 'top',
-    },
-    tooltip: {
-      trigger: 'axis',
-    },
-    grid: {top: '35%', left: '20%'},
-    toolbox: {
-      feature: {
-        saveAsImage: {show: true, title: 'Save'},
+      tooltip: {
+        trigger: 'axis',
       },
-    },
-    legend: {
-      top: '8%',
-      data: networkDataLegend.legend,
-    },
-    xAxis: {
-      data: categorySysNetworkList,
-    },
-    dataZoom: [
-      {
-        show: true,
-        realtime: true,
-        start: 30,
-        end: 100,
-        xAxisIndex: [0, 1],
+      grid: {top: '35%', left: '20%'},
+      toolbox: {
+        feature: {
+          saveAsImage: {show: true, title: 'Save'},
+        },
       },
-    ],
-    yAxis: [{name: `${$t('perf.network')}(MB)`, min: 0}],
-    series: seriesSysNetworkList,
-  };
-  chart.setOption(option);
+      legend: {
+        top: '8%',
+        data: networkDataLegend.legend,
+      },
+      xAxis: {
+        data: categorySysNetworkList,
+      },
+      dataZoom: [
+        {
+          show: true,
+          realtime: true,
+          start: netZoomStart,
+          end: netZoomEnd,
+          xAxisIndex: [0, 1],
+        },
+      ],
+      yAxis: [{name: `${$t('perf.network')}(MB)`, min: 0}],
+      series: seriesSysNetworkList,
+    };
+    chart.on('dataZoom', function (event) {
+      if (event.batch) {
+        netZoomStart = event.batch[0].start;
+        netZoomEnd = event.batch[0].end;
+      } else {
+        netZoomStart = event.start;
+        netZoomEnd = event.end;
+      }
+    });
+    chart.setOption(option);
+  }
 };
+
+let netZoomStart = 30
+let netZoomEnd = 100
 
 const printTemperature = () => {
   let chart = echarts.getInstanceByDom(
@@ -664,58 +750,72 @@ const printTemperature = () => {
         )
     );
   }
-
-  chart.resize();
-  const option = {
-    color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#409EFF'],
-    title: {
-      text: 'System Temperature',
-      textStyle: {
-        color: '#606266',
+  if (chart !== null) {
+    chart.resize();
+    const option = {
+      color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#409EFF'],
+      title: {
+        text: 'System Temperature',
+        textStyle: {
+          color: '#606266',
+        },
+        x: 'center',
+        y: 'top',
       },
-      x: 'center',
-      y: 'top',
-    },
-    tooltip: {
-      trigger: 'axis',
-    },
-    grid: {top: '35%', left: '20%'},
-    toolbox: {
-      feature: {
-        saveAsImage: {show: true, title: 'Save'},
+      tooltip: {
+        trigger: 'axis',
       },
-    },
-    legend: {
-      top: '8%',
-    },
-    xAxis: {
-      data: procTemperatureOption.xTimeList,
-    },
-    dataZoom: [
-      {
-        show: true,
-        realtime: true,
-        start: 30,
-        end: 100,
-        xAxisIndex: [0, 1],
+      grid: {top: '35%', left: '20%'},
+      toolbox: {
+        feature: {
+          saveAsImage: {show: true, title: 'Save'},
+        },
       },
-    ],
-    yAxis: {
-      type: 'value',
-      axisLabel: {
-        formatter: '{value} ℃'
+      legend: {
+        top: '8%',
+      },
+      xAxis: {
+        data: procTemperatureOption.xTimeList,
+      },
+      dataZoom: [
+        {
+          show: true,
+          realtime: true,
+          start: temperatureZoomStart,
+          end: temperatureZoomEnd,
+          xAxisIndex: [0, 1],
+        },
+      ],
+      yAxis: {
+        type: 'value',
+        axisLabel: {
+          formatter: '{value} ℃'
+        }
+      },
+      series: [
+        {
+          type: 'line',
+          data: procTemperatureOption.temperature,
+          showSymbol: false,
+        },
+      ],
+    };
+    chart.on('dataZoom', function (event) {
+      if (event.batch) {
+        temperatureZoomStart = event.batch[0].start;
+        temperatureZoomEnd = event.batch[0].end;
+      } else {
+        temperatureZoomStart = event.start;
+        temperatureZoomEnd = event.end;
       }
-    },
-    series: [
-      {
-        type: 'line',
-        data: procTemperatureOption.temperature,
-        showSymbol: false,
-      },
-    ],
-  };
-  chart.setOption(option);
+    });
+    chart.setOption(option);
+  }
+
 };
+
+let temperatureZoomStart = 30
+let temperatureZoomEnd = 100
 const printPerfCpu = () => {
   let chart = echarts.getInstanceByDom(
       document.getElementById(
@@ -758,8 +858,8 @@ const printPerfCpu = () => {
       {
         show: true,
         realtime: true,
-        start: 30,
-        end: 100,
+        start: procCPUZoomStart,
+        end: procCPUZoomEnd,
         xAxisIndex: [0, 1],
       },
     ],
@@ -774,8 +874,22 @@ const printPerfCpu = () => {
       },
     ],
   };
+  chart.on('dataZoom', function (event) {
+    if (event.batch) {
+      procCPUZoomStart = event.batch[0].start;
+      procCPUZoomEnd = event.batch[0].end;
+    } else {
+      procCPUZoomStart = event.start;
+      procCPUZoomEnd = event.end;
+    }
+  });
   chart.setOption(option);
 };
+
+let procCPUZoomStart = 30
+let procCPUZoomEnd = 100
+
+
 const printPerfMem = () => {
   let chart = echarts.getInstanceByDom(
       document.getElementById(
@@ -789,102 +903,118 @@ const printPerfMem = () => {
         )
     );
   }
-  chart.resize();
-  const option = {
-    color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#409EFF'],
-    title: {
-      text: 'Process Memory',
-      textStyle: {
-        color: '#606266',
+  if (chart !== null) {
+    chart.resize();
+    const option = {
+      color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#409EFF'],
+      title: {
+        text: 'Process Memory',
+        textStyle: {
+          color: '#606266',
+        },
+        x: 'center',
+        y: 'top',
       },
-      x: 'center',
-      y: 'top',
-    },
-    tooltip: {
-      trigger: 'axis',
-    },
-    grid: {top: '30%', left: '20%'},
-    toolbox: {
-      feature: {
-        saveAsImage: {show: true, title: 'Save'},
+      tooltip: {
+        trigger: 'axis',
       },
-    },
-    xAxis: {
-      boundaryGap: false,
-      type: 'category',
-      data: procMemOption.xTimeList,
-    },
-    dataZoom: [
-      {
-        show: true,
-        realtime: true,
-        start: 30,
-        end: 100,
-        xAxisIndex: [0, 1],
+      grid: {top: '30%', left: '20%'},
+      toolbox: {
+        feature: {
+          saveAsImage: {show: true, title: 'Save'},
+        },
       },
-    ],
-    legend: {
-      top: '8%',
-      data: procMemOption.legend,
-    },
-    yAxis: [{name: `${$t('perf.memUsage')}(MB)`, min: 0}],
-    series: [
-      {
-        name: 'totalPSS',
-        type: 'line',
-        data: procMemOption.totalPSS,
-        showSymbol: false,
+      xAxis: {
         boundaryGap: false,
+        type: 'category',
+        data: procMemOption.xTimeList,
       },
-      {
-        name: 'javaHeap',
-        type: 'line',
-        data: procMemOption.javaHeap,
-        showSymbol: false,
-        boundaryGap: false,
+      dataZoom: [
+        {
+          show: true,
+          realtime: true,
+          start: procMemZoomStart,
+          end: procMemZoomEnd,
+          xAxisIndex: [0, 1],
+        },
+      ],
+      legend: {
+        top: '8%',
+        data: procMemOption.legend,
       },
-      {
-        name: 'graphics',
-        type: 'line',
-        data: procMemOption.graphics,
-        showSymbol: false,
-        boundaryGap: false,
-      },
-      {
-        name: 'nativeHeap',
-        type: 'line',
-        data: procMemOption.nativeHeap,
-        showSymbol: false,
-        boundaryGap: false,
-      }, {
-        name: 'code',
-        type: 'line',
-        data: procMemOption.code,
-        showSymbol: false,
-        boundaryGap: false,
-      }, {
-        name: 'privateOther',
-        type: 'line',
-        data: procMemOption.privateOther,
-        showSymbol: false,
-        boundaryGap: false,
-      }, {
-        name: 'stack',
-        type: 'line',
-        data: procMemOption.stack,
-        showSymbol: false,
-        boundaryGap: false,
-      }, {
-        name: 'system',
-        type: 'line',
-        data: procMemOption.system,
-        showSymbol: false,
-        boundaryGap: false,
-      },
-    ],
-  };
-  chart.setOption(option);
+      yAxis: [{name: `${$t('perf.memUsage')}(MB)`, min: 0}],
+      series: [
+        {
+          name: 'totalPSS',
+          type: 'line',
+          data: procMemOption.totalPSS,
+          showSymbol: false,
+          boundaryGap: false,
+        },
+        {
+          name: 'javaHeap',
+          type: 'line',
+          data: procMemOption.javaHeap,
+          showSymbol: false,
+          boundaryGap: false,
+        },
+        {
+          name: 'graphics',
+          type: 'line',
+          data: procMemOption.graphics,
+          showSymbol: false,
+          boundaryGap: false,
+        },
+        {
+          name: 'nativeHeap',
+          type: 'line',
+          data: procMemOption.nativeHeap,
+          showSymbol: false,
+          boundaryGap: false,
+        }, {
+          name: 'code',
+          type: 'line',
+          data: procMemOption.code,
+          showSymbol: false,
+          boundaryGap: false,
+        }, {
+          name: 'privateOther',
+          type: 'line',
+          data: procMemOption.privateOther,
+          showSymbol: false,
+          boundaryGap: false,
+        }, {
+          name: 'stack',
+          type: 'line',
+          data: procMemOption.stack,
+          showSymbol: false,
+          boundaryGap: false,
+        }, {
+          name: 'system',
+          type: 'line',
+          data: procMemOption.system,
+          showSymbol: false,
+          boundaryGap: false,
+        },
+      ],
+    };
+    chart.on('dataZoom', function (event) {
+      if (event.batch) {
+        procMemZoomStart = event.batch[0].start;
+        procMemZoomEnd = event.batch[0].end;
+      } else {
+        procMemZoomStart = event.start;
+        procMemZoomEnd = event.end;
+      }
+    });
+    chart.setOption(option);
+  }
+
 };
+
+let procMemZoomStart = 30
+let procMemZoomEnd = 100
+
 defineExpose({
   printCpu,
   printMem,
@@ -955,7 +1085,7 @@ const switchTab = (e) => {
               `${props.rid}-${props.cid}-${props.did}-` + `perfMemChart`
           )
       );
-      if (procMemChart!==undefined){
+      if (procMemChart !== undefined) {
         procMemChart.resize();
       }
     })
@@ -967,7 +1097,7 @@ const switchTab = (e) => {
               `${props.rid}-${props.cid}-${props.did}-` + `sysNetworkChart`
           )
       );
-      if (networkChart!==undefined){
+      if (networkChart !== undefined) {
         networkChart.resize();
       }
 
@@ -976,7 +1106,7 @@ const switchTab = (e) => {
               `${props.rid}-${props.cid}-${props.did}-` + `procThreadChart`
           )
       );
-      if (threadChart!==undefined){
+      if (threadChart !== undefined) {
         threadChart.resize();
       }
 
@@ -986,7 +1116,7 @@ const switchTab = (e) => {
               `${props.rid}-${props.cid}-${props.did}-` + `sysTemperatureChart`
           )
       );
-      if (temperatureChart!==undefined){
+      if (temperatureChart !== undefined) {
         temperatureChart.resize();
       }
 
