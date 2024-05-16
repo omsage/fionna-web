@@ -63,11 +63,31 @@ const props = defineProps({
   procThread: Object,
 });
 
+const clearPerfData = () => {
+  clearPerfSysNetworkData()
+  clearPerfSysCpu()
+  clearPerfSysMem()
+  clearSysFrame()
+  clearProcCpu()
+  clearProcMem()
+  clearProcThread()
+  clearTemperature()
+}
 
-const seriesSysNetworkMap = {}
-const seriesSysNetworkList = []
-const categorySysNetworkList = []
-const networkDataLegend = {
+const clearPerfSysNetworkData = () => {
+  seriesSysNetworkMap = {}
+  seriesSysNetworkList = []
+  categorySysNetworkList = []
+  networkDataLegend = {
+    isInit: true,
+    legend: []
+  }
+}
+
+let seriesSysNetworkMap = {}
+let seriesSysNetworkList = []
+let categorySysNetworkList = []
+let networkDataLegend = {
   isInit: true,
   legend: []
 }
@@ -109,11 +129,20 @@ watch(() => props.sysNetwork, () => {
   }
 })
 
+const clearPerfSysCpu = () => {
+  seriesSysCpuMap = {}
+  seriesSysCpuList = []
+  categorySysCpuList = []
+  cpuDataLegend = {
+    isInit: true,
+    legend: []
+  }
+}
 
-const seriesSysCpuMap = {}
-const seriesSysCpuList = []
-const categorySysCpuList = []
-const cpuDataLegend = {
+let seriesSysCpuMap = {}
+let seriesSysCpuList = []
+let categorySysCpuList = []
+let cpuDataLegend = {
   isInit: true,
   legend: []
 }
@@ -146,6 +175,17 @@ watch(() => props.sysCpu, () => {
   }
 })
 
+const clearPerfSysMem = () => {
+  sysMemOption = {
+    memBuffers: [],
+    memCached: [],
+    memFree: [],
+    memTotal: [],
+    swapFree: [],
+    swapTotal: [],
+    categorySysMemList: []
+  }
+}
 
 let sysMemOption = {
   memBuffers: [],
@@ -167,6 +207,15 @@ watch(() => props.sysMem, () => {
   }
 })
 
+const clearSysFrame = () => {
+  sysFrameOption = {
+    FPS: [],
+    jankCount: [],
+    bigJankCount: [],
+    categorySysFrameList: []
+  }
+}
+
 let sysFrameOption = {
   FPS: [],
   jankCount: [],
@@ -183,6 +232,13 @@ watch(() => props.sysFps, () => {
   }
 })
 
+const clearProcCpu = () => {
+  procCpuOption = {
+    cpuUtilization: [],
+    xTimeList: []
+  }
+}
+
 let procCpuOption = {
   cpuUtilization: [],
   xTimeList: []
@@ -196,6 +252,21 @@ watch(() => props.procCpu, () => {
     }
   }
 })
+
+const clearProcMem = () => {
+  procMemOption = {
+    legend: ['totalPSS', 'javaHeap', 'nativeHeap', 'code', 'stack', 'graphics', 'privateOther', 'system'],
+    totalPSS: [],
+    javaHeap: [],
+    nativeHeap: [],
+    code: [],
+    stack: [],
+    graphics: [],
+    privateOther: [],
+    system: [],
+    xTimeList: []
+  }
+}
 
 let procMemOption = {
   legend: ['totalPSS', 'javaHeap', 'nativeHeap', 'code', 'stack', 'graphics', 'privateOther', 'system'],
@@ -219,6 +290,13 @@ watch(() => props.procMem, () => {
   }
 })
 
+const clearProcThread = () => {
+  procThreadOption = {
+    threadCount: [],
+    xTimeList: []
+  }
+}
+
 let procThreadOption = {
   threadCount: [],
   xTimeList: []
@@ -232,6 +310,13 @@ watch(() => props.procThread, () => {
     }
   }
 })
+
+const clearTemperature = () => {
+  procTemperatureOption = {
+    temperature: [],
+    xTimeList: []
+  }
+}
 
 let procTemperatureOption = {
   temperature: [],
@@ -1025,6 +1110,7 @@ defineExpose({
   printFps,
   printJank,
   printProcThread,
+  clearPerfData,
 });
 const switchTab = (e) => {
   if (e.index == 1) {
@@ -1035,7 +1121,7 @@ const switchTab = (e) => {
               `${props.rid}-${props.cid}-${props.did}-` + `perfCpuChart`
           )
       );
-      if (procCpuOption.xTimeList !== 0) {
+      if (cpuChart!==undefined) {
         cpuChart.resize();
       }
 
@@ -1044,7 +1130,7 @@ const switchTab = (e) => {
               `${props.rid}-${props.cid}-${props.did}-` + `sysCpuChart`
           )
       );
-      if (seriesSysCpuList.length !== 0) {
+      if (sysCpuChart!==undefined) {
         sysCpuChart.resize();
       }
 
@@ -1056,7 +1142,7 @@ const switchTab = (e) => {
               `${props.rid}-${props.cid}-${props.did}-` + `sysFpsChart`
           )
       );
-      if (sysFrameOption.categorySysFrameList !== 0) {
+      if (fpsChart!==undefined) {
         fpsChart.resize();
       }
 
@@ -1065,7 +1151,7 @@ const switchTab = (e) => {
               `${props.rid}-${props.cid}-${props.did}-` + `sysJankChart`
           )
       );
-      if (sysFrameOption.categorySysFrameList !== 0) {
+      if (jankChart!==undefined) {
         jankChart.resize();
       }
     })
@@ -1076,7 +1162,7 @@ const switchTab = (e) => {
               `${props.rid}-${props.cid}-${props.did}-` + `sysMemChart`
           )
       );
-      if (sysMemOption.categorySysMemList.length !== 0) {
+      if (sysMemChart!==undefined) {
         sysMemChart.resize();
       }
 

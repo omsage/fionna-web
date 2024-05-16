@@ -50,6 +50,7 @@ const stopPerfmon = () => {
   // isStart.value = false;
 };
 const clearPerfmon = () => {
+  console.log("?????????")
   sysCpu.value = {};
   sysMem.value = {};
   sysNetwork.value = {};
@@ -57,6 +58,7 @@ const clearPerfmon = () => {
   procMem.value = {};
   sysFps.value = {};
   procThread.value = {};
+  androidPerfChart.value.clearPerfData()
 };
 const setData = (data) => {
   if (data.process) {
@@ -111,7 +113,7 @@ const sysFps = ref(null);
 const sysJank = ref(null);
 const procThread = ref(null);
 const sysTemperature = ref(null);
-defineExpose({setData});
+defineExpose({setData,clearPerfmon});
 
 const getCurrentAppName = () => {
   isPackageLoading.value = true

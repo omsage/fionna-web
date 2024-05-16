@@ -156,7 +156,7 @@ const stopPerfmon = (isStart) => {
     clearTimeout(perfPongId);
     perfPongId = null;
   }
-
+  androidPerfRef.value.clearPerfmon()
 };
 const img = import.meta.globEager('../../assets/img/*');
 let perfWebsocket = null;
