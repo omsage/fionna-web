@@ -40,6 +40,9 @@ const perf = {
     procCpu: "Process CPU Usage",
     emptyData: "No Data Available",
     byteData: "Data Volume",
+    selectTipPre: "This input box has two modes:",
+    selectTipMid: "1. Enter the package name directly",
+    selectTipEnd: "2. Specify the PID mode using :pid=(PID) , for example, :pid=0 to obtain the performance of the specified PID=0 process"
 };
 
 const elements = {

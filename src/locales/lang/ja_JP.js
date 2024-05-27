@@ -38,6 +38,9 @@ const perf = {
     procCpu: 'CPU使用率',
     emptyData: 'データがありません',
     byteData: 'データ量',
+    selectTipPre: "この入力ボックスには2つのモードがあります：",
+    selectTipMid: "1.パッケージ名を直接入力する",
+    selectTipEnd: "2. :pid=(PID) モードを使用してPIDを指定します。たとえば、:pid=0 は指定されたPID=0のプロセスの性能を取得します"
 };
 const elements = {
     warn: '警告',

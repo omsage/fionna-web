@@ -107,7 +107,7 @@ const switchTabs = (e) => {
 let perfPongId;
 const startPerfmon = (perfConfig, isStart) => {
   if (perfConfig.procCpu || perfConfig.procMem || perfConfig.procThread) {
-    if (perfConfig.packageName === "") {
+    if (perfConfig.packageName === "" && perfConfig.pid === "") {
       ElMessage.error({
         message: $t('perf.pleaseSelectApply'),
       });
@@ -146,17 +146,19 @@ const startPerfmon = (perfConfig, isStart) => {
   }
 };
 const stopPerfmon = (isStart) => {
-  isStart.value = false
-  perfWebsocket.send(
+  if (perfWebsocket!==null){
+    isStart.value = false
+    perfWebsocket.send(
       JSON.stringify({
         messageType: 'closePerfmon',
       })
-  );
-  if (perfPongId !== null) {
-    clearTimeout(perfPongId);
-    perfPongId = null;
+    );
+    if (perfPongId !== null) {
+      clearTimeout(perfPongId);
+      perfPongId = null;
+    }
+    androidPerfRef.value.clearPerfmon()
   }
-  androidPerfRef.value.clearPerfmon()
 };
 const img = import.meta.globEager('../../assets/img/*');
 let perfWebsocket = null;
@@ -210,12 +212,15 @@ const clearLogcat = () => {
   logcatOutPut.value = [];
 };
 const stopLogcat = () => {
-  terminalWebsocket.send(
+  if (terminalWebsocket!==null){
+    terminalWebsocket.send(
       JSON.stringify({
         messageType: 'stopLogcat',
         uuid: logcatUUID.value,
       })
-  );
+    );
+  }
+
 };
 
 let terminalPongId = null;

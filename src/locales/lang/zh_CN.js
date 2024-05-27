@@ -40,6 +40,9 @@ const perf = {
     procCpu: 'CPU使用率',
     emptyData: '暂无数据',
     byteData: '数据量',
+    selectTipPre :"该输入框有两种模式：",
+    selectTipMid:"1.直接输入包名",
+    selectTipEnd:"2.通过 :pid=(PID) 模式指定pid，例如 :pid=0 的即为获取指定pid=0的程序的性能",
 };
 const elements = {
     warn: '警告',

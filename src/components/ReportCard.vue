@@ -118,12 +118,12 @@ const getPerfConfig = () => {
         <!--        // todo-->
         <el-input v-show="isInput"
                   size="mini"
-                  placeholder="请输入报告名"
+                  :placeholder="$t('report.selectReportMess')"
                   v-model="testName">
         </el-input>
-        <el-button size="mini" v-show="!isInput" icon="el-icon-edit" @click="isInput=true" circle></el-button>
+        <el-button size="mini" v-show="!isInput" icon="el-icon-edit" @click="isInput.value=true" circle></el-button>
         <el-button size="mini" v-show="isInput" icon="el-icon-check" @click="submitRename" circle></el-button>
-        <el-button size="mini" v-show="isInput" icon="el-icon-close" @click="isInput=false" circle></el-button>
+        <el-button size="mini" v-show="isInput" icon="el-icon-close" @click="isInput.value=false" circle></el-button>
       </div>
     </template>
     <el-tooltip class="box-item"

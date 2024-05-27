@@ -42,6 +42,12 @@ watch(() => props.udid, (udid) => {
 })
 
 const startPerfmon = () => {
+  console.log(perfPackNameOrPid.value)
+  if (perfPackNameOrPid.value.includes(":pid=")){
+    perfConfig.value.pid = perfPackNameOrPid.value.replaceAll(":pid=","")
+  }else {
+    perfConfig.value.packageName = perfPackNameOrPid.value
+  }
   emit('startPerfmon', perfConfig.value, isStart);
   // isStart.value = true;
 };
@@ -118,7 +124,9 @@ defineExpose({setData,clearPerfmon});
 const getCurrentAppName = () => {
   isPackageLoading.value = true
   axios.get("/android/app/current", {params: {udid: props.udid}}).then((resp) => {
-    perfConfig.value.packageName = resp.data
+    perfPackNameOrPid.value = resp.data.packageName
+    perfConfig.value.packageName = resp.data.packageName;
+    perfConfig.value.pid = resp.data.pid;
     isPackageLoading.value = false
   })
 }
@@ -134,28 +142,51 @@ const perfConfig = ref({
   procThread: false,
   sysTemperature: false,
   packageName: "",
+  pid:"",
 })
 
+const perfPackNameOrPid = ref("")
 
 </script>
 
 <template>
   <div>
-    <el-select
-        v-model="perfConfig.packageName "
-        style="margin-right: 10px; width: 280px"
-        filterable
-        clearable
-        size="mini"
-        :placeholder="$t('perf.select')"
-        v-loading="isPackageLoading"
-    >
-      <el-option v-for="packageName in appList" :value="packageName">
-        <div style="display: flex; align-items: center">
-          {{ packageName }}
+    <el-tooltip class="box-item"
+                effect="dark"
+                placement="top">
+      <template #content>
+        <div >
+          {{ $t('perf.selectTipPre') }}<br>
+          {{ $t('perf.selectTipMid') }}<br>
+          {{ $t('perf.selectTipEnd') }}
         </div>
-      </el-option>
-    </el-select>
+      </template>
+      <el-input
+        v-model="perfPackNameOrPid"
+        size="small"
+        style="margin-right: 10px; width: 280px;"
+        :placeholder="$t('perf.select')"
+        clearable
+      >
+        <template #prepend>
+          <el-select
+            v-model="perfPackNameOrPid "
+            placeholder="Select"
+            filterable
+            size="mini"
+
+            v-loading="isPackageLoading"
+          >
+            <el-option v-for="packageName in appList" :value="packageName">
+              <div style="display: flex; align-items: center">
+                {{ packageName }}
+              </div>
+            </el-option>
+          </el-select>
+        </template>
+      </el-input>
+
+    </el-tooltip>
     <el-button
         @click="getCurrentAppName"
         icon="el-icon-aim"
