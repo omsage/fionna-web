@@ -21,6 +21,7 @@ import {useI18n} from 'vue-i18n';
 import {ref, watch} from 'vue';
 import AndroidPerfChart from './AndroidPerfChart.vue';
 import axios from "@/http/axios";
+import { ElMessage } from "element-plus";
 
 const androidPerfChart = ref(null);
 const {t: $t} = useI18n();
@@ -43,6 +44,12 @@ watch(() => props.udid, (udid) => {
 
 const startPerfmon = () => {
   console.log(perfPackNameOrPid.value)
+  if (perfPackNameOrPid.value===undefined||perfPackNameOrPid.value===""){
+    ElMessage.error({
+      message:  $t('androidRemoteTS.noSelectDevice'),
+    });
+    return
+  }
   if (perfPackNameOrPid.value.includes(":pid=")){
     perfConfig.value.pid = perfPackNameOrPid.value.replaceAll(":pid=","")
   }else {
@@ -56,7 +63,6 @@ const stopPerfmon = () => {
   // isStart.value = false;
 };
 const clearPerfmon = () => {
-  console.log("?????????")
   sysCpu.value = {};
   sysMem.value = {};
   sysNetwork.value = {};
@@ -128,6 +134,11 @@ const getCurrentAppName = () => {
     perfConfig.value.packageName = resp.data.packageName;
     perfConfig.value.pid = resp.data.pid;
     isPackageLoading.value = false
+    if ( resp.data.packageName===""|| resp.data.packageName===undefined){
+      ElMessage.error({
+        message:  $t('androidRemoteTS.noSelectDevice'),
+      });
+    }
   })
 }
 
