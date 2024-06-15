@@ -117,7 +117,6 @@ const startPerfmon = (perfConfig, isStart) => {
 
   }
   if (selectDeviceUdid.value === ""||selectDeviceUdid.value ===undefined) {
-    console.log(selectDeviceUdid.value)
     ElMessage.error({
       message:  $t('androidRemoteTS.noSelectDevice'),
     });

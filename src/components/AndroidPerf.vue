@@ -43,13 +43,6 @@ watch(() => props.udid, (udid) => {
 })
 
 const startPerfmon = () => {
-  console.log(perfPackNameOrPid.value)
-  if (perfPackNameOrPid.value===undefined||perfPackNameOrPid.value===""){
-    ElMessage.error({
-      message:  $t('androidRemoteTS.noSelectDevice'),
-    });
-    return
-  }
   if (perfPackNameOrPid.value.includes(":pid=")){
     perfConfig.value.pid = perfPackNameOrPid.value.replaceAll(":pid=","")
   }else {
