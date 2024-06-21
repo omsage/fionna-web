@@ -16,9 +16,9 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import moment from 'moment/moment';
-import {useI18n} from 'vue-i18n';
-import * as echarts from 'echarts/core';
+import moment from "moment/moment";
+import { useI18n } from "vue-i18n";
+import * as echarts from "echarts/core";
 import {
   TitleComponent,
   ToolboxComponent,
@@ -28,10 +28,10 @@ import {
   DataZoomComponent,
   MarkPointComponent,
   MarkLineComponent,
-} from 'echarts/components';
-import {LineChart} from 'echarts/charts';
-import {CanvasRenderer} from 'echarts/renderers';
-import {nextTick, watch} from 'vue';
+} from "echarts/components";
+import { LineChart } from "echarts/charts";
+import { CanvasRenderer } from "echarts/renderers";
+import { nextTick, watch } from "vue";
 
 echarts.use([
   MarkPointComponent,
@@ -46,7 +46,7 @@ echarts.use([
   TooltipComponent,
 ]);
 
-const {t: $t} = useI18n();
+const { t: $t } = useI18n();
 const props = defineProps({
   isStartPerf: Boolean,
   rid: String,
@@ -64,116 +64,126 @@ const props = defineProps({
 });
 
 const clearPerfData = () => {
-  clearPerfSysNetworkData()
-  clearPerfSysCpu()
-  clearPerfSysMem()
-  clearSysFrame()
-  clearProcCpu()
-  clearProcMem()
-  clearProcThread()
-  clearTemperature()
-}
+  clearPerfSysNetworkData();
+  clearPerfSysCpu();
+  clearPerfSysMem();
+  clearSysFrame();
+  clearProcCpu();
+  clearProcMem();
+  clearProcThread();
+  clearTemperature();
+};
 
 const clearPerfSysNetworkData = () => {
-  seriesSysNetworkMap = {}
-  seriesSysNetworkList = []
-  categorySysNetworkList = []
+  seriesSysNetworkMap = {};
+  seriesSysNetworkList = [];
+  categorySysNetworkList = [];
   networkDataLegend = {
     isInit: true,
-    legend: []
-  }
-}
+    legend: [],
+  };
+};
 
-let seriesSysNetworkMap = {}
-let seriesSysNetworkList = []
-let categorySysNetworkList = []
+let seriesSysNetworkMap = {};
+let seriesSysNetworkList = [];
+let categorySysNetworkList = [];
 let networkDataLegend = {
   isInit: true,
-  legend: []
-}
+  legend: [],
+};
 
-watch(() => props.sysNetwork, () => {
-  let isAddTime = true;
-  for (const i in props.sysNetwork) {
-    if (isAddTime) {
-      categorySysNetworkList.push(moment(new Date(props.sysNetwork[i].timestamp)).format('HH:mm:ss'));
-      isAddTime = false;
-    }
-
-    if (networkDataLegend.isInit) {
-      networkDataLegend.legend.push(i + '_rx')
-      networkDataLegend.legend.push(i + '_tx')
-    }
-
-    if (seriesSysNetworkMap[i + '_rx'] === undefined) {
-      seriesSysNetworkMap[i + '_rx'] = {
-        type: 'line',
-        name: i + '_rx',
-        data: [props.sysNetwork[i].rx],
-        showSymbol: false,
-        boundaryGap: false,
+watch(
+  () => props.sysNetwork,
+  () => {
+    let isAddTime = true;
+    for (const i in props.sysNetwork) {
+      if (isAddTime) {
+        categorySysNetworkList.push(
+          moment(new Date(props.sysNetwork[i].timestamp)).format("HH:mm:ss")
+        );
+        isAddTime = false;
       }
-      seriesSysNetworkMap[i + '_tx'] = {
-        type: 'line',
-        name: i + '_tx',
-        data: [props.sysNetwork[i].tx],
-        showSymbol: false,
-        boundaryGap: false,
+
+      if (networkDataLegend.isInit) {
+        networkDataLegend.legend.push(i + "_rx");
+        networkDataLegend.legend.push(i + "_tx");
       }
-      seriesSysNetworkList.push(seriesSysNetworkMap[i + '_rx']);
-      seriesSysNetworkList.push(seriesSysNetworkMap[i + '_tx']);
-    } else {
-      seriesSysNetworkMap[i + '_rx'].data.push(props.sysNetwork[i].rx)
-      seriesSysNetworkMap[i + '_tx'].data.push(props.sysNetwork[i].tx)
+
+      if (seriesSysNetworkMap[i + "_rx"] === undefined) {
+        seriesSysNetworkMap[i + "_rx"] = {
+          type: "line",
+          name: i + "_rx",
+          data: [props.sysNetwork[i].rx],
+          showSymbol: false,
+          boundaryGap: false,
+        };
+        seriesSysNetworkMap[i + "_tx"] = {
+          type: "line",
+          name: i + "_tx",
+          data: [props.sysNetwork[i].tx],
+          showSymbol: false,
+          boundaryGap: false,
+        };
+        seriesSysNetworkList.push(seriesSysNetworkMap[i + "_rx"]);
+        seriesSysNetworkList.push(seriesSysNetworkMap[i + "_tx"]);
+      } else {
+        seriesSysNetworkMap[i + "_rx"].data.push(props.sysNetwork[i].rx);
+        seriesSysNetworkMap[i + "_tx"].data.push(props.sysNetwork[i].tx);
+      }
     }
   }
-})
+);
 
 const clearPerfSysCpu = () => {
-  seriesSysCpuMap = {}
-  seriesSysCpuList = []
-  categorySysCpuList = []
+  seriesSysCpuMap = {};
+  seriesSysCpuList = [];
+  categorySysCpuList = [];
   cpuDataLegend = {
     isInit: true,
-    legend: []
-  }
-}
+    legend: [],
+  };
+};
 
-let seriesSysCpuMap = {}
-let seriesSysCpuList = []
-let categorySysCpuList = []
+let seriesSysCpuMap = {};
+let seriesSysCpuList = [];
+let categorySysCpuList = [];
 let cpuDataLegend = {
   isInit: true,
-  legend: []
-}
+  legend: [],
+};
 
-watch(() => props.sysCpu, () => {
-  let isAddTime = true;
-  for (const i in props.sysCpu) {
-    if (isAddTime) {
-      categorySysCpuList.push(moment(new Date(props.sysCpu[i].timestamp)).format('HH:mm:ss'));
-      isAddTime = false;
-    }
-
-    if (cpuDataLegend.isInit) {
-      cpuDataLegend.legend.push(i)
-    }
-
-    if (seriesSysCpuMap[i] === undefined) {
-      seriesSysCpuMap[i] = {
-        type: 'line',
-        name: i,
-        data: [props.sysCpu[i].cpuUsage],
-        showSymbol: false,
-        areaStyle: {},
-        boundaryGap: false,
+watch(
+  () => props.sysCpu,
+  () => {
+    let isAddTime = true;
+    for (const i in props.sysCpu) {
+      if (isAddTime) {
+        categorySysCpuList.push(
+          moment(new Date(props.sysCpu[i].timestamp)).format("HH:mm:ss")
+        );
+        isAddTime = false;
       }
-      seriesSysCpuList.push(seriesSysCpuMap[i]);
-    } else {
-      seriesSysCpuMap[i].data.push(props.sysCpu[i].cpuUsage)
+
+      if (cpuDataLegend.isInit) {
+        cpuDataLegend.legend.push(i);
+      }
+
+      if (seriesSysCpuMap[i] === undefined) {
+        seriesSysCpuMap[i] = {
+          type: "line",
+          name: i,
+          data: [props.sysCpu[i].cpuUsage],
+          showSymbol: false,
+          areaStyle: {},
+          boundaryGap: false,
+        };
+        seriesSysCpuList.push(seriesSysCpuMap[i]);
+      } else {
+        seriesSysCpuMap[i].data.push(props.sysCpu[i].cpuUsage);
+      }
     }
   }
-})
+);
 
 const clearPerfSysMem = () => {
   sysMemOption = {
@@ -183,9 +193,9 @@ const clearPerfSysMem = () => {
     memTotal: [],
     swapFree: [],
     swapTotal: [],
-    categorySysMemList: []
-  }
-}
+    categorySysMemList: [],
+  };
+};
 
 let sysMemOption = {
   memBuffers: [],
@@ -194,68 +204,92 @@ let sysMemOption = {
   memTotal: [],
   swapFree: [],
   swapTotal: [],
-  categorySysMemList: []
-}
+  categorySysMemList: [],
+};
 
-watch(() => props.sysMem, () => {
-  sysMemOption.categorySysMemList.push(moment(new Date(props.sysMem.timestamp)).format('HH:mm:ss'));
-  for (const i in props.sysMem) {
-    // console.log(props.sysMem[i])
-    if (sysMemOption[i] !== undefined) {
-      sysMemOption[i].push(props.sysMem[i])
+watch(
+  () => props.sysMem,
+  () => {
+    sysMemOption.categorySysMemList.push(
+      moment(new Date(props.sysMem.timestamp)).format("HH:mm:ss")
+    );
+    for (const i in props.sysMem) {
+      // console.log(props.sysMem[i])
+      if (sysMemOption[i] !== undefined) {
+        sysMemOption[i].push(props.sysMem[i]);
+      }
     }
   }
-})
+);
 
 const clearSysFrame = () => {
   sysFrameOption = {
     FPS: [],
     jankCount: [],
     bigJankCount: [],
-    categorySysFrameList: []
-  }
-}
+    categorySysFrameList: [],
+  };
+};
 
 let sysFrameOption = {
   FPS: [],
   jankCount: [],
   bigJankCount: [],
-  categorySysFrameList: []
-}
+  categorySysFrameList: [],
+};
 
-watch(() => props.sysFps, () => {
-  sysFrameOption.categorySysFrameList.push(moment(new Date(props.sysFps.timestamp)).format('HH:mm:ss'));
-  for (const i in props.sysFps) {
-    if (sysFrameOption[i] !== undefined) {
-      sysFrameOption[i].push(props.sysFps[i])
+watch(
+  () => props.sysFps,
+  () => {
+    sysFrameOption.categorySysFrameList.push(
+      moment(new Date(props.sysFps.timestamp)).format("HH:mm:ss")
+    );
+    for (const i in props.sysFps) {
+      if (sysFrameOption[i] !== undefined) {
+        sysFrameOption[i].push(props.sysFps[i]);
+      }
     }
   }
-})
+);
 
 const clearProcCpu = () => {
   procCpuOption = {
     cpuUtilization: [],
-    xTimeList: []
-  }
-}
+    xTimeList: [],
+  };
+};
 
 let procCpuOption = {
   cpuUtilization: [],
-  xTimeList: []
-}
+  xTimeList: [],
+};
 
-watch(() => props.procCpu, () => {
-  procCpuOption.xTimeList.push(moment(new Date(props.procCpu.timestamp)).format('HH:mm:ss'));
-  for (const i in props.procCpu) {
-    if (procCpuOption[i] !== undefined) {
-      procCpuOption[i].push(props.procCpu[i])
+watch(
+  () => props.procCpu,
+  () => {
+    procCpuOption.xTimeList.push(
+      moment(new Date(props.procCpu.timestamp)).format("HH:mm:ss")
+    );
+    for (const i in props.procCpu) {
+      if (procCpuOption[i] !== undefined) {
+        procCpuOption[i].push(props.procCpu[i]);
+      }
     }
   }
-})
+);
 
 const clearProcMem = () => {
   procMemOption = {
-    legend: ['totalPSS', 'javaHeap', 'nativeHeap', 'code', 'stack', 'graphics', 'privateOther', 'system'],
+    legend: [
+      "totalPSS",
+      "javaHeap",
+      "nativeHeap",
+      "code",
+      "stack",
+      "graphics",
+      "privateOther",
+      "system",
+    ],
     totalPSS: [],
     javaHeap: [],
     nativeHeap: [],
@@ -264,12 +298,21 @@ const clearProcMem = () => {
     graphics: [],
     privateOther: [],
     system: [],
-    xTimeList: []
-  }
-}
+    xTimeList: [],
+  };
+};
 
 let procMemOption = {
-  legend: ['totalPSS', 'javaHeap', 'nativeHeap', 'code', 'stack', 'graphics', 'privateOther', 'system'],
+  legend: [
+    "totalPSS",
+    "javaHeap",
+    "nativeHeap",
+    "code",
+    "stack",
+    "graphics",
+    "privateOther",
+    "system",
+  ],
   totalPSS: [],
   javaHeap: [],
   nativeHeap: [],
@@ -278,102 +321,117 @@ let procMemOption = {
   graphics: [],
   privateOther: [],
   system: [],
-  xTimeList: []
-}
+  xTimeList: [],
+};
 
-watch(() => props.procMem, () => {
-  procMemOption.xTimeList.push(moment(new Date(props.procMem.timestamp)).format('HH:mm:ss'));
-  for (const i in props.procMem) {
-    if (procMemOption[i] !== undefined) {
-      procMemOption[i].push(props.procMem[i])
+watch(
+  () => props.procMem,
+  () => {
+    procMemOption.xTimeList.push(
+      moment(new Date(props.procMem.timestamp)).format("HH:mm:ss")
+    );
+    for (const i in props.procMem) {
+      if (procMemOption[i] !== undefined) {
+        procMemOption[i].push(props.procMem[i]);
+      }
     }
   }
-})
+);
 
 const clearProcThread = () => {
   procThreadOption = {
     threadCount: [],
-    xTimeList: []
-  }
-}
+    xTimeList: [],
+  };
+};
 
 let procThreadOption = {
   threadCount: [],
-  xTimeList: []
-}
+  xTimeList: [],
+};
 
-watch(() => props.procThread, () => {
-  procThreadOption.xTimeList.push(moment(new Date(props.procThread.timestamp)).format('HH:mm:ss'));
-  for (const i in props.procThread) {
-    if (procThreadOption[i] !== undefined) {
-      procThreadOption[i].push(props.procThread[i])
+watch(
+  () => props.procThread,
+  () => {
+    procThreadOption.xTimeList.push(
+      moment(new Date(props.procThread.timestamp)).format("HH:mm:ss")
+    );
+    for (const i in props.procThread) {
+      if (procThreadOption[i] !== undefined) {
+        procThreadOption[i].push(props.procThread[i]);
+      }
     }
   }
-})
+);
 
 const clearTemperature = () => {
   procTemperatureOption = {
     temperature: [],
-    xTimeList: []
-  }
-}
+    xTimeList: [],
+  };
+};
 
 let procTemperatureOption = {
   temperature: [],
-  xTimeList: []
-}
+  xTimeList: [],
+};
 
-watch(() => props.sysTemperature, () => {
-  procTemperatureOption.xTimeList.push(moment(new Date(props.sysTemperature.timestamp)).format('HH:mm:ss'));
-  procTemperatureOption.temperature.push(props.sysTemperature.temperature)
-})
+watch(
+  () => props.sysTemperature,
+  () => {
+    procTemperatureOption.xTimeList.push(
+      moment(new Date(props.sysTemperature.timestamp)).format("HH:mm:ss")
+    );
+    procTemperatureOption.temperature.push(props.sysTemperature.temperature);
+  }
+);
 
 const printCpu = () => {
   let chart = echarts.getInstanceByDom(
-      document.getElementById(
-          `${props.rid}-${props.cid}-${props.did}-` + `sysCpuChart`
-      )
+    document.getElementById(
+      `${props.rid}-${props.cid}-${props.did}-` + `sysCpuChart`
+    )
   );
   if (chart == null) {
     chart = echarts.init(
-        document.getElementById(
-            `${props.rid}-${props.cid}-${props.did}-` + `sysCpuChart`
-        )
+      document.getElementById(
+        `${props.rid}-${props.cid}-${props.did}-` + `sysCpuChart`
+      )
     );
   }
-  if (chart!==null){
+  if (chart !== null) {
     chart.resize();
     const option = {
       title: {
-        text: 'System Total CPU',
+        text: "System Total CPU",
         textStyle: {
-          color: '#606266',
+          color: "#606266",
         },
-        x: 'center',
-        y: 'top',
+        x: "center",
+        y: "top",
       },
       tooltip: {
-        trigger: 'axis',
+        trigger: "axis",
         position(pos, params, dom, rect, size) {
-          const obj = {top: 60};
-          obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 5;
+          const obj = { top: 60 };
+          obj[["left", "right"][+(pos[0] < size.viewSize[0] / 2)]] = 5;
           return obj;
         },
         valueFormatter: (value) => `${value.toFixed(3)} %`,
       },
       legend: {
-        top: '8%',
+        top: "8%",
         data: cpuDataLegend.legend,
       },
-      grid: {top: '28%', left: '20%'},
+      grid: { top: "28%", left: "20%" },
       toolbox: {
         feature: {
-          saveAsImage: {show: true, title: 'Save'},
+          saveAsImage: { show: true, title: "Save" },
         },
       },
       xAxis: {
         boundaryGap: false,
-        type: 'category',
+        type: "category",
         data: categorySysCpuList,
       },
       dataZoom: [
@@ -385,10 +443,10 @@ const printCpu = () => {
           xAxisIndex: [0, 1],
         },
       ],
-      yAxis: [{name: `${$t('perf.totalCpu')}(%)`, min: 0}],
+      yAxis: [{ name: `${$t("perf.totalCpu")}(%)`, min: 0 }],
       series: seriesSysCpuList,
     };
-    chart.on('dataZoom', function (event) {
+    chart.on("dataZoom", function (event) {
       if (event.batch) {
         sysCPUZoomStart = event.batch[0].start;
         sysCPUZoomEnd = event.batch[0].end;
@@ -399,7 +457,6 @@ const printCpu = () => {
     });
     chart.setOption(option);
   }
-
 };
 
 let sysCPUZoomStart = 30;
@@ -407,52 +464,52 @@ let sysCPUZoomEnd = 100;
 
 const printMem = () => {
   let chart = echarts.getInstanceByDom(
-      document.getElementById(
-          `${props.rid}-${props.cid}-${props.did}-` + `sysMemChart`
-      )
+    document.getElementById(
+      `${props.rid}-${props.cid}-${props.did}-` + `sysMemChart`
+    )
   );
   if (chart == null) {
     chart = echarts.init(
-        document.getElementById(
-            `${props.rid}-${props.cid}-${props.did}-` + `sysMemChart`
-        )
+      document.getElementById(
+        `${props.rid}-${props.cid}-${props.did}-` + `sysMemChart`
+      )
     );
   }
-  if (chart!==null){
+  if (chart !== null) {
     chart.resize();
     const option = {
-      color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#409EFF'],
+      color: ["#5470c6", "#91cc75", "#fac858", "#ee6666", "#73c0de", "#409EFF"],
       title: {
-        text: 'System Memory',
+        text: "System Memory",
         textStyle: {
-          color: '#606266',
+          color: "#606266",
         },
-        x: 'center',
-        y: 'top',
+        x: "center",
+        y: "top",
       },
       tooltip: {
-        trigger: 'axis',
+        trigger: "axis",
       },
-      grid: {top: '30%', left: '20%'},
+      grid: { top: "30%", left: "20%" },
       toolbox: {
         feature: {
-          saveAsImage: {show: true, title: 'Save'},
+          saveAsImage: { show: true, title: "Save" },
         },
       },
       legend: {
-        top: '8%',
+        top: "8%",
         data: [
-          'Mem Buffers',
-          'Mem Cached',
-          'Mem Free',
-          'Mem Total',
-          'Swap Free',
-          'Swap Total',
+          "Mem Buffers",
+          "Mem Cached",
+          "Mem Free",
+          "Mem Total",
+          "Swap Free",
+          "Swap Total",
         ],
       },
       xAxis: {
         boundaryGap: false,
-        type: 'category',
+        type: "category",
         data: sysMemOption.categorySysMemList,
       },
       dataZoom: [
@@ -464,53 +521,53 @@ const printMem = () => {
           xAxisIndex: [0, 1],
         },
       ],
-      yAxis: [{name: `${$t('perf.memUsage')}(MB)`, min: 0}],
+      yAxis: [{ name: `${$t("perf.memUsage")}(MB)`, min: 0 }],
       series: [
         {
-          name: 'Mem Buffers',
-          type: 'line',
+          name: "Mem Buffers",
+          type: "line",
           data: sysMemOption.memBuffers,
           showSymbol: false,
           boundaryGap: false,
         },
         {
-          name: 'Mem Cached',
-          type: 'line',
+          name: "Mem Cached",
+          type: "line",
           data: sysMemOption.memCached,
           showSymbol: false,
           boundaryGap: false,
         },
         {
-          name: 'Mem Free',
-          type: 'line',
+          name: "Mem Free",
+          type: "line",
           data: sysMemOption.memFree,
           showSymbol: false,
           boundaryGap: false,
         },
         {
-          name: 'Mem Total',
-          type: 'line',
+          name: "Mem Total",
+          type: "line",
           data: sysMemOption.memTotal,
           showSymbol: false,
           boundaryGap: false,
         },
         {
-          name: 'Swap Free',
-          type: 'line',
+          name: "Swap Free",
+          type: "line",
           data: sysMemOption.swapFree,
           showSymbol: false,
           boundaryGap: false,
         },
         {
-          name: 'Swap Total',
-          type: 'line',
+          name: "Swap Total",
+          type: "line",
           data: sysMemOption.swapTotal,
           showSymbol: false,
           boundaryGap: false,
         },
       ],
     };
-    chart.on('dataZoom', function (event) {
+    chart.on("dataZoom", function (event) {
       if (event.batch) {
         sysMemZoomStart = event.batch[0].start;
         sysMemZoomEnd = event.batch[0].end;
@@ -521,42 +578,41 @@ const printMem = () => {
     });
     chart.setOption(option);
   }
-
 };
 let sysMemZoomStart = 30;
 let sysMemZoomEnd = 100;
 const printFps = () => {
   let chart = echarts.getInstanceByDom(
-      document.getElementById(
-          `${props.rid}-${props.cid}-${props.did}-` + `sysFpsChart`
-      )
+    document.getElementById(
+      `${props.rid}-${props.cid}-${props.did}-` + `sysFpsChart`
+    )
   );
   if (chart == null) {
     chart = echarts.init(
-        document.getElementById(
-            `${props.rid}-${props.cid}-${props.did}-` + `sysFpsChart`
-        )
+      document.getElementById(
+        `${props.rid}-${props.cid}-${props.did}-` + `sysFpsChart`
+      )
     );
   }
   if (chart !== null) {
     chart.resize();
     const option = {
-      color: ['#67C23A'],
+      color: ["#67C23A"],
       title: {
-        text: 'System FPS',
+        text: "System FPS",
         textStyle: {
-          color: '#606266',
+          color: "#606266",
         },
-        x: 'center',
-        y: 'top',
+        x: "center",
+        y: "top",
       },
       tooltip: {
-        trigger: 'axis',
+        trigger: "axis",
       },
-      grid: {top: '15%'},
+      grid: { top: "15%" },
       toolbox: {
         feature: {
-          saveAsImage: {show: true, title: 'Save'},
+          saveAsImage: { show: true, title: "Save" },
         },
       },
       xAxis: {
@@ -571,16 +627,16 @@ const printFps = () => {
           xAxisIndex: [0, 1],
         },
       ],
-      yAxis: [{name: 'FPS', min: 0}],
+      yAxis: [{ name: "FPS", min: 0 }],
       series: [
         {
-          type: 'line',
+          type: "line",
           data: sysFrameOption.FPS,
           showSymbol: false,
         },
       ],
     };
-    chart.on('dataZoom', function (event) {
+    chart.on("dataZoom", function (event) {
       if (event.batch) {
         sysFPSZoomStart = event.batch[0].start;
         sysFPSZoomEnd = event.batch[0].end;
@@ -598,36 +654,36 @@ let sysFPSZoomEnd = 100;
 
 const printJank = () => {
   let chart = echarts.getInstanceByDom(
-      document.getElementById(
-          `${props.rid}-${props.cid}-${props.did}-` + `sysJankChart`
-      )
+    document.getElementById(
+      `${props.rid}-${props.cid}-${props.did}-` + `sysJankChart`
+    )
   );
   if (chart == null) {
     chart = echarts.init(
-        document.getElementById(
-            `${props.rid}-${props.cid}-${props.did}-` + `sysJankChart`
-        )
+      document.getElementById(
+        `${props.rid}-${props.cid}-${props.did}-` + `sysJankChart`
+      )
     );
   }
   if (chart !== null) {
     chart.resize();
     const option = {
-      color: ['#f1df80', '#e03b16'],
+      color: ["#f1df80", "#e03b16"],
       title: {
-        text: 'Jank Info',
+        text: "Jank Info",
         textStyle: {
-          color: '#606266',
+          color: "#606266",
         },
-        x: 'center',
-        y: 'top',
+        x: "center",
+        y: "top",
       },
       tooltip: {
-        trigger: 'axis',
+        trigger: "axis",
       },
-      grid: {top: '15%'},
+      grid: { top: "15%" },
       toolbox: {
         feature: {
-          saveAsImage: {show: true, title: 'Save'},
+          saveAsImage: { show: true, title: "Save" },
         },
       },
       xAxis: {
@@ -642,32 +698,29 @@ const printJank = () => {
           xAxisIndex: [0, 1],
         },
       ],
-      yAxis: [{name: 'Jank', min: 0}],
+      yAxis: [{ name: "Jank", min: 0 }],
       legend: {
-        top: '8%',
-        data: [
-          'jank',
-          'big jank',
-        ],
+        top: "8%",
+        data: ["jank", "big jank"],
       },
       series: [
         {
-          name: 'jank',
-          type: 'line',
+          name: "jank",
+          type: "line",
           data: sysFrameOption.jankCount,
           showSymbol: false,
           boundaryGap: false,
         },
         {
-          name: 'big jank',
-          type: 'line',
+          name: "big jank",
+          type: "line",
           data: sysFrameOption.bigJankCount,
           showSymbol: false,
           boundaryGap: false,
         },
       ],
     };
-    chart.on('dataZoom', function (event) {
+    chart.on("dataZoom", function (event) {
       if (event.batch) {
         sysJankZoomStart = event.batch[0].start;
         sysJankZoomEnd = event.batch[0].end;
@@ -685,36 +738,36 @@ let sysJankZoomEnd = 100;
 
 const printProcThread = () => {
   let chart = echarts.getInstanceByDom(
-      document.getElementById(
-          `${props.rid}-${props.cid}-${props.did}-` + `procThreadChart`
-      )
+    document.getElementById(
+      `${props.rid}-${props.cid}-${props.did}-` + `procThreadChart`
+    )
   );
   if (chart == null) {
     chart = echarts.init(
-        document.getElementById(
-            `${props.rid}-${props.cid}-${props.did}-` + `procThreadChart`
-        )
+      document.getElementById(
+        `${props.rid}-${props.cid}-${props.did}-` + `procThreadChart`
+      )
     );
   }
   if (chart !== null) {
     chart.resize();
     const option = {
-      color: ['#ee6666'],
+      color: ["#ee6666"],
       title: {
-        text: 'Process Thread Count',
+        text: "Process Thread Count",
         textStyle: {
-          color: '#606266',
+          color: "#606266",
         },
-        x: 'center',
-        y: 'top',
+        x: "center",
+        y: "top",
       },
       tooltip: {
-        trigger: 'axis',
+        trigger: "axis",
       },
-      grid: {top: '15%'},
+      grid: { top: "15%" },
       toolbox: {
         feature: {
-          saveAsImage: {show: true, title: 'Save'},
+          saveAsImage: { show: true, title: "Save" },
         },
       },
       xAxis: {
@@ -729,16 +782,16 @@ const printProcThread = () => {
           xAxisIndex: [0, 1],
         },
       ],
-      yAxis: [{name: 'Count', min: 0}],
+      yAxis: [{ name: "Count", min: 0 }],
       series: [
         {
-          type: 'line',
+          type: "line",
           data: procThreadOption.threadCount,
           showSymbol: false,
         },
       ],
     };
-    chart.on('dataZoom', function (event) {
+    chart.on("dataZoom", function (event) {
       if (event.batch) {
         threadCountZoomStart = event.batch[0].start;
         threadCountZoomEnd = event.batch[0].end;
@@ -751,44 +804,44 @@ const printProcThread = () => {
   }
 };
 
-let threadCountZoomStart = 30
-let threadCountZoomEnd = 100
+let threadCountZoomStart = 30;
+let threadCountZoomEnd = 100;
 const printNetwork = () => {
   let chart = echarts.getInstanceByDom(
-      document.getElementById(
-          `${props.rid}-${props.cid}-${props.did}-` + `sysNetworkChart`
-      )
+    document.getElementById(
+      `${props.rid}-${props.cid}-${props.did}-` + `sysNetworkChart`
+    )
   );
   if (chart == null) {
     chart = echarts.init(
-        document.getElementById(
-            `${props.rid}-${props.cid}-${props.did}-` + `sysNetworkChart`
-        )
+      document.getElementById(
+        `${props.rid}-${props.cid}-${props.did}-` + `sysNetworkChart`
+      )
     );
   }
   if (chart !== null) {
     chart.resize();
     const option = {
-      color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#409EFF'],
+      color: ["#5470c6", "#91cc75", "#fac858", "#ee6666", "#73c0de", "#409EFF"],
       title: {
-        text: 'System Network',
+        text: "System Network",
         textStyle: {
-          color: '#606266',
+          color: "#606266",
         },
-        x: 'center',
-        y: 'top',
+        x: "center",
+        y: "top",
       },
       tooltip: {
-        trigger: 'axis',
+        trigger: "axis",
       },
-      grid: {top: '35%', left: '20%'},
+      grid: { top: "35%", left: "20%" },
       toolbox: {
         feature: {
-          saveAsImage: {show: true, title: 'Save'},
+          saveAsImage: { show: true, title: "Save" },
         },
       },
       legend: {
-        top: '8%',
+        top: "8%",
         data: networkDataLegend.legend,
       },
       xAxis: {
@@ -803,10 +856,10 @@ const printNetwork = () => {
           xAxisIndex: [0, 1],
         },
       ],
-      yAxis: [{name: `${$t('perf.network')}(MB)`, min: 0}],
+      yAxis: [{ name: `${$t("perf.network")}(MB)`, min: 0 }],
       series: seriesSysNetworkList,
     };
-    chart.on('dataZoom', function (event) {
+    chart.on("dataZoom", function (event) {
       if (event.batch) {
         netZoomStart = event.batch[0].start;
         netZoomEnd = event.batch[0].end;
@@ -819,45 +872,45 @@ const printNetwork = () => {
   }
 };
 
-let netZoomStart = 30
-let netZoomEnd = 100
+let netZoomStart = 30;
+let netZoomEnd = 100;
 
 const printTemperature = () => {
   let chart = echarts.getInstanceByDom(
-      document.getElementById(
-          `${props.rid}-${props.cid}-${props.did}-` + `sysTemperatureChart`
-      )
+    document.getElementById(
+      `${props.rid}-${props.cid}-${props.did}-` + `sysTemperatureChart`
+    )
   );
   if (chart == null) {
     chart = echarts.init(
-        document.getElementById(
-            `${props.rid}-${props.cid}-${props.did}-` + `sysTemperatureChart`
-        )
+      document.getElementById(
+        `${props.rid}-${props.cid}-${props.did}-` + `sysTemperatureChart`
+      )
     );
   }
   if (chart !== null) {
     chart.resize();
     const option = {
-      color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#409EFF'],
+      color: ["#5470c6", "#91cc75", "#fac858", "#ee6666", "#73c0de", "#409EFF"],
       title: {
-        text: 'System Temperature',
+        text: "System Temperature",
         textStyle: {
-          color: '#606266',
+          color: "#606266",
         },
-        x: 'center',
-        y: 'top',
+        x: "center",
+        y: "top",
       },
       tooltip: {
-        trigger: 'axis',
+        trigger: "axis",
       },
-      grid: {top: '35%', left: '20%'},
+      grid: { top: "35%", left: "20%" },
       toolbox: {
         feature: {
-          saveAsImage: {show: true, title: 'Save'},
+          saveAsImage: { show: true, title: "Save" },
         },
       },
       legend: {
-        top: '8%',
+        top: "8%",
       },
       xAxis: {
         data: procTemperatureOption.xTimeList,
@@ -872,20 +925,20 @@ const printTemperature = () => {
         },
       ],
       yAxis: {
-        type: 'value',
+        type: "value",
         axisLabel: {
-          formatter: '{value} ℃'
-        }
+          formatter: "{value} ℃",
+        },
       },
       series: [
         {
-          type: 'line',
+          type: "line",
           data: procTemperatureOption.temperature,
           showSymbol: false,
         },
       ],
     };
-    chart.on('dataZoom', function (event) {
+    chart.on("dataZoom", function (event) {
       if (event.batch) {
         temperatureZoomStart = event.batch[0].start;
         temperatureZoomEnd = event.batch[0].end;
@@ -896,47 +949,46 @@ const printTemperature = () => {
     });
     chart.setOption(option);
   }
-
 };
 
-let temperatureZoomStart = 30
-let temperatureZoomEnd = 100
+let temperatureZoomStart = 30;
+let temperatureZoomEnd = 100;
 const printPerfCpu = () => {
   let chart = echarts.getInstanceByDom(
-      document.getElementById(
-          `${props.rid}-${props.cid}-${props.did}-` + `perfCpuChart`
-      )
+    document.getElementById(
+      `${props.rid}-${props.cid}-${props.did}-` + `perfCpuChart`
+    )
   );
   if (chart == null) {
     chart = echarts.init(
-        document.getElementById(
-            `${props.rid}-${props.cid}-${props.did}-` + `perfCpuChart`
-        )
+      document.getElementById(
+        `${props.rid}-${props.cid}-${props.did}-` + `perfCpuChart`
+      )
     );
   }
   chart.resize();
   const option = {
     title: {
-      text: 'Process CPU',
+      text: "Process CPU",
       textStyle: {
-        color: '#606266',
+        color: "#606266",
       },
-      x: 'center',
-      y: 'top',
+      x: "center",
+      y: "top",
     },
     tooltip: {
-      trigger: 'axis',
+      trigger: "axis",
       valueFormatter: (value) => `${value.toFixed(3)} %`,
     },
-    grid: {top: '15%'},
+    grid: { top: "15%" },
     toolbox: {
       feature: {
-        saveAsImage: {show: true, title: 'Save'},
+        saveAsImage: { show: true, title: "Save" },
       },
     },
     xAxis: {
       boundaryGap: false,
-      type: 'category',
+      type: "category",
       data: procCpuOption.xTimeList,
     },
     dataZoom: [
@@ -948,10 +1000,10 @@ const printPerfCpu = () => {
         xAxisIndex: [0, 1],
       },
     ],
-    yAxis: [{name: `${$t('perf.procCpu')}(%)`, min: 0}],
+    yAxis: [{ name: `${$t("perf.procCpu")}(%)`, min: 0 }],
     series: [
       {
-        type: 'line',
+        type: "line",
         data: procCpuOption.cpuUtilization,
         showSymbol: false,
         areaStyle: {},
@@ -959,7 +1011,7 @@ const printPerfCpu = () => {
       },
     ],
   };
-  chart.on('dataZoom', function (event) {
+  chart.on("dataZoom", function (event) {
     if (event.batch) {
       procCPUZoomStart = event.batch[0].start;
       procCPUZoomEnd = event.batch[0].end;
@@ -971,47 +1023,46 @@ const printPerfCpu = () => {
   chart.setOption(option);
 };
 
-let procCPUZoomStart = 30
-let procCPUZoomEnd = 100
-
+let procCPUZoomStart = 30;
+let procCPUZoomEnd = 100;
 
 const printPerfMem = () => {
   let chart = echarts.getInstanceByDom(
-      document.getElementById(
-          `${props.rid}-${props.cid}-${props.did}-` + `perfMemChart`
-      )
+    document.getElementById(
+      `${props.rid}-${props.cid}-${props.did}-` + `perfMemChart`
+    )
   );
   if (chart == null) {
     chart = echarts.init(
-        document.getElementById(
-            `${props.rid}-${props.cid}-${props.did}-` + `perfMemChart`
-        )
+      document.getElementById(
+        `${props.rid}-${props.cid}-${props.did}-` + `perfMemChart`
+      )
     );
   }
   if (chart !== null) {
     chart.resize();
     const option = {
-      color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#409EFF'],
+      color: ["#5470c6", "#91cc75", "#fac858", "#ee6666", "#73c0de", "#409EFF"],
       title: {
-        text: 'Process Memory',
+        text: "Process Memory",
         textStyle: {
-          color: '#606266',
+          color: "#606266",
         },
-        x: 'center',
-        y: 'top',
+        x: "center",
+        y: "top",
       },
       tooltip: {
-        trigger: 'axis',
+        trigger: "axis",
       },
-      grid: {top: '30%', left: '20%'},
+      grid: { top: "30%", left: "20%" },
       toolbox: {
         feature: {
-          saveAsImage: {show: true, title: 'Save'},
+          saveAsImage: { show: true, title: "Save" },
         },
       },
       xAxis: {
         boundaryGap: false,
-        type: 'category',
+        type: "category",
         data: procMemOption.xTimeList,
       },
       dataZoom: [
@@ -1024,66 +1075,70 @@ const printPerfMem = () => {
         },
       ],
       legend: {
-        top: '8%',
+        top: "8%",
         data: procMemOption.legend,
       },
-      yAxis: [{name: `${$t('perf.memUsage')}(MB)`, min: 0}],
+      yAxis: [{ name: `${$t("perf.memUsage")}(MB)`, min: 0 }],
       series: [
         {
-          name: 'totalPSS',
-          type: 'line',
+          name: "totalPSS",
+          type: "line",
           data: procMemOption.totalPSS,
           showSymbol: false,
           boundaryGap: false,
         },
         {
-          name: 'javaHeap',
-          type: 'line',
+          name: "javaHeap",
+          type: "line",
           data: procMemOption.javaHeap,
           showSymbol: false,
           boundaryGap: false,
         },
         {
-          name: 'graphics',
-          type: 'line',
+          name: "graphics",
+          type: "line",
           data: procMemOption.graphics,
           showSymbol: false,
           boundaryGap: false,
         },
         {
-          name: 'nativeHeap',
-          type: 'line',
+          name: "nativeHeap",
+          type: "line",
           data: procMemOption.nativeHeap,
           showSymbol: false,
           boundaryGap: false,
-        }, {
-          name: 'code',
-          type: 'line',
+        },
+        {
+          name: "code",
+          type: "line",
           data: procMemOption.code,
           showSymbol: false,
           boundaryGap: false,
-        }, {
-          name: 'privateOther',
-          type: 'line',
+        },
+        {
+          name: "privateOther",
+          type: "line",
           data: procMemOption.privateOther,
           showSymbol: false,
           boundaryGap: false,
-        }, {
-          name: 'stack',
-          type: 'line',
+        },
+        {
+          name: "stack",
+          type: "line",
           data: procMemOption.stack,
           showSymbol: false,
           boundaryGap: false,
-        }, {
-          name: 'system',
-          type: 'line',
+        },
+        {
+          name: "system",
+          type: "line",
           data: procMemOption.system,
           showSymbol: false,
           boundaryGap: false,
         },
       ],
     };
-    chart.on('dataZoom', function (event) {
+    chart.on("dataZoom", function (event) {
       if (event.batch) {
         procMemZoomStart = event.batch[0].start;
         procMemZoomEnd = event.batch[0].end;
@@ -1094,11 +1149,10 @@ const printPerfMem = () => {
     });
     chart.setOption(option);
   }
-
 };
 
-let procMemZoomStart = 30
-let procMemZoomEnd = 100
+let procMemZoomStart = 30;
+let procMemZoomEnd = 100;
 
 defineExpose({
   printCpu,
@@ -1115,97 +1169,92 @@ defineExpose({
 const switchTab = (e) => {
   if (e.index == 1) {
     nextTick(() => {
-
       const cpuChart = echarts.getInstanceByDom(
-          document.getElementById(
-              `${props.rid}-${props.cid}-${props.did}-` + `perfCpuChart`
-          )
+        document.getElementById(
+          `${props.rid}-${props.cid}-${props.did}-` + `perfCpuChart`
+        )
       );
-      if (cpuChart!==undefined) {
+      if (cpuChart !== undefined) {
         cpuChart.resize();
       }
 
       const sysCpuChart = echarts.getInstanceByDom(
-          document.getElementById(
-              `${props.rid}-${props.cid}-${props.did}-` + `sysCpuChart`
-          )
+        document.getElementById(
+          `${props.rid}-${props.cid}-${props.did}-` + `sysCpuChart`
+        )
       );
-      if (sysCpuChart!==undefined) {
+      if (sysCpuChart !== undefined) {
         sysCpuChart.resize();
       }
-
     });
   } else if (e.index == 2) {
     nextTick(() => {
       const fpsChart = echarts.getInstanceByDom(
-          document.getElementById(
-              `${props.rid}-${props.cid}-${props.did}-` + `sysFpsChart`
-          )
+        document.getElementById(
+          `${props.rid}-${props.cid}-${props.did}-` + `sysFpsChart`
+        )
       );
-      if (fpsChart!==undefined) {
+      if (fpsChart !== undefined) {
         fpsChart.resize();
       }
 
       const jankChart = echarts.getInstanceByDom(
-          document.getElementById(
-              `${props.rid}-${props.cid}-${props.did}-` + `sysJankChart`
-          )
+        document.getElementById(
+          `${props.rid}-${props.cid}-${props.did}-` + `sysJankChart`
+        )
       );
-      if (jankChart!==undefined) {
+      if (jankChart !== undefined) {
         jankChart.resize();
       }
-    })
+    });
   } else if (e.index == 3) {
     nextTick(() => {
       const sysMemChart = echarts.getInstanceByDom(
-          document.getElementById(
-              `${props.rid}-${props.cid}-${props.did}-` + `sysMemChart`
-          )
+        document.getElementById(
+          `${props.rid}-${props.cid}-${props.did}-` + `sysMemChart`
+        )
       );
-      if (sysMemChart!==undefined) {
+      if (sysMemChart !== undefined) {
         sysMemChart.resize();
       }
 
       const procMemChart = echarts.getInstanceByDom(
-          document.getElementById(
-              `${props.rid}-${props.cid}-${props.did}-` + `perfMemChart`
-          )
+        document.getElementById(
+          `${props.rid}-${props.cid}-${props.did}-` + `perfMemChart`
+        )
       );
       if (procMemChart !== undefined) {
         procMemChart.resize();
       }
-    })
+    });
   } else {
     nextTick(() => {
-
       const networkChart = echarts.getInstanceByDom(
-          document.getElementById(
-              `${props.rid}-${props.cid}-${props.did}-` + `sysNetworkChart`
-          )
+        document.getElementById(
+          `${props.rid}-${props.cid}-${props.did}-` + `sysNetworkChart`
+        )
       );
       if (networkChart !== undefined) {
         networkChart.resize();
       }
 
       const threadChart = echarts.getInstanceByDom(
-          document.getElementById(
-              `${props.rid}-${props.cid}-${props.did}-` + `procThreadChart`
-          )
+        document.getElementById(
+          `${props.rid}-${props.cid}-${props.did}-` + `procThreadChart`
+        )
       );
       if (threadChart !== undefined) {
         threadChart.resize();
       }
 
-
       const temperatureChart = echarts.getInstanceByDom(
-          document.getElementById(
-              `${props.rid}-${props.cid}-${props.did}-` + `sysTemperatureChart`
-          )
+        document.getElementById(
+          `${props.rid}-${props.cid}-${props.did}-` + `sysTemperatureChart`
+        )
       );
       if (temperatureChart !== undefined) {
         temperatureChart.resize();
       }
-
     });
   }
 };
@@ -1213,73 +1262,91 @@ const switchTab = (e) => {
 
 <template>
   <el-tabs
-      style="margin-top: 10px"
-      stretch
-      type="border-card"
-      @tab-click="switchTab"
+    style="margin-top: 10px"
+    stretch
+    type="border-card"
+    @tab-click="switchTab"
   >
     <el-tab-pane label="CPU">
       <el-row :gutter="10">
         <el-col :span="12">
-          <el-tooltip class="item" :disabled="procCpu!==null" content="proc cpu" placement="top">
+          <el-tooltip
+            class="item"
+            :disabled="procCpu !== null"
+            content="proc cpu"
+            placement="top"
+          >
             <el-card style="margin-top: 10px">
               <div
-                  :id="rid + '-' + cid + '-' + did + '-' + 'perfCpuChart'"
-                  v-loading="procCpu === null"
-                  :element-loading-text="$t('perf.emptyData')"
-                  element-loading-spinner="el-icon-box"
-                  style="width: 100%; height: 350px"
+                :id="rid + '-' + cid + '-' + did + '-' + 'perfCpuChart'"
+                v-loading="procCpu === null"
+                :element-loading-text="$t('perf.emptyData')"
+                element-loading-spinner="el-icon-box"
+                style="width: 100%; height: 350px"
               ></div>
             </el-card>
           </el-tooltip>
         </el-col>
 
         <el-col :span="12">
-          <el-tooltip class="item" :disabled="sysCpu!==null" content="sys cpu" placement="top">
+          <el-tooltip
+            class="item"
+            :disabled="sysCpu !== null"
+            content="sys cpu"
+            placement="top"
+          >
             <el-card style="margin-top: 10px">
               <div
-                  :id="rid + '-' + cid + '-' + did + '-' + 'sysCpuChart'"
-                  v-loading="sysCpu === null"
-                  :element-loading-text="$t('perf.emptyData')"
-                  element-loading-spinner="el-icon-box"
-                  style="width: 100%; height: 350px"
+                :id="rid + '-' + cid + '-' + did + '-' + 'sysCpuChart'"
+                v-loading="sysCpu === null"
+                :element-loading-text="$t('perf.emptyData')"
+                element-loading-spinner="el-icon-box"
+                style="width: 100%; height: 350px"
               ></div>
             </el-card>
           </el-tooltip>
         </el-col>
-
       </el-row>
     </el-tab-pane>
     <el-tab-pane label="Frame">
       <el-row :gutter="10">
         <el-col :span="12">
-          <el-tooltip class="item" :disabled="sysFps!==null" content="sys FPS" placement="top">
+          <el-tooltip
+            class="item"
+            :disabled="sysFps !== null"
+            content="sys FPS"
+            placement="top"
+          >
             <el-card style="margin-top: 10px">
               <div
-                  :id="rid + '-' + cid + '-' + did + '-' + 'sysFpsChart'"
-                  v-loading="sysFps === null"
-                  :element-loading-text="$t('perf.emptyData')"
-                  element-loading-spinner="el-icon-box"
-                  style="width: 100%; height: 350px"
+                :id="rid + '-' + cid + '-' + did + '-' + 'sysFpsChart'"
+                v-loading="sysFps === null"
+                :element-loading-text="$t('perf.emptyData')"
+                element-loading-spinner="el-icon-box"
+                style="width: 100%; height: 350px"
               ></div>
             </el-card>
           </el-tooltip>
         </el-col>
 
         <el-col :span="12">
-          <el-tooltip class="item" :disabled="sysJank!==null" content="jank info" placement="top">
+          <el-tooltip
+            class="item"
+            :disabled="sysJank !== null"
+            content="jank info"
+            placement="top"
+          >
             <el-card style="margin-top: 10px">
               <div
-                  :id="rid + '-' + cid + '-' + did + '-' + 'sysJankChart'"
-                  v-loading="sysJank === null"
-                  :element-loading-text="$t('perf.emptyData')"
-                  element-loading-spinner="el-icon-box"
-                  style="width: 100%; height: 350px"
+                :id="rid + '-' + cid + '-' + did + '-' + 'sysJankChart'"
+                v-loading="sysJank === null"
+                :element-loading-text="$t('perf.emptyData')"
+                element-loading-spinner="el-icon-box"
+                style="width: 100%; height: 350px"
               ></div>
             </el-card>
           </el-tooltip>
         </el-col>
-
       </el-row>
     </el-tab-pane>
 
@@ -1287,75 +1354,98 @@ const switchTab = (e) => {
       <el-row :gutter="10">
         <!--        :disabled="procMem.length !== 0"-->
         <el-col :span="12">
-          <el-tooltip class="item" :disabled="procMem!==null" content="proc mem" placement="top">
+          <el-tooltip
+            class="item"
+            :disabled="procMem !== null"
+            content="proc mem"
+            placement="top"
+          >
             <el-card style="margin-top: 10px">
               <div
-                  :id="rid + '-' + cid + '-' + did + '-' + 'perfMemChart'"
-                  v-loading="procMem === null"
-                  :element-loading-text="$t('perf.emptyData')"
-                  element-loading-spinner="el-icon-box"
-                  style="width: 100%; height: 350px"
+                :id="rid + '-' + cid + '-' + did + '-' + 'perfMemChart'"
+                v-loading="procMem === null"
+                :element-loading-text="$t('perf.emptyData')"
+                element-loading-spinner="el-icon-box"
+                style="width: 100%; height: 350px"
               ></div>
             </el-card>
           </el-tooltip>
         </el-col>
 
         <el-col :span="12">
-          <el-tooltip class="item" :disabled="sysMem!==null" content="sys mem" placement="top">
+          <el-tooltip
+            class="item"
+            :disabled="sysMem !== null"
+            content="sys mem"
+            placement="top"
+          >
             <el-card style="margin-top: 10px">
               <div
-                  :id="rid + '-' + cid + '-' + did + '-' + 'sysMemChart'"
-                  v-loading="sysMem === null"
-                  :element-loading-text="$t('perf.emptyData')"
-                  element-loading-spinner="el-icon-box"
-                  style="width: 100%; height: 350px"
+                :id="rid + '-' + cid + '-' + did + '-' + 'sysMemChart'"
+                v-loading="sysMem === null"
+                :element-loading-text="$t('perf.emptyData')"
+                element-loading-spinner="el-icon-box"
+                style="width: 100%; height: 350px"
               ></div>
             </el-card>
           </el-tooltip>
         </el-col>
-
       </el-row>
     </el-tab-pane>
     <el-tab-pane label="Other">
       <el-row :gutter="10">
-
         <el-col :span="12">
-          <el-tooltip class="item" :disabled="sysNetwork !== null" content="sys network" placement="top">
+          <el-tooltip
+            class="item"
+            :disabled="sysNetwork !== null"
+            content="sys network"
+            placement="top"
+          >
             <el-card style="margin-top: 10px">
               <div
-                  :id="rid + '-' + cid + '-' + did + '-' + 'sysNetworkChart'"
-                  v-loading="sysNetwork === null"
-                  :element-loading-text="$t('perf.emptyData')"
-                  element-loading-spinner="el-icon-box"
-                  style="width: 100%; height: 350px"
+                :id="rid + '-' + cid + '-' + did + '-' + 'sysNetworkChart'"
+                v-loading="sysNetwork === null"
+                :element-loading-text="$t('perf.emptyData')"
+                element-loading-spinner="el-icon-box"
+                style="width: 100%; height: 350px"
               ></div>
             </el-card>
           </el-tooltip>
         </el-col>
 
         <el-col :span="12">
-          <el-tooltip class="item" :disabled="sysTemperature !== null" content="sys temperature" placement="top">
+          <el-tooltip
+            class="item"
+            :disabled="sysTemperature !== null"
+            content="sys temperature"
+            placement="top"
+          >
             <el-card style="margin-top: 10px">
               <div
-                  :id="rid + '-' + cid + '-' + did + '-' + 'sysTemperatureChart'"
-                  v-loading="sysNetwork === null"
-                  :element-loading-text="$t('perf.emptyData')"
-                  element-loading-spinner="el-icon-box"
-                  style="width: 100%; height: 350px"
+                :id="rid + '-' + cid + '-' + did + '-' + 'sysTemperatureChart'"
+                v-loading="sysNetwork === null"
+                :element-loading-text="$t('perf.emptyData')"
+                element-loading-spinner="el-icon-box"
+                style="width: 100%; height: 350px"
               ></div>
             </el-card>
           </el-tooltip>
         </el-col>
 
         <el-col :span="12">
-          <el-tooltip class="item" :disabled="procThread !== null" content="proc thread" placement="top">
+          <el-tooltip
+            class="item"
+            :disabled="procThread !== null"
+            content="proc thread"
+            placement="top"
+          >
             <el-card style="margin-top: 10px">
               <div
-                  :id="rid + '-' + cid + '-' + did + '-' + 'procThreadChart'"
-                  v-loading="procThread === null"
-                  :element-loading-text="$t('perf.emptyData')"
-                  element-loading-spinner="el-icon-box"
-                  style="width: 100%; height: 350px"
+                :id="rid + '-' + cid + '-' + did + '-' + 'procThreadChart'"
+                v-loading="procThread === null"
+                :element-loading-text="$t('perf.emptyData')"
+                element-loading-spinner="el-icon-box"
+                style="width: 100%; height: 350px"
               ></div>
             </el-card>
           </el-tooltip>

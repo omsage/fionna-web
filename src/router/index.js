@@ -1,9 +1,9 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory } from "vue-router";
 
 const getRoutes = () => [
   {
-    path: '/',
-    component: () => import('../views/Home.vue'),
+    path: "/",
+    component: () => import("../views/Home.vue"),
   },
   // {
   //   path: '/',

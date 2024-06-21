@@ -16,16 +16,16 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 // locales/i18n.ts
-import { createI18n } from 'vue-i18n';
-import { getLocal } from '@/utils/cache/localStorage';
-import { LOCALE_KEY } from '@/config/cache';
-import { LOCALE, localeSetting } from '@/config/locale';
+import { createI18n } from "vue-i18n";
+import { getLocal } from "@/utils/cache/localStorage";
+import { LOCALE_KEY } from "@/config/cache";
+import { LOCALE, localeSetting } from "@/config/locale";
 // 按需引入组件库语言包
-import zhCn from 'element-plus/es/locale/lang/zh-cn';
-import zhTW from 'element-plus/es/locale/lang/zh-tw';
-import en from 'element-plus/es/locale/lang/en';
-import ja from 'element-plus/es/locale/lang/ja';
-import { setHtmlPageLang, getSystemLanguage, supportLanguage } from './helper';
+import zhCn from "element-plus/es/locale/lang/zh-cn";
+import zhTW from "element-plus/es/locale/lang/zh-tw";
+import en from "element-plus/es/locale/lang/en";
+import ja from "element-plus/es/locale/lang/ja";
+import { setHtmlPageLang, getSystemLanguage, supportLanguage } from "./helper";
 // ...更多语言
 
 const langDefault = localeSetting.locale;
@@ -74,9 +74,9 @@ export function getElementPlusLocale() {
 // 本地文件匹配
 export function $tc(params) {
   if (!localeData) {
-    throw new Error('not init localeData!');
+    throw new Error("not init localeData!");
   }
-  const arr = typeof params === 'string' ? params.split('.') : [];
+  const arr = typeof params === "string" ? params.split(".") : [];
   let data = localeData;
   for (let i = 0; i < arr.length; i++) {
     data = data[arr[i]];

@@ -19,31 +19,31 @@
  * 全局统一配置参数
  */
 export const LOCALE = {
-  ZH_CN: 'zh_CN',
-  EN_US: 'en_US',
-  ZH_TW: 'zh_TW',
-  JA_JP: 'ja_JP',
+  ZH_CN: "zh_CN",
+  EN_US: "en_US",
+  ZH_TW: "zh_TW",
+  JA_JP: "ja_JP",
   // ...更多语言
 };
 
 export const localeList = [
   {
-    text: '简体中文',
+    text: "简体中文",
     building: false,
     event: LOCALE.ZH_CN,
   },
   {
-    text: '繁體中文',
+    text: "繁體中文",
     building: true,
     event: LOCALE.ZH_TW,
   },
   {
-    text: 'English',
+    text: "English",
     building: false,
     event: LOCALE.EN_US,
   },
   {
-    text: '日本語',
+    text: "日本語",
     building: true,
     event: LOCALE.JA_JP,
   },

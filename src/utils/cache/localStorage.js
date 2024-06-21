@@ -2,7 +2,7 @@
  * localStroage
  */
 export function setLocal(key, value) {
-  if (typeof value === 'object') {
+  if (typeof value === "object") {
     value = JSON.stringify(value);
   }
 
@@ -12,7 +12,7 @@ export function setLocal(key, value) {
 export function getLocal(key) {
   let value = localStorage.getItem(key);
 
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     value = JSON.parse(value);
   }
 

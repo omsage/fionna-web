@@ -1,1 +1,1 @@
-export const LOCALE_KEY = '__LOCALE__';
+export const LOCALE_KEY = "__LOCALE__";

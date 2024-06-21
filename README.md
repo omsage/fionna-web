@@ -1,6 +1,6 @@
 # fionna-web
 
-fionna专属前端
+fionna 专属前端
 
 ## 开发
 
@@ -15,4 +15,3 @@ npm install
 ```
 npm run dev
 ```
-

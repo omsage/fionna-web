@@ -15,72 +15,70 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import axios from 'axios';
-import qs from 'qs';
-import { ElMessage } from 'element-plus';
-import { i18n, $tc } from '@/locales/setupI18n';
-import { router } from '../router/index.js';
+import axios from "axios";
+import qs from "qs";
+import { ElMessage } from "element-plus";
+import { i18n, $tc } from "@/locales/setupI18n";
+import { router } from "../router/index.js";
 
-export let baseURL = '';
-if (process.env.NODE_ENV === 'development') {
-    baseURL = '/serverproxy';
+export let baseURL = "";
+if (process.env.NODE_ENV === "development") {
+  baseURL = "/serverproxy";
 }
-if (process.env.NODE_ENV === 'production') {
-    baseURL = '/';
+if (process.env.NODE_ENV === "production") {
+  baseURL = "/";
 }
-const $http = axios.create(
-
-);
-baseURL = baseURL.replace(':80/', '/');
+const $http = axios.create();
+baseURL = baseURL.replace(":80/", "/");
 $http.defaults.baseURL = baseURL;
 // $http.defaults.timeout = 20000;
-$http.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+$http.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
 $http.defaults.withCredentials = true;
 $http.defaults.paramsSerializer = (params) =>
-    qs.stringify(params, { arrayFormat: 'brackets' });
+  qs.stringify(params, { arrayFormat: "brackets" });
 
 $http.interceptors.request.use(
-    (config) => {
-        config.headers = {
-            'Content-Type': 'application/json',
-            'Accept-Language': i18n.global.locale.value,
-        };
-        if (localStorage.getItem('SonicToken')) {
-            config.headers.SonicToken = localStorage.getItem('SonicToken');
-        }
-        return config;
-    },
-    (err) => {
-        return Promise.reject(err);
+  (config) => {
+    config.headers = {
+      "Content-Type": "application/json",
+      "Accept-Language": i18n.global.locale.value,
+    };
+    if (localStorage.getItem("SonicToken")) {
+      config.headers.SonicToken = localStorage.getItem("SonicToken");
     }
+    return config;
+  },
+  (err) => {
+    return Promise.reject(err);
+  }
 );
 
 $http.interceptors.response.use(
-    (response) => {
-        switch (response.data.code) {
-            case 10000:
-                break;
-            default:
-                if (response.data.message) {
-                    ElMessage.error({
-                        message: response.data.message,
-                    });
-                }
+  (response) => {
+    switch (response.data.code) {
+      case 10000:
+        break;
+      default:
+        if (response.data.message) {
+          ElMessage.error({
+            message: response.data.message,
+          });
         }
-        return response.data;
-    },
-    // (err) => {
-    //     if (err.response.status === 503) {
-    //         ElMessage.info({
-    //             message: $tc('dialog.ready'),
-    //         });
-    //     } else {
-    //         ElMessage.error({
-    //             message: $tc('dialog.error'),
-    //         });
-    //     }
-    //     return Promise.reject(err);
-    // }
+    }
+    return response.data;
+  }
+  // (err) => {
+  //     if (err.response.status === 503) {
+  //         ElMessage.info({
+  //             message: $tc('dialog.ready'),
+  //         });
+  //     } else {
+  //         ElMessage.error({
+  //             message: $tc('dialog.error'),
+  //         });
+  //     }
+  //     return Promise.reject(err);
+  // }
 );
 
 export default $http;

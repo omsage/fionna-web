@@ -16,10 +16,10 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import { ref } from 'vue';
-import { ElMessage } from 'element-plus';
-import { useI18n } from 'vue-i18n';
-import AndroidRemote from './AndroidRemote.vue';
+import { ref } from "vue";
+import { ElMessage } from "element-plus";
+import { useI18n } from "vue-i18n";
+import AndroidRemote from "./AndroidRemote.vue";
 
 const { t: $t } = useI18n();
 
@@ -28,9 +28,9 @@ const startPosition = { x: 0, y: 0 };
 let parentNode = null;
 
 const isPress = ref(false);
-const _layoutSplitInfo = window.localStorage.getItem('layoutSplitInfo');
-const _tabPosition = window.localStorage.getItem('tabPosition');
-const tabPosition = ref(_tabPosition || 'left'); // left,top
+const _layoutSplitInfo = window.localStorage.getItem("layoutSplitInfo");
+const _tabPosition = window.localStorage.getItem("tabPosition");
+const tabPosition = ref(_tabPosition || "left"); // left,top
 // 分屏默认值
 const layoutSplitInfo = ref(
   _layoutSplitInfo
@@ -44,38 +44,38 @@ const layoutSplitInfo = ref(
 );
 // 画布默认值
 const canvasRectInfo = ref(
-  tabPosition.value == 'left'
-    ? { width: '100%', height: 'auto' }
+  tabPosition.value == "left"
+    ? { width: "100%", height: "auto" }
     : {
-        width: 'auto',
+        width: "auto",
         height: `${layoutSplitInfo.value.top}px`,
       }
 );
 const switchLayout = () => {
   // console.log('swithLayout!!', tabPosition.value);
-  if (tabPosition.value == 'left') {
+  if (tabPosition.value == "left") {
     // 变竖屏
-    tabPosition.value = 'top';
+    tabPosition.value = "top";
     canvasRectInfo.value = {
-      width: 'auto',
+      width: "auto",
       height: `${layoutSplitInfo.value.top}px`,
     };
   } else {
     // 变横屏
-    tabPosition.value = 'left';
-    canvasRectInfo.value = { width: '100%', height: 'auto' };
+    tabPosition.value = "left";
+    canvasRectInfo.value = { width: "100%", height: "auto" };
   }
-  window.localStorage.setItem('tabPosition', tabPosition.value);
+  window.localStorage.setItem("tabPosition", tabPosition.value);
   ElMessage.success({
-    message: $t('indexIOSTS.successText'),
+    message: $t("indexIOSTS.successText"),
   });
 };
 const lineMouseup = (event) => {
   // console.log('lineMouseup', event.clientX, event.clientY);
   isPress.value = false;
-  if (tabPosition.value == 'left') {
+  if (tabPosition.value == "left") {
     layoutSplitInfo.value.last_left = layoutSplitInfo.value.left;
-  } else if (tabPosition.value == 'top') {
+  } else if (tabPosition.value == "top") {
     layoutSplitInfo.value.last_top = layoutSplitInfo.value.top;
   }
   saveLastSplitObj();
@@ -86,7 +86,7 @@ const lineMouseleave = (event) => {
   }
   // console.log('lineMouseleave', event.clientX, event.clientY);
   // 由于左右滑动有可能误触发该事件，所以只处理上下滑动的情况
-  if (tabPosition.value == 'top') {
+  if (tabPosition.value == "top") {
     isPress.value = false;
     layoutSplitInfo.value.last_top = layoutSplitInfo.value.top;
   }
@@ -109,12 +109,12 @@ const lineMousemove = (event) => {
     if (mouseMoveTime < 2) {
       mouseMoveTime++;
     } else {
-      if (tabPosition.value == 'left') {
+      if (tabPosition.value == "left") {
         // 水平移动
         const deltaX = event.clientX - startPosition.x;
         // console.log('deltaX', deltaX);
         handleSplit(deltaX);
-      } else if (tabPosition.value == 'top') {
+      } else if (tabPosition.value == "top") {
         // 垂直移动
         const deltaY = event.clientY - startPosition.y;
         // console.log('deltaY', deltaY);
@@ -125,7 +125,7 @@ const lineMousemove = (event) => {
   }
 };
 const handleSplit = (variate) => {
-  if (tabPosition.value == 'left') {
+  if (tabPosition.value == "left") {
     const rect = parentNode.getBoundingClientRect();
     const percent = ((variate * 100) / rect.width).toFixed(2);
     // 边界处理
@@ -139,10 +139,10 @@ const handleSplit = (variate) => {
     layoutSplitInfo.value.left =
       layoutSplitInfo.value.last_left + Number(percent);
     // console.log('variate', percent, layoutSplitInfo.value.left);
-  } else if (tabPosition.value == 'top') {
+  } else if (tabPosition.value == "top") {
     const rect = parentNode.getBoundingClientRect();
     const percent = variate;
-    const canvas = document.getElementById('canvas');
+    const canvas = document.getElementById("canvas");
     const rectCanvas = canvas.getBoundingClientRect();
 
     // 边界处理
@@ -163,7 +163,7 @@ const handleSplit = (variate) => {
 const saveLastSplitObj = () => {
   // 储存最后比例
   window.localStorage.setItem(
-    'layoutSplitInfo',
+    "layoutSplitInfo",
     JSON.stringify(layoutSplitInfo.value)
   );
 };
@@ -207,7 +207,7 @@ const saveLastSplitObj = () => {
     top: 0px;
     width: 30px;
     height: 30px;
-    background: url('@/assets/img/left.png') no-repeat center;
+    background: url("@/assets/img/left.png") no-repeat center;
     background-size: 70% 70%;
     cursor: pointer;
 

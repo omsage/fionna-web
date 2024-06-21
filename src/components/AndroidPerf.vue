@@ -16,43 +16,50 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import {View, VideoPause, Delete} from '@element-plus/icons';
-import {useI18n} from 'vue-i18n';
-import {ref, watch} from 'vue';
-import AndroidPerfChart from './AndroidPerfChart.vue';
+import { View, VideoPause, Delete } from "@element-plus/icons";
+import { useI18n } from "vue-i18n";
+import { ref, watch } from "vue";
+import AndroidPerfChart from "./AndroidPerfChart.vue";
 import axios from "@/http/axios";
 import { ElMessage } from "element-plus";
 
 const androidPerfChart = ref(null);
-const {t: $t} = useI18n();
-const emit = defineEmits(['pickCurrentApp', 'startPerfmon', 'stopPerfmon', 'refreshAppList']);
+const { t: $t } = useI18n();
+const emit = defineEmits([
+  "pickCurrentApp",
+  "startPerfmon",
+  "stopPerfmon",
+  "refreshAppList",
+]);
 const isStart = ref(false);
-const isPackageLoading = ref(false)
+const isPackageLoading = ref(false);
 const props = defineProps({
   udid: String,
   appList: Array,
 });
 
-watch(() => props.udid, (udid) => {
-  if (udid !== "") {
-    isPackageLoading.value = props.appList.length === 0;
-  } else {
-    isPackageLoading.value = false
+watch(
+  () => props.udid,
+  (udid) => {
+    if (udid !== "") {
+      isPackageLoading.value = props.appList.length === 0;
+    } else {
+      isPackageLoading.value = false;
+    }
   }
-
-})
+);
 
 const startPerfmon = () => {
-  if (perfPackNameOrPid.value.includes(":pid=")){
-    perfConfig.value.pid = perfPackNameOrPid.value.replaceAll(":pid=","")
-  }else {
-    perfConfig.value.packageName = perfPackNameOrPid.value
+  if (perfPackNameOrPid.value.includes(":pid=")) {
+    perfConfig.value.pid = perfPackNameOrPid.value.replaceAll(":pid=", "");
+  } else {
+    perfConfig.value.packageName = perfPackNameOrPid.value;
   }
-  emit('startPerfmon', perfConfig.value, isStart);
+  emit("startPerfmon", perfConfig.value, isStart);
   // isStart.value = true;
 };
 const stopPerfmon = () => {
-  emit('stopPerfmon', isStart);
+  emit("stopPerfmon", isStart);
   // isStart.value = false;
 };
 const clearPerfmon = () => {
@@ -63,7 +70,7 @@ const clearPerfmon = () => {
   procMem.value = {};
   sysFps.value = {};
   procThread.value = {};
-  androidPerfChart.value.clearPerfData()
+  androidPerfChart.value.clearPerfData();
 };
 const setData = (data) => {
   if (data.process) {
@@ -93,9 +100,9 @@ const setData = (data) => {
       sysNetwork.value = data.system.networkInfo;
       androidPerfChart.value.printNetwork();
     }
-    if (data.system.temperature){
+    if (data.system.temperature) {
       sysTemperature.value = data.system.temperature;
-      androidPerfChart.value.printTemperature()
+      androidPerfChart.value.printTemperature();
     }
     if (data.system.frame) {
       // console.log(data.system.frame)
@@ -118,22 +125,24 @@ const sysFps = ref(null);
 const sysJank = ref(null);
 const procThread = ref(null);
 const sysTemperature = ref(null);
-defineExpose({setData,clearPerfmon});
+defineExpose({ setData, clearPerfmon });
 
 const getCurrentAppName = () => {
-  isPackageLoading.value = true
-  axios.get("/android/app/current", {params: {udid: props.udid}}).then((resp) => {
-    perfPackNameOrPid.value = resp.data.packageName
-    perfConfig.value.packageName = resp.data.packageName;
-    perfConfig.value.pid = resp.data.pid;
-    isPackageLoading.value = false
-    if ( resp.data.packageName===""|| resp.data.packageName===undefined){
-      ElMessage.error({
-        message:  $t('androidRemoteTS.noSelectDevice'),
-      });
-    }
-  })
-}
+  isPackageLoading.value = true;
+  axios
+    .get("/android/app/current", { params: { udid: props.udid } })
+    .then((resp) => {
+      perfPackNameOrPid.value = resp.data.packageName;
+      perfConfig.value.packageName = resp.data.packageName;
+      perfConfig.value.pid = resp.data.pid;
+      isPackageLoading.value = false;
+      if (resp.data.packageName === "" || resp.data.packageName === undefined) {
+        ElMessage.error({
+          message: $t("androidRemoteTS.noSelectDevice"),
+        });
+      }
+    });
+};
 
 const perfConfig = ref({
   sysCpu: true,
@@ -146,39 +155,35 @@ const perfConfig = ref({
   procThread: false,
   sysTemperature: false,
   packageName: "",
-  pid:"",
-})
+  pid: "",
+});
 
-const perfPackNameOrPid = ref("")
-
+const perfPackNameOrPid = ref("");
 </script>
 
 <template>
   <div>
-    <el-tooltip class="box-item"
-                effect="dark"
-                placement="top">
+    <el-tooltip class="box-item" effect="dark" placement="top">
       <template #content>
-        <div >
-          {{ $t('perf.selectTipPre') }}<br>
-          {{ $t('perf.selectTipMid') }}<br>
-          {{ $t('perf.selectTipEnd') }}
+        <div>
+          {{ $t("perf.selectTipPre") }}<br />
+          {{ $t("perf.selectTipMid") }}<br />
+          {{ $t("perf.selectTipEnd") }}
         </div>
       </template>
       <el-input
         v-model="perfPackNameOrPid"
         size="small"
-        style="margin-right: 10px; width: 280px;"
+        style="margin-right: 10px; width: 280px"
         :placeholder="$t('perf.select')"
         clearable
       >
         <template #prepend>
           <el-select
-            v-model="perfPackNameOrPid "
+            v-model="perfPackNameOrPid"
             placeholder="Select"
             filterable
             size="mini"
-
             v-loading="isPackageLoading"
           >
             <el-option v-for="packageName in appList" :value="packageName">
@@ -189,99 +194,125 @@ const perfPackNameOrPid = ref("")
           </el-select>
         </template>
       </el-input>
-
     </el-tooltip>
     <el-button
-        @click="getCurrentAppName"
-        icon="el-icon-aim"
-        type="primary"
-        size="mini"
+      @click="getCurrentAppName"
+      icon="el-icon-aim"
+      type="primary"
+      size="mini"
     >
-      {{$t('devices.currentApp')}}
+      {{ $t("devices.currentApp") }}
     </el-button>
     <el-button
-        type="primary"
-        size="mini"
-        :loading="isStart"
-        @click="startPerfmon"
+      type="primary"
+      size="mini"
+      :loading="isStart"
+      @click="startPerfmon"
     >
       <el-icon :size="12" style="vertical-align: middle">
-        <View/>
+        <View />
       </el-icon>
-      {{ $t('perf.start') }}
+      {{ $t("perf.start") }}
     </el-button>
     <el-button type="warning" size="mini" @click="stopPerfmon">
       <el-icon :size="12" style="vertical-align: middle">
-        <VideoPause/>
+        <VideoPause />
       </el-icon>
-      {{ $t('perf.stop') }}
+      {{ $t("perf.stop") }}
     </el-button>
-<!--    <el-button type="danger" size="mini" @click="clearPerfmon">-->
-<!--      <el-icon :size="12" style="vertical-align: middle">-->
-<!--        <Delete/>-->
-<!--      </el-icon>-->
-<!--      {{ $t('perf.clear') }}-->
-<!--    </el-button>-->
+    <!--    <el-button type="danger" size="mini" @click="clearPerfmon">-->
+    <!--      <el-icon :size="12" style="vertical-align: middle">-->
+    <!--        <Delete/>-->
+    <!--      </el-icon>-->
+    <!--      {{ $t('perf.clear') }}-->
+    <!--    </el-button>-->
     <!--    性能配置   -->
     <div v-show="!isStart" style="margin-top: 10px">
       <el-card style="height: 100%">
-
-        <el-form v-show="!isStart" ref="form" :model="perfConfig" label-width="10px">
-
-
+        <el-form
+          v-show="!isStart"
+          ref="form"
+          :model="perfConfig"
+          label-width="10px"
+        >
           <el-form-item>
             <span>sys-cpu</span>
-            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.sysCpu"></el-switch>
+            <el-switch
+              style="margin-right: 5px; margin-left: 6px"
+              v-model="perfConfig.sysCpu"
+            ></el-switch>
             <span>sys-mem</span>
-            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.sysMem"></el-switch>
+            <el-switch
+              style="margin-right: 5px; margin-left: 6px"
+              v-model="perfConfig.sysMem"
+            ></el-switch>
 
             <span>network</span>
-            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.sysNetwork"></el-switch>
+            <el-switch
+              style="margin-right: 5px; margin-left: 6px"
+              v-model="perfConfig.sysNetwork"
+            ></el-switch>
             <span>temperature</span>
-            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.sysTemperature"></el-switch>
+            <el-switch
+              style="margin-right: 5px; margin-left: 6px"
+              v-model="perfConfig.sysTemperature"
+            ></el-switch>
           </el-form-item>
           <!--          <el-divider></el-divider>-->
 
           <el-form-item>
             <span>proc-cpu</span>
-            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.procCpu"></el-switch>
+            <el-switch
+              style="margin-right: 5px; margin-left: 6px"
+              v-model="perfConfig.procCpu"
+            ></el-switch>
             <span>proc-mem</span>
-            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.procMem"></el-switch>
+            <el-switch
+              style="margin-right: 5px; margin-left: 6px"
+              v-model="perfConfig.procMem"
+            ></el-switch>
             <span>thread</span>
-            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.procThread"></el-switch>
+            <el-switch
+              style="margin-right: 5px; margin-left: 6px"
+              v-model="perfConfig.procThread"
+            ></el-switch>
           </el-form-item>
 
           <!--          <el-divider></el-divider>-->
           <el-form-item>
             <span>FPS</span>
-            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.FPS"></el-switch>
+            <el-switch
+              style="margin-right: 5px; margin-left: 6px"
+              v-model="perfConfig.FPS"
+            ></el-switch>
             <span>Jank</span>
-            <el-switch style="margin-right: 5px;margin-left: 6px" v-model="perfConfig.jank"></el-switch>
+            <el-switch
+              style="margin-right: 5px; margin-left: 6px"
+              v-model="perfConfig.jank"
+            ></el-switch>
           </el-form-item>
           <!--          <el-divider></el-divider>-->
-
-
         </el-form>
       </el-card>
     </div>
 
     <!--性能图表-->
     <android-perf-chart
-        v-show="isStart"
-        ref="androidPerfChart"
-        :cid="0"
-        :rid="''"
-        :did="0"
-        :is-start-perf="isStart"
-        :sys-cpu="sysCpu"
-        :sys-mem="sysMem"
-        :sys-network="sysNetwork"
-        :sys-fps="sysFps"
-        :sys-jank="sysJank"
-        :proc-cpu="procCpu"
-        :proc-mem="procMem"
-        :proc-thread="procThread"
-        :sys-temperature="sysTemperature"
+      v-show="isStart"
+      ref="androidPerfChart"
+      :cid="0"
+      :rid="''"
+      :did="0"
+      :is-start-perf="isStart"
+      :sys-cpu="sysCpu"
+      :sys-mem="sysMem"
+      :sys-network="sysNetwork"
+      :sys-fps="sysFps"
+      :sys-jank="sysJank"
+      :proc-cpu="procCpu"
+      :proc-mem="procMem"
+      :proc-thread="procThread"
+      :sys-temperature="sysTemperature"
     />
   </div>
 </template>

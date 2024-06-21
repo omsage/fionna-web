@@ -18,10 +18,10 @@
 /**
  * 音频接受处理器
  */
-import JMuxer from 'jmuxer';
-import Socket from './socket';
+import JMuxer from "jmuxer";
+import Socket from "./socket";
 
-const DEFAULT_WS_URL = 'ws://localhost:8080';
+const DEFAULT_WS_URL = "ws://localhost:8080";
 
 export default class AudioProcessor {
   constructor(options) {
@@ -34,7 +34,7 @@ export default class AudioProcessor {
      * wsUrl
      */
     this.jmuxer = new JMuxer({
-      mode: 'audio',
+      mode: "audio",
       flushingTime: 0,
       // onReady() {
       // 	console.log('Jmuxer audio init onReady!');
@@ -52,7 +52,7 @@ export default class AudioProcessor {
     const that = this;
     this.ws = new Socket({
       url,
-      binaryType: 'arraybuffer',
+      binaryType: "arraybuffer",
       isErrorReconnect: false,
       onmessage(event) {
         const data = that.parse(event.data);

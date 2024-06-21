@@ -15,46 +15,46 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import { createApp } from 'vue';
-import ElementPlus, { ElMessage } from 'element-plus';
-import App from './App.vue';
-import { setupRouter, router } from './router/index.js';
-import store from './store/index.js';
-import 'element-plus/dist/index.css';
-import axios from './http/axios';
-import { setupI18n, $tc } from './locales/setupI18n';
+import { createApp } from "vue";
+import ElementPlus, { ElMessage } from "element-plus";
+import App from "./App.vue";
+import { setupRouter, router } from "./router/index.js";
+import store from "./store/index.js";
+import "element-plus/dist/index.css";
+import axios from "./http/axios";
+import { setupI18n, $tc } from "./locales/setupI18n";
 
 async function initApp() {
-    const app = createApp(App);
+  const app = createApp(App);
 
-    // 国际化
-    await setupI18n(app);
+  // 国际化
+  await setupI18n(app);
 
-    // 初始化组件库
-    app.use(ElementPlus);
+  // 初始化组件库
+  app.use(ElementPlus);
 
-    // 初始化路由
-    setupRouter(app);
+  // 初始化路由
+  setupRouter(app);
 
-    // 初始化vuex
-    app.use(store);
+  // 初始化vuex
+  app.use(store);
 
-    app.mount('#app');
+  app.mount("#app");
 }
 
 // 创建应用
 initApp().then(() => {
-    // router.beforeEach((to, from, next) => {
-    //     document.title = $tc('devices.title');
-    //     if (to.meta.title) {
-    //         document.title += ` - ${to.meta.title}`;
-    //     }
-    //     if (store.state.token.length === 0 && to.path !== '/') {
-    //         next({
-    //             path: '/',
-    //         });
-    //     } else {
-    //         next();
-    //     }
-    // });
+  // router.beforeEach((to, from, next) => {
+  //     document.title = $tc('devices.title');
+  //     if (to.meta.title) {
+  //         document.title += ` - ${to.meta.title}`;
+  //     }
+  //     if (store.state.token.length === 0 && to.path !== '/') {
+  //         next({
+  //             path: '/',
+  //         });
+  //     } else {
+  //         next();
+  //     }
+  // });
 });
