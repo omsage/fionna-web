@@ -61,6 +61,7 @@ const submitRename = () => {
         testName: testName.value,
       })
       .then((resp) => {
+        props.device.testName = testName.value
         isInput.value = false;
       });
   }
@@ -137,7 +138,7 @@ const getPerfConfig = () => {
           size="mini"
           v-show="!isInput"
           icon="el-icon-edit"
-          @click="isInput.value = true"
+          @click="isInput = true"
           circle
         ></el-button>
         <el-button
