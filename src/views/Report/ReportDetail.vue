@@ -1318,6 +1318,16 @@ const printProcMem = () => {
     },
     tooltip: {
       trigger: "axis",
+      position: 'bottom',
+      confine: true,
+      axisPointer: {
+        type: 'none',
+      },
+      textStyle: {
+        color: 'fff',
+      },
+      enterable: true, //允许鼠标进入提示框浮层中，默认为false
+      extraCssText: 'max-width:340px;max-height:83%;overflow:auto', //出现滚动条
     },
     legend: {
       top: "8%",
@@ -1468,6 +1478,16 @@ const printSysCPU = () => {
     },
     tooltip: {
       trigger: "axis",
+      position: 'bottom',
+      confine: true,
+      axisPointer: {
+        type: 'none',
+      },
+      textStyle: {
+        color: 'fff',
+      },
+      enterable: true, //允许鼠标进入提示框浮层中，默认为false
+      extraCssText: 'max-width:340px;max-height:83%;overflow:auto', //出现滚动条
     },
     legend: {
       top: "8%",
@@ -1529,40 +1549,36 @@ const getSysNetworkData = () => {
           sysNetworkOption.xTimeList.push(xTimestr);
           sysNetworkOption.xTimeMap[xTimestr] = 1;
         }
+        let interfaceNameTx = sysNetData.interfaceName + "_tx"
+        let interfaceNameRx = sysNetData.interfaceName + "_rx"
         if (
-          sysNetworkOption.networkSeriesMap[
-            sysNetData.interfaceName + "_tx"
-          ] === undefined
+          sysNetworkOption.networkSeriesMap[interfaceNameTx] === undefined
         ) {
-          sysNetworkOption.networkSeriesMap[sysNetData.interfaceName + "_tx"] =
+          sysNetworkOption.networkSeriesMap[interfaceNameTx] =
             {
-              name: sysNetData.interfaceName + "_tx",
+              name: interfaceNameTx,
               type: "line",
               data: [],
               showSymbol: false,
               areaStyle: {},
             };
-          sysNetworkOption.networkSeriesMap[sysNetData.interfaceName + "_rx"] =
+          sysNetworkOption.networkSeriesMap[interfaceNameRx] =
             {
-              name: sysNetData.name + "_rx",
+              name: interfaceNameRx,
               type: "line",
               data: [],
               showSymbol: false,
               areaStyle: {},
             };
           sysNetworkOption.networkSeriesList.push(
-            sysNetworkOption.networkSeriesMap[sysNetData.interfaceName + "_tx"]
+            sysNetworkOption.networkSeriesMap[interfaceNameTx]
           );
           sysNetworkOption.networkSeriesList.push(
-            sysNetworkOption.networkSeriesMap[sysNetData.interfaceName + "_rx"]
+            sysNetworkOption.networkSeriesMap[interfaceNameRx]
           );
         }
-        sysNetworkOption.networkSeriesMap[
-          sysNetData.interfaceName + "_tx"
-        ].data.push(sysNetData.tx);
-        sysNetworkOption.networkSeriesMap[
-          sysNetData.interfaceName + "_rx"
-        ].data.push(sysNetData.rx);
+        sysNetworkOption.networkSeriesMap[interfaceNameTx].data.push(sysNetData.tx);
+        sysNetworkOption.networkSeriesMap[interfaceNameRx].data.push(sysNetData.rx);
       }
       sysNetworkOption.loading = false;
       printSysNetwork();
@@ -1577,6 +1593,16 @@ const printSysNetwork = () => {
     },
     tooltip: {
       trigger: "axis",
+      position: 'bottom',
+      confine: true,
+      axisPointer: {
+        type: 'none',
+      },
+      textStyle: {
+        color: 'fff',
+      },
+      enterable: true, //允许鼠标进入提示框浮层中，默认为false
+      extraCssText: 'max-width:340px;max-height:83%;overflow:auto', //出现滚动条
     },
     legend: {
       top: "8%",
@@ -1645,6 +1671,7 @@ const printSysMem = () => {
     },
     tooltip: {
       trigger: "axis",
+      position: ['50%', '30%']
     },
     legend: {},
     toolbox: {
