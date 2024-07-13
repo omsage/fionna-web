@@ -23,7 +23,7 @@ import {
   onBeforeUnmount,
   onMounted,
   ref,
-  watch,
+  watch
 } from "vue";
 import { useStore } from "vuex";
 import axios from "@/http/axios";
@@ -37,7 +37,7 @@ import {
   House,
   Back,
   View,
-  InfoFilled,
+  InfoFilled
 } from "@element-plus/icons";
 
 import { useI18n } from "vue-i18n";
@@ -61,7 +61,7 @@ const text = ref({ content: "" });
 let imgWidth = 0;
 let imgHeight = 0;
 const directionStatus = {
-  value: -1,
+  value: -1
 };
 let isPress = false;
 const pic = ref("高");
@@ -79,7 +79,7 @@ const cmdIsDone = ref(true);
 const currentUdid = ref("");
 const logcatFilter = ref({
   level: "E",
-  filter: "",
+  filter: ""
 });
 
 const element = ref({
@@ -88,7 +88,7 @@ const element = ref({
   eleName: "",
   eleType: "image",
   eleValue: "",
-  projectId: 0,
+  projectId: 0
 });
 const switchTabs = (e) => {
   if (e.props.name === "apps" || e.props.name === "perfmon") {
@@ -109,7 +109,7 @@ const startPerfmon = (perfConfig, isStart) => {
   if (perfConfig.procCpu || perfConfig.procMem || perfConfig.procThread) {
     if (perfConfig.packageName === "" && perfConfig.pid === "") {
       ElMessage.error({
-        message: $t("perf.pleaseSelectApply"),
+        message: $t("perf.pleaseSelectApply")
       });
       isStart.value = false;
       return;
@@ -117,7 +117,7 @@ const startPerfmon = (perfConfig, isStart) => {
   }
   if (selectDeviceUdid.value === "" || selectDeviceUdid.value === undefined) {
     ElMessage.error({
-      message: $t("androidRemoteTS.noSelectDevice"),
+      message: $t("androidRemoteTS.noSelectDevice")
     });
     isStart.value = false;
   } else {
@@ -129,13 +129,13 @@ const startPerfmon = (perfConfig, isStart) => {
       perfWebsocket.send(
         JSON.stringify({
           messageType: "startPerfmon",
-          data: perfConfig,
+          data: perfConfig
         })
       );
       perfPongId = setTimeout(() => {
         perfWebsocket.send(
           JSON.stringify({
-            messageType: "pongPerfmon",
+            messageType: "pongPerfmon"
           })
         );
       }, 2000);
@@ -150,7 +150,7 @@ const stopPerfmon = (isStart) => {
     isStart.value = false;
     perfWebsocket.send(
       JSON.stringify({
-        messageType: "closePerfmon",
+        messageType: "closePerfmon"
       })
     );
     if (perfPongId !== null) {
@@ -165,6 +165,7 @@ let perfWebsocket = null;
 let screenWebsocket = null;
 let __Scrcpy = null; // 实例
 let terminalWebsocket = null;
+let controlWebsocket = null;
 
 defineProps({
   tabPosition: String,
@@ -174,7 +175,7 @@ defineProps({
   lineMouseup: Function,
   lineMousemove: Function,
   lineMousedown: Function,
-  lineMouseleave: Function,
+  lineMouseleave: Function
 });
 
 const terminalLoading = ref(false);
@@ -203,8 +204,8 @@ const sendLogcat = () => {
       messageType: "logcat",
       data: {
         level: logcatFilter.value.level,
-        filter: logcatFilter.value.filter,
-      },
+        filter: logcatFilter.value.filter
+      }
     })
   );
 };
@@ -216,7 +217,7 @@ const stopLogcat = () => {
     terminalWebsocket.send(
       JSON.stringify({
         messageType: "stopLogcat",
-        uuid: logcatUUID.value,
+        uuid: logcatUUID.value
       })
     );
   }
@@ -226,7 +227,7 @@ let terminalPongId = null;
 const initTerminalWebsocket = () => {
   if (selectDeviceUdid.value === "") {
     ElMessage.error({
-      message: $t("androidRemoteTS.noSelectDevice"),
+      message: $t("androidRemoteTS.noSelectDevice")
     });
     return;
   }
@@ -240,7 +241,7 @@ const initTerminalWebsocket = () => {
     terminalPongId = setTimeout(() => {
       terminalWebsocket.send(
         JSON.stringify({
-          messageType: "pongTerminal",
+          messageType: "pongTerminal"
         })
       );
     }, 2000);
@@ -256,7 +257,7 @@ const sendCmd = () => {
       cmdOutPut.value.push(
         JSON.parse(
           JSON.stringify(
-            `<span style='color: #409EFF'>${cmdUser.value}</span>:/ $ ${cmdInput.value}`
+            `<span style="color: #409EFF">${cmdUser.value}</span>:/ $ ${cmdInput.value}`
           )
         )
       );
@@ -264,7 +265,7 @@ const sendCmd = () => {
         JSON.stringify({
           messageType: "command",
           uuid: commandUUID.value,
-          data: cmdInput.value,
+          data: cmdInput.value
         })
       );
       cmdInput.value = "";
@@ -279,7 +280,7 @@ const stopCmd = () => {
   terminalWebsocket.send(
     JSON.stringify({
       messageType: "stopCommand",
-      uuid: commandUUID.value,
+      uuid: commandUUID.value
     })
   );
 };
@@ -329,7 +330,7 @@ const terminalWebsocketOnmessage = (message) => {
       break;
     case "error":
       ElMessage.error({
-        message: $t("androidRemoteTS.systemException"),
+        message: $t("androidRemoteTS.systemException")
       });
       closeTerminal();
       break;
@@ -359,7 +360,7 @@ const screenWebsocketOnmessage = (message) => {
     // }
     case "error":
       ElMessage.error({
-        message: $t("androidRemoteTS.systemException"),
+        message: $t("androidRemoteTS.systemException")
       });
       closeScreenWebsocket();
       break;
@@ -374,7 +375,7 @@ const perfWebsocketOnmessage = (message) => {
       break;
     case "error": {
       ElMessage.error({
-        message: $t("androidRemoteTS.systemException"),
+        message: $t("androidRemoteTS.systemException")
       });
       closePerf();
       break;
@@ -417,105 +418,84 @@ const getCurLocation = () => {
   const canvas = document.getElementById("scrcpy-video");
 
   const rect = canvas.getBoundingClientRect();
-  x = parseInt((event.clientX - rect.left) * (imgWidth / canvas.clientWidth));
-  y = parseInt((event.clientY - rect.top) * (imgHeight / canvas.clientHeight));
+  x = (event.clientX - rect.left)  / canvas.clientWidth;
+  y = (event.clientY - rect.top) / canvas.clientHeight;
   inputBoxStyle.value = {
     left: `${event.clientX - rect.left}px`,
-    top: `${event.clientY - rect.top}px`,
+    top: `${event.clientY - rect.top}px`
   };
   if (x < 0 || x === -0) {
     x = 0;
   }
-  if (x > imgWidth) {
-    x = imgWidth;
+  if (x > 1) {
+    x = 1;
   }
   if (y < 0 || y === -0) {
     y = 0;
   }
-  if (y > imgHeight) {
-    y = imgHeight;
+  if (y > 1) {
+    y = 1;
   }
+  console.log(x,y)
   return {
     x,
-    y,
+    y
   };
 };
 const mouseup = (event) => {
   if (isPress) {
     isPress = false;
-    const { x, y } = getCurLocation();
     isPress = false;
-    __Scrcpy.touch(
-      JSON.stringify({
-        messageType: "touch",
-        data: {
-          actionType: 1,
-          x: x,
-          y: y,
-          width: imgWidth,
-          height: imgHeight,
-        },
-      })
-    );
+    controlWebsocket.send(JSON.stringify(
+      {
+        touchType: "up",
+        fingerID: 1
+      }
+    ));
     inputBox.value.focus();
   }
 };
 const mouseleave = () => {
   if (isPress) {
-    const { x, y } = getCurLocation();
     isPress = false;
-    __Scrcpy.touch(
-      JSON.stringify({
-        messageType: "touch",
-        data: {
-          actionType: 1,
-          x: x,
-          y: y,
-          width: imgWidth,
-          height: imgHeight,
-        },
-      })
-    );
+    controlWebsocket.send(JSON.stringify(
+      {
+        touchType: "up",
+        fingerID: 1
+      }
+    ));
   }
 };
 const mousedown = (event) => {
   const { x, y } = getCurLocation();
   isPress = true;
-  __Scrcpy.touch(
-    JSON.stringify({
-      messageType: "touch",
-      data: {
-        actionType: 0,
-        x: x,
-        y: y,
-        width: imgWidth,
-        height: imgHeight,
-      },
-    })
-  );
+  controlWebsocket.send(JSON.stringify(
+    {
+      x: x,
+      y: y,
+      touchType: "down",
+      fingerID: 1
+    }
+  ));
 };
 const mousemove = (event) => {
   if (isPress) {
     const { x, y } = getCurLocation();
-    __Scrcpy.touch(
-      JSON.stringify({
-        messageType: "touch",
-        data: {
-          actionType: 2,
-          x: x,
-          y: y,
-          width: imgWidth,
-          height: imgHeight,
-        },
-      })
-    );
+    controlWebsocket.send(JSON.stringify(
+      {
+        x: x,
+        y: y,
+        touchType: "move",
+        fingerID: 1
+      }
+    ));
   }
 };
 const refreshAppList = () => {
   if (selectDeviceUdid.value !== "") {
     appList.value = [];
     ElMessage.success({
-      message: $t("androidRemoteTS.loadIng"),
+      message: $t("androidRemoteTS.loadIng")
     });
     getAppList();
   }
@@ -536,10 +516,11 @@ const pressKey = (keyNum) => {
     .get("/android/serial/keycode", {
       params: {
         udid: selectDeviceUdid.value,
-        keycode: keyNum,
-      },
+        keycode: keyNum
+      }
     })
-    .then((resp) => {});
+    .then((resp) => {
+    });
   // websocket.send(
   //     JSON.stringify({
   //       type: 'keyEvent',
@@ -567,7 +548,7 @@ const changePic = (type) => {
   screenWebsocket.send(
     JSON.stringify({
       type: "pic",
-      detail: pic,
+      detail: pic
     })
   );
 };
@@ -576,21 +557,21 @@ const scan = (url) => {
   perfWebsocket.send(
     JSON.stringify({
       type: "scan",
-      url,
+      url
     })
   );
 };
 const startKeyboard = () => {
   perfWebsocket.send(
     JSON.stringify({
-      type: "startKeyboard",
+      type: "startKeyboard"
     })
   );
 };
 const stopKeyboard = () => {
   perfWebsocket.send(
     JSON.stringify({
-      type: "stopKeyboard",
+      type: "stopKeyboard"
     })
   );
 };
@@ -645,7 +626,7 @@ const getAndroidDeviceList = () => {
     if (serialInfoList.value.length === 0) {
       ElMessage({
         type: "error",
-        message: "not find device",
+        message: "not find device"
       });
     }
     udidListLoading.value = false;
@@ -681,19 +662,19 @@ const selectGroupDevices = () => {
   ElMessageBox.confirm($t("perf.selectDeviceMess"), $t("elements.warn"), {
     confirmButtonText: $t("form.confirm"),
     cancelButtonText: $t("form.cancel"),
-    type: "warning",
+    type: "warning"
   })
     .then(() => {
       showCardMode.value = 1;
       infoLoading.value = true;
       axios
         .get("/android/serial/info", {
-          params: { udid: selectDeviceUdid.value },
+          params: { udid: selectDeviceUdid.value }
         })
         .then((resp) => {
           ElMessage({
             type: "success",
-            message: "success",
+            message: "success"
           });
           currentUdid.value = selectDeviceUdid.value;
           infoLoading.value = false;
@@ -704,7 +685,7 @@ const selectGroupDevices = () => {
     .catch((err) => {
       ElMessage({
         type: "info",
-        message: $t("form.cancel"),
+        message: $t("form.cancel")
       });
       selectDeviceUdid.value = "";
     });
@@ -716,9 +697,13 @@ const useScreenCall = () => {
     udid: selectDeviceUdid.value,
     socketURL: WSUri + `android/scrcpy`,
     node: "scrcpy-video",
-    onmessage: screenWebsocketOnmessage,
+    onmessage: screenWebsocketOnmessage
   });
   screenWebsocket = __Scrcpy.websocket;
+
+  controlWebsocket = new WebSocket(
+    WSUri + "android/control?udid=" + selectDeviceUdid.value
+  );
 };
 
 const cancelTheCasting = () => {
@@ -728,14 +713,14 @@ const cancelTheCasting = () => {
     {
       confirmButtonText: $t("form.confirm"),
       cancelButtonText: $t("form.cancel"),
-      type: "warning",
+      type: "warning"
     }
   )
     .then(() => {
       // todo 增加选择设备的方法
       ElMessage({
         type: "success",
-        message: "success",
+        message: "success"
       });
       __Scrcpy.destroy();
       showCardMode.value = 1;
@@ -743,7 +728,7 @@ const cancelTheCasting = () => {
     .catch((err) => {
       ElMessage({
         type: "info",
-        message: $t("form.cancel"),
+        message: $t("form.cancel")
       });
     });
 };
@@ -813,8 +798,9 @@ const reSelectionDevice = () => {
             description="not device!"
           >
             <el-button type="primary" @click="getAndroidDeviceList">{{
-              $t("androidRemoteTS.flushed")
-            }}</el-button>
+                $t("androidRemoteTS.flushed")
+              }}
+            </el-button>
           </el-empty>
         </el-card>
         <!--        这里选择设备后再显示-->
@@ -1155,7 +1141,7 @@ const reSelectionDevice = () => {
                       style="margin-left: 5px"
                       type="primary"
                       @click="sendCmd"
-                      >Send
+                    >Send
                     </el-button>
                     <el-button
                       size="mini"
@@ -1163,14 +1149,14 @@ const reSelectionDevice = () => {
                       style="margin-left: 5px"
                       type="danger"
                       @click="stopCmd"
-                      >Stop
+                    >Stop
                     </el-button>
                     <el-button
                       size="mini"
                       style="margin-left: 5px"
                       type="warning"
                       @click="clearCmd"
-                      >Clear
+                    >Clear
                     </el-button>
                   </div>
                 </el-card>
@@ -1207,21 +1193,21 @@ const reSelectionDevice = () => {
                       style="margin-left: 5px"
                       type="primary"
                       @click="sendLogcat"
-                      >Search
+                    >Search
                     </el-button>
                     <el-button
                       size="mini"
                       style="margin-left: 5px"
                       type="danger"
                       @click="stopLogcat"
-                      >Stop
+                    >Stop
                     </el-button>
                     <el-button
                       size="mini"
                       style="margin-left: 5px"
                       type="warning"
                       @click="clearLogcat"
-                      >Clear
+                    >Clear
                     </el-button>
                   </div>
                   <el-scrollbar

@@ -119,12 +119,12 @@ class Scrcpy {
     };
   }
 
-  touch(touchInfo) {
-    // console.log(touchInfo)
-    if (this.websocket !== null) {
-      this.websocket.send(touchInfo);
-    }
-  }
+  // touch(touchInfo) {
+  //   // console.log(touchInfo)
+  //   if (this.websocket !== null) {
+  //     this.websocket.send(touchInfo);
+  //   }
+  // }
 }
 
 export default Scrcpy;
