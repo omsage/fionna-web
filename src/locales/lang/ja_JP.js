@@ -209,7 +209,7 @@ const androidRemoteTS = {
   connection: "接続に成功しました！",
   code: {
     LUS: "画面のロック/アンロック",
-    frameNumber: "スクリーンプロジェクションのフレーム番号",
+    frameNumber: "ビデオクオリティ",
     systemVersion: "システムバージョン",
     preparingImager: "画像を準備中...",
     precautions: "注意事項",

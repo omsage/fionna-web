@@ -64,7 +64,7 @@ const directionStatus = {
   value: -1
 };
 let isPress = false;
-const pic = ref("高");
+const pic = ref("中");
 const _screenMode = window.localStorage.getItem("screenMode");
 const screenMode = ref(_screenMode || "Scrcpy"); // Scrcpy,Minicap
 const activeTab = ref("perfmon");
@@ -106,6 +106,7 @@ const switchTabs = (e) => {
 
 let perfPongId;
 const startPerfmon = (perfConfig, isStart) => {
+  androidPerfRef.value.clearPerfmon();
   if (perfConfig.procCpu || perfConfig.procMem || perfConfig.procThread) {
     if (perfConfig.packageName === "" && perfConfig.pid === "") {
       ElMessage.error({
@@ -121,42 +122,21 @@ const startPerfmon = (perfConfig, isStart) => {
     });
     isStart.value = false;
   } else {
-    perfWebsocket = new WebSocket(WSUri + "android/perf");
-    perfWebsocket.onopen = () => {
-      // console.log(JSON.stringify(udidInfo.value))
-      perfWebsocket.send(JSON.stringify(udidInfo.value));
-
-      perfWebsocket.send(
-        JSON.stringify({
-          messageType: "startPerfmon",
-          data: perfConfig
-        })
-      );
-      perfPongId = setTimeout(() => {
-        perfWebsocket.send(
-          JSON.stringify({
-            messageType: "pongPerfmon"
-          })
-        );
-      }, 2000);
-
-      perfWebsocket.onmessage = perfWebsocketOnmessage;
-      isStart.value = true;
-    };
+    controlWebsocket.send(JSON.stringify({
+      messageType: "startPerfmon",
+      data: perfConfig
+    }));
+    isStart.value = true;
   }
 };
 const stopPerfmon = (isStart) => {
-  if (perfWebsocket !== null) {
+  if (controlWebsocket !== null) {
     isStart.value = false;
-    perfWebsocket.send(
+    controlWebsocket.send(
       JSON.stringify({
         messageType: "closePerfmon"
       })
     );
-    if (perfPongId !== null) {
-      clearTimeout(perfPongId);
-      perfPongId = null;
-    }
     androidPerfRef.value.clearPerfmon();
   }
 };
@@ -366,14 +346,15 @@ const screenWebsocketOnmessage = (message) => {
       break;
   }
 };
-const perfWebsocketOnmessage = (message) => {
-  // console.log(message.data)
+
+const controlWebsocketOnmessage = (message) => {
   let infoData = JSON.parse(message.data);
+  console.log(infoData);
   switch (infoData.messageType) {
     case "perfdata":
       androidPerfRef.value.setData(infoData.perfData);
       break;
-    case "error": {
+    case "perfError": {
       ElMessage.error({
         message: $t("androidRemoteTS.systemException")
       });
@@ -418,7 +399,7 @@ const getCurLocation = () => {
   const canvas = document.getElementById("scrcpy-video");
 
   const rect = canvas.getBoundingClientRect();
-  x = (event.clientX - rect.left)  / canvas.clientWidth;
+  x = (event.clientX - rect.left) / canvas.clientWidth;
   y = (event.clientY - rect.top) / canvas.clientHeight;
   inputBoxStyle.value = {
     left: `${event.clientX - rect.left}px`,
@@ -436,7 +417,7 @@ const getCurLocation = () => {
   if (y > 1) {
     y = 1;
   }
-  console.log(x,y)
+  console.log(x, y);
   return {
     x,
     y
@@ -448,8 +429,11 @@ const mouseup = (event) => {
     isPress = false;
     controlWebsocket.send(JSON.stringify(
       {
-        touchType: "up",
-        fingerID: 1
+        messageType: "touch",
+        data: {
+          touchType: "up",
+          fingerID: 1
+        }
       }
     ));
     inputBox.value.focus();
@@ -460,8 +444,11 @@ const mouseleave = () => {
     isPress = false;
     controlWebsocket.send(JSON.stringify(
       {
-        touchType: "up",
-        fingerID: 1
+        messageType: "touch",
+        data: {
+          touchType: "up",
+          fingerID: 1
+        }
       }
     ));
   }
@@ -471,10 +458,13 @@ const mousedown = (event) => {
   isPress = true;
   controlWebsocket.send(JSON.stringify(
     {
-      x: x,
-      y: y,
-      touchType: "down",
-      fingerID: 1
+      messageType: "touch",
+      data: {
+        x: x,
+        y: y,
+        touchType: "down",
+        fingerID: 1
+      }
     }
   ));
 };
@@ -483,10 +473,13 @@ const mousemove = (event) => {
     const { x, y } = getCurLocation();
     controlWebsocket.send(JSON.stringify(
       {
-        x: x,
-        y: y,
-        touchType: "move",
-        fingerID: 1
+        messageType: "touch",
+        data: {
+          x: x,
+          y: y,
+          touchType: "move",
+          fingerID: 1
+        }
       }
     ));
   }
@@ -541,49 +534,50 @@ const changePic = (type) => {
     case $t("androidRemoteTS.high"):
       pic = "high";
       break;
-    case "fixed":
-      pic = "fixed";
-      break;
+    // case "fixed":
+    //   pic = "fixed";
+    //   break;
   }
-  screenWebsocket.send(
-    JSON.stringify({
-      type: "pic",
-      detail: pic
-    })
-  );
+  closeScreenWebsocket()
+  initScreenWebsocket(pic)
+  // screenWebsocket.send(
+  //   JSON.stringify({
+  //     type: "pic",
+  //     detail: pic
+  //   })
+  // );
 };
 
-const scan = (url) => {
-  perfWebsocket.send(
-    JSON.stringify({
-      type: "scan",
-      url
-    })
-  );
-};
-const startKeyboard = () => {
-  perfWebsocket.send(
-    JSON.stringify({
-      type: "startKeyboard"
-    })
-  );
-};
-const stopKeyboard = () => {
-  perfWebsocket.send(
-    JSON.stringify({
-      type: "stopKeyboard"
-    })
-  );
-};
+// const scan = (url) => {
+//   controlWebsocket.send(
+//     JSON.stringify({
+//       type: "scan",
+//       url
+//     })
+//   );
+// };
+// const startKeyboard = () => {
+//   controlWebsocket.send(
+//     JSON.stringify({
+//       type: "startKeyboard"
+//     })
+//   );
+// };
+// const stopKeyboard = () => {
+//   controlWebsocket.send(
+//     JSON.stringify({
+//       type: "stopKeyboard"
+//     })
+//   );
+// };
 
 const closePerf = () => {
-  if (perfWebsocket !== null) {
-    perfWebsocket.close();
-    perfWebsocket = null;
-  }
-  if (perfPongId !== null) {
-    clearTimeout(perfPongId);
-    perfPongId = null;
+  if (controlWebsocket !== null) {
+    controlWebsocket.send(JSON.stringify(
+      {
+        messageType: "closePerfmon"
+      }
+    ));
   }
 };
 
@@ -679,6 +673,16 @@ const selectGroupDevices = () => {
           currentUdid.value = selectDeviceUdid.value;
           infoLoading.value = false;
           udidInfo.value = resp.data;
+
+          controlWebsocket = new WebSocket(
+            WSUri + "android/control?udid=" + selectDeviceUdid.value
+          );
+          controlWebsocket.onopen = () => {
+            // console.log(JSON.stringify(udidInfo.value))
+            controlWebsocket.send(JSON.stringify(udidInfo.value));
+          };
+          controlWebsocket.onmessage = controlWebsocketOnmessage;
+
         });
       refreshAppList();
     })
@@ -693,18 +697,21 @@ const selectGroupDevices = () => {
 
 const useScreenCall = () => {
   showCardMode.value = 2;
+  initScreenWebsocket()
+};
+
+const initScreenWebsocket = (pic) => {
+  if (pic===""||pic===undefined){
+    pic = "mid"
+  }
   __Scrcpy = new Scrcpy({
     udid: selectDeviceUdid.value,
-    socketURL: WSUri + `android/scrcpy`,
+    socketURL: WSUri + `android/scrcpy?pic=`+pic,
     node: "scrcpy-video",
     onmessage: screenWebsocketOnmessage
   });
   screenWebsocket = __Scrcpy.websocket;
-
-  controlWebsocket = new WebSocket(
-    WSUri + "android/control?udid=" + selectDeviceUdid.value
-  );
-};
+}
 
 const cancelTheCasting = () => {
   ElMessageBox.confirm(
@@ -989,48 +996,48 @@ const reSelectionDevice = () => {
           </div>
           <!--一些细节按钮-->
           <div style="position: absolute; right: 5px; top: 10px">
-            <!--            <el-tooltip-->
-            <!--                :enterable="false"-->
-            <!--                effect="dark"-->
-            <!--                :content="$t('androidRemoteTS.code.frameNumber')"-->
-            <!--                :placement="tabPosition == 'left' ? 'right' : 'left'"-->
-            <!--                :offset="15"-->
-            <!--            >-->
-            <!--              <div>-->
-            <!--                <el-dropdown-->
-            <!--                    :hide-on-click="false"-->
-            <!--                    trigger="click"-->
-            <!--                    placement="right"-->
-            <!--                    style="margin-top: 4px"-->
-            <!--                >-->
-            <!--                  <el-button size="small" type="info" circle>-->
-            <!--                    <el-icon :size="12" style="vertical-align: middle">-->
-            <!--                      <View/>-->
-            <!--                    </el-icon>-->
-            <!--                  </el-button>-->
-            <!--                  <template #dropdown>-->
-            <!--                    <el-dropdown-menu class="divider">-->
-            <!--                      <el-radio-group-->
-            <!--                          v-model="pic"-->
-            <!--                          v-loading="loading"-->
-            <!--                          size="mini"-->
-            <!--                          @change="changePic"-->
-            <!--                      >-->
-            <!--                        <el-radio-button-->
-            <!--                            :label="$t('androidRemoteTS.low')"-->
-            <!--                        ></el-radio-button>-->
-            <!--                        <el-radio-button-->
-            <!--                            :label="$t('androidRemoteTS.middle')"-->
-            <!--                        ></el-radio-button>-->
-            <!--                        <el-radio-button-->
-            <!--                            :label="$t('androidRemoteTS.high')"-->
-            <!--                        ></el-radio-button>-->
-            <!--                      </el-radio-group>-->
-            <!--                    </el-dropdown-menu>-->
-            <!--                  </template>-->
-            <!--                </el-dropdown>-->
-            <!--              </div>-->
-            <!--            </el-tooltip>-->
+            <el-tooltip
+              :enterable="false"
+              effect="dark"
+              :content="$t('androidRemoteTS.code.frameNumber')"
+              :placement="tabPosition == 'left' ? 'right' : 'left'"
+              :offset="15"
+            >
+              <div>
+                <el-dropdown
+                  :hide-on-click="false"
+                  trigger="click"
+                  placement="right"
+                  style="margin-top: 4px"
+                >
+                  <el-button size="small" type="info" circle>
+                    <el-icon :size="12" style="vertical-align: middle">
+                      <View />
+                    </el-icon>
+                  </el-button>
+                  <template #dropdown>
+                    <el-dropdown-menu class="divider">
+                      <el-radio-group
+                        v-model="pic"
+                        v-loading="loading"
+                        size="mini"
+                        @change="changePic"
+                      >
+                        <el-radio-button
+                          :label="$t('androidRemoteTS.low')"
+                        ></el-radio-button>
+                        <el-radio-button
+                          :label="$t('androidRemoteTS.middle')"
+                        ></el-radio-button>
+                        <el-radio-button
+                          :label="$t('androidRemoteTS.high')"
+                        ></el-radio-button>
+                      </el-radio-group>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
+            </el-tooltip>
             <el-tooltip
               effect="dark"
               :content="$t('androidRemoteTS.code.LUS')"

@@ -210,7 +210,7 @@ const androidRemoteTS = {
   connection: "连接成功！",
   code: {
     LUS: "锁定/解锁屏幕",
-    frameNumber: "投屏帧数",
+    frameNumber: "视频质量",
     systemVersion: "系统版本",
     preparingImager: "准备图像中...",
     precautions: "注意事项",

@@ -213,7 +213,7 @@ const androidRemoteTS = {
   connection: "Connection successful!",
   code: {
     LUS: "Lock/Unlock Screen",
-    frameNumber: "Casting Frame Number",
+    frameNumber: "Video quality",
     systemVersion: "System Version",
     preparingImager: "Preparing image...",
     precautions: "Precautions",
