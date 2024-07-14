@@ -52,6 +52,7 @@ const props = defineProps({
   rid: String,
   cid: Number,
   did: Number,
+  perfConfig:Object,
   sysCpu: Object,
   sysMem: Object,
   sysNetwork: Object,
@@ -210,6 +211,9 @@ let sysMemOption = {
 watch(
   () => props.sysMem,
   () => {
+    if (props.sysMem.timestamp===undefined){
+      return
+    }
     sysMemOption.categorySysMemList.push(
       moment(new Date(props.sysMem.timestamp)).format("HH:mm:ss")
     );
@@ -241,6 +245,9 @@ let sysFrameOption = {
 watch(
   () => props.sysFps,
   () => {
+    if (props.sysFps.timestamp===undefined){
+      return
+    }
     sysFrameOption.categorySysFrameList.push(
       moment(new Date(props.sysFps.timestamp)).format("HH:mm:ss")
     );
@@ -267,6 +274,9 @@ let procCpuOption = {
 watch(
   () => props.procCpu,
   () => {
+    if (props.procCpu.timestamp===undefined){
+      return
+    }
     procCpuOption.xTimeList.push(
       moment(new Date(props.procCpu.timestamp)).format("HH:mm:ss")
     );
@@ -327,6 +337,9 @@ let procMemOption = {
 watch(
   () => props.procMem,
   () => {
+    if (props.procMem.timestamp===undefined){
+      return
+    }
     procMemOption.xTimeList.push(
       moment(new Date(props.procMem.timestamp)).format("HH:mm:ss")
     );
@@ -353,6 +366,9 @@ let procThreadOption = {
 watch(
   () => props.procThread,
   () => {
+    if (props.procThread.timestamp===undefined){
+      return
+    }
     procThreadOption.xTimeList.push(
       moment(new Date(props.procThread.timestamp)).format("HH:mm:ss")
     );
@@ -379,6 +395,9 @@ let procTemperatureOption = {
 watch(
   () => props.sysTemperature,
   () => {
+    if (props.sysTemperature.timestamp===undefined){
+      return
+    }
     procTemperatureOption.xTimeList.push(
       moment(new Date(props.sysTemperature.timestamp)).format("HH:mm:ss")
     );
@@ -1272,14 +1291,14 @@ const switchTab = (e) => {
         <el-col :span="12">
           <el-tooltip
             class="item"
-            :disabled="procCpu !== null"
+            :disabled="perfConfig.procCpu"
             content="proc cpu"
             placement="top"
           >
             <el-card style="margin-top: 10px">
               <div
                 :id="rid + '-' + cid + '-' + did + '-' + 'perfCpuChart'"
-                v-loading="procCpu === null"
+                v-loading="!perfConfig.procCpu"
                 :element-loading-text="$t('perf.emptyData')"
                 element-loading-spinner="el-icon-box"
                 style="width: 100%; height: 350px"
@@ -1291,14 +1310,14 @@ const switchTab = (e) => {
         <el-col :span="12">
           <el-tooltip
             class="item"
-            :disabled="sysCpu !== null"
+            :disabled="perfConfig.sysCpu"
             content="sys cpu"
             placement="top"
           >
             <el-card style="margin-top: 10px">
               <div
                 :id="rid + '-' + cid + '-' + did + '-' + 'sysCpuChart'"
-                v-loading="sysCpu === null"
+                v-loading="!perfConfig.sysCpu"
                 :element-loading-text="$t('perf.emptyData')"
                 element-loading-spinner="el-icon-box"
                 style="width: 100%; height: 350px"
@@ -1313,14 +1332,14 @@ const switchTab = (e) => {
         <el-col :span="12">
           <el-tooltip
             class="item"
-            :disabled="sysFps !== null"
+            :disabled="perfConfig.FPS"
             content="sys FPS"
             placement="top"
           >
             <el-card style="margin-top: 10px">
               <div
                 :id="rid + '-' + cid + '-' + did + '-' + 'sysFpsChart'"
-                v-loading="sysFps === null"
+                v-loading="!perfConfig.FPS"
                 :element-loading-text="$t('perf.emptyData')"
                 element-loading-spinner="el-icon-box"
                 style="width: 100%; height: 350px"
@@ -1332,14 +1351,14 @@ const switchTab = (e) => {
         <el-col :span="12">
           <el-tooltip
             class="item"
-            :disabled="sysJank !== null"
+            :disabled="perfConfig.jank"
             content="jank info"
             placement="top"
           >
             <el-card style="margin-top: 10px">
               <div
                 :id="rid + '-' + cid + '-' + did + '-' + 'sysJankChart'"
-                v-loading="sysJank === null"
+                v-loading="!perfConfig.jank"
                 :element-loading-text="$t('perf.emptyData')"
                 element-loading-spinner="el-icon-box"
                 style="width: 100%; height: 350px"
@@ -1356,14 +1375,14 @@ const switchTab = (e) => {
         <el-col :span="12">
           <el-tooltip
             class="item"
-            :disabled="procMem !== null"
+            :disabled="perfConfig.procMem"
             content="proc mem"
             placement="top"
           >
             <el-card style="margin-top: 10px">
               <div
                 :id="rid + '-' + cid + '-' + did + '-' + 'perfMemChart'"
-                v-loading="procMem === null"
+                v-loading="!perfConfig.procMem"
                 :element-loading-text="$t('perf.emptyData')"
                 element-loading-spinner="el-icon-box"
                 style="width: 100%; height: 350px"
@@ -1375,14 +1394,14 @@ const switchTab = (e) => {
         <el-col :span="12">
           <el-tooltip
             class="item"
-            :disabled="sysMem !== null"
+            :disabled="perfConfig.sysMem"
             content="sys mem"
             placement="top"
           >
             <el-card style="margin-top: 10px">
               <div
                 :id="rid + '-' + cid + '-' + did + '-' + 'sysMemChart'"
-                v-loading="sysMem === null"
+                v-loading="!perfConfig.sysMem"
                 :element-loading-text="$t('perf.emptyData')"
                 element-loading-spinner="el-icon-box"
                 style="width: 100%; height: 350px"
@@ -1397,14 +1416,14 @@ const switchTab = (e) => {
         <el-col :span="12">
           <el-tooltip
             class="item"
-            :disabled="sysNetwork !== null"
+            :disabled="perfConfig.sysNetwork"
             content="sys network"
             placement="top"
           >
             <el-card style="margin-top: 10px">
               <div
                 :id="rid + '-' + cid + '-' + did + '-' + 'sysNetworkChart'"
-                v-loading="sysNetwork === null"
+                v-loading="!perfConfig.sysNetwork"
                 :element-loading-text="$t('perf.emptyData')"
                 element-loading-spinner="el-icon-box"
                 style="width: 100%; height: 350px"
@@ -1416,14 +1435,14 @@ const switchTab = (e) => {
         <el-col :span="12">
           <el-tooltip
             class="item"
-            :disabled="sysTemperature !== null"
+            :disabled="perfConfig.sysTemperature"
             content="sys temperature"
             placement="top"
           >
             <el-card style="margin-top: 10px">
               <div
                 :id="rid + '-' + cid + '-' + did + '-' + 'sysTemperatureChart'"
-                v-loading="sysNetwork === null"
+                v-loading="!perfConfig.sysTemperature"
                 :element-loading-text="$t('perf.emptyData')"
                 element-loading-spinner="el-icon-box"
                 style="width: 100%; height: 350px"
@@ -1435,14 +1454,14 @@ const switchTab = (e) => {
         <el-col :span="12">
           <el-tooltip
             class="item"
-            :disabled="procThread !== null"
+            :disabled="perfConfig.procThread"
             content="proc thread"
             placement="top"
           >
             <el-card style="margin-top: 10px">
               <div
                 :id="rid + '-' + cid + '-' + did + '-' + 'procThreadChart'"
-                v-loading="procThread === null"
+                v-loading="!perfConfig.procThread"
                 :element-loading-text="$t('perf.emptyData')"
                 element-loading-spinner="el-icon-box"
                 style="width: 100%; height: 350px"

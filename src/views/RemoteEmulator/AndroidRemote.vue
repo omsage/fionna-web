@@ -141,7 +141,6 @@ const stopPerfmon = (isStart) => {
   }
 };
 const img = import.meta.globEager("../../assets/img/*");
-let perfWebsocket = null;
 let screenWebsocket = null;
 let __Scrcpy = null; // 实例
 let terminalWebsocket = null;
