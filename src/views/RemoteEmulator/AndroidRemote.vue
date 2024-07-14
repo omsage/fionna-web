@@ -417,7 +417,6 @@ const getCurLocation = () => {
   if (y > 1) {
     y = 1;
   }
-  console.log(x, y);
   return {
     x,
     y
@@ -745,6 +744,10 @@ const reSelectionDevice = () => {
   appList.value = [];
   currentUdid.value = "";
   showCardMode.value = 0;
+  if (controlWebsocket!==null){
+    controlWebsocket.close()
+    controlWebsocket = null;
+  }
 };
 </script>
 
